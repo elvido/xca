@@ -1,0 +1,23 @@
+#
+# $Id$
+#
+#####################################################################
+
+UINAMES=CertDetail ExportKey ExportCert KeyDetail MainWindow \
+        NewKey NewX509 PassRead PassWrite ReqDetail TrustState \
+        CertExtend ExportTinyCA CrlDetail ImportMulti
+
+OBJS=$(patsubst %,moc_%.o,$(UINAMES)) $(patsubst %,%.o,$(UINAMES))
+
+MOC_CPP=$(patsubst %,moc_%.cpp,$(UINAMES))
+UI_CPP=$(patsubst %, %.cpp, $(UINAMES))
+UI_H=$(patsubst %, %.h, $(UINAMES))
+
+DELFILES=$(MOC_CPP) $(UI_CPP) $(UI_H)
+
+EXTRA_CFLAGS+=-I../widgets -I../view
+
+all: ui.obj
+
+include ../Rules.mak
+

@@ -1,0 +1,112 @@
+#!/bin/sh -x
+
+#####################################################
+# this configurescript searches for the needed includes
+# and libraries.
+#######################################################
+
+DIRS="$@ $QTDIR /usr /usr/X11R6 /usr/local"
+
+CF="-I. -I.."
+LIBS=-lstdc++
+LDIRS=
+MOC=moc
+UIC=uic
+
+err() {
+  echo ERROR: $1
+}
+
+#adds an includedir to $CF
+add_include() {
+  
+  if test "$1" = "/usr/include"; then
+    return 0
+  fi
+  
+  if echo ${CF} | grep -v "$1" >/dev/null 2>&1 ; then
+  	CF="${CF} -I$1"
+  fi
+}
+
+add_lib() {
+  LIBS="$LIBS -l$2"
+  if test "$1" = "/usr/lib"; then
+    return 0
+  fi
+  
+  if echo ${LDIRS} | grep -v "$1" >/dev/null 2>&1 ; then
+    LDIRS="${LDIRS} -L$1"
+  fi
+}
+
+search_includes() {
+  # check for includes
+  inc=""
+  for dbn in "" ${subdirs}; do
+    for dir in ${DIRS};  do
+      if test -r ${dir}/include${dbn}/$1; then
+        add_include ${dir}/include${dbn}
+	echo Found:  $1 at ${dir}/include${dbn}
+        return 0
+      fi
+    done
+  done
+  return 1
+}
+
+search_lib() {
+  # check for includes
+  inc=""
+  for dbn in $@; do
+    for dir in ${DIRS};  do
+      if test -r ${dir}/lib/lib$dbn.so; then
+        add_lib ${dir}/lib $dbn;
+	echo Found: lib$dbn.so at ${dir}/lib
+        return 0
+      fi
+    done
+  done
+  return 1
+}
+ 
+
+
+subdirs="/db /db3 /db4"
+search_includes db_cxx.h || err "The Berkeley DB header files were not found"
+
+subdirs=""
+search_includes openssl/opensslv.h || err "The OpenSSL library headerfiles were not found."
+
+subdirs="/qt"
+search_includes qobject.h || err "The QT Library headerfiles were not found. Set QTDIR appropriately."
+
+search_lib c_r || true
+search_lib db4_cxx db3_cxx db_cxx-4 db_cxx-3 db_cxx || err "The Berkeley DB library was not found. Try installing db-dev" 
+search_lib crypto || err "The OpenSSL library was not found."
+search_lib qt qt-mt || err "The QT library was not found. Try installing qt-dev" 
+
+if test -x $QTDIR/bin/moc; then
+  MOC="$QTDIR/bin/moc"
+fi
+
+if test -x $QTDIR/bin/uic; then
+  UIC="$QTDIR/bin/uic"
+fi
+
+cat >Local.mak <<EOF
+CPPFLAGS=$CF 
+CFLAGS=${CFLAGS:--Wall}
+
+LDFLAGS=$LDIRS
+LIBS=$LIBS
+
+MOC=$MOC
+UIC=$UIC
+
+CC=${CC:-gcc}
+LD=${LD:-ld}
+
+prefix=${prefix:-/usr/local}
+
+EOF

@@ -3,18 +3,21 @@
 #ifndef BASE_H
 #define BASE_H
 
-#define VER "@PACKAGE_VERSION@"
+#define VER "VERSION"
 
-#define MARK CERR("--Mark--")
 #define DBEX(x) CERR("DB-error: "<<x.what()<<", Errno: "<<x.get_errno())
-
-#ifdef PRINTF_DEBUG__
-#define CERR(x) cerr <<__FILE__<<" ("<<__LINE__<<") :"<< x << endl;
-#else
 #define CERR(x)
-#endif
+#define MARK
 
-#define PREFIX "@prefix@/share/xca"
+#if QT_VERSION >= 0x030000
+#define qt3 1
+#endif
+#define BASE_DIR "xca"
+
+#ifdef WIN32
+#include <WINDOWS.H>
+#endif  
+
 #define XCA_TITLE "X Certifikate and Key management"
 
 #endif
