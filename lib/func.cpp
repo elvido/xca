@@ -85,8 +85,12 @@ if (PREFIX[0] == '\0') {
         lRc=RegCloseKey(hKey);
 }
 #endif
-
 QString path = (char *)PREFIX;
+
+#ifndef WIN32
+path += "/share/xca";
+#endif
+
 path += QDir::separator();
 return new QPixmap(path + name);
 }

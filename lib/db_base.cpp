@@ -70,7 +70,6 @@ db_base::db_base(DbEnv *dbe, QString DBfile, QString DB, DbTxn *global_tid,
 #endif
 	}
 	catch (DbException &err) {
-		DBEX(err);
 		throw errorEx(err.what());
 	}
 }
@@ -101,7 +100,6 @@ void *db_base::getData(void *key, int length, int *dsize)
 		return q;
 	}
 	catch (DbException &err) {
-		DBEX(err);
 		throw errorEx(err.what());
 	}
 	return NULL;
@@ -156,7 +154,6 @@ void db_base::putData(void *key, int keylen, void *dat, int datalen)
 		data->put(NULL, &k, &d, 0 );
 	}
 	catch (DbException &err) {
-		DBEX(err);
 		throw errorEx(err.what());
 	}
 }
@@ -168,14 +165,12 @@ void db_base::putString(QString key, void *dat, int datalen)
 
 void db_base::putString(QString key, QString dat)
 {
-	CERR( key);
 	putString(key, (void *)dat.latin1(), dat.length() +1);
 }
 
 void db_base::putString(char *key, QString dat)
 {
 	QString x = key;
-	CERR(key);
 	putString(x,dat);
 }
 
@@ -224,7 +219,6 @@ void db_base::loadContainer()
 	}
 	catch (DbException &err) {
 		tid->abort();
-		DBEX(err);
 		throw errorEx(err.what());
 	}
 }	
@@ -240,7 +234,7 @@ void db_base::insertPKI(pki_base *pki)
 	}
 	catch (DbException &err) {
 		tid->abort();
-		DBEX(err);
+		throw errorEx(err.what());
 	}
 	if (listview) {
 		
@@ -269,7 +263,6 @@ void db_base::_writePKI(pki_base *pki, bool overwrite, DbTxn *tid)
 	while (x == DB_KEYEXIST) {
 		Dbt k((void *)desc.latin1(), desc.length() + 1);
 		Dbt d((void *)p, size);
-		CERR("Size: " << d.get_size());
 		if ((x = data->put(tid, &k, &d, flags ))!=0) {
 			data->err(x,"DB Error put");
 			sprintf(field,"%02i", ++cnt);
@@ -306,7 +299,6 @@ void db_base::deletePKI(pki_base *pki)
 		delete(pki);
 	}
 	catch (DbException &err) {
-		DBEX(err);
 		tid->abort();
 		throw errorEx(err.what());
 	}
@@ -324,7 +316,6 @@ void db_base::renamePKI(pki_base *pki, QString desc)
 		tid->commit(0);
 	}
 	catch (DbException &err) {
-		DBEX(err);
 		tid->abort();
 		throw errorEx(err.what(), "rename PKI");
 	}
@@ -350,7 +341,6 @@ void db_base::updatePKI(pki_base *pki)
 		tid->commit(0);
 	}
 	catch (DbException &err) {
-		DBEX(err);
 		tid->abort();
 		throw errorEx(err.what(), "update PKI");
 	}
@@ -359,7 +349,6 @@ void db_base::updatePKI(pki_base *pki)
 pki_base *db_base::getByName(QString desc)
 {
 	if (desc == "" ) return NULL;
-	CERR( __FUNCTION__ << "desc = '" << desc << "'");
 	pki_base *pki;
         QListIterator<pki_base> it(container);
         for ( ; it.current(); ++it ) {

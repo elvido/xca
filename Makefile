@@ -7,17 +7,20 @@ TAG=$(shell echo "V.$(TVERSION)" |sed "s/\./_/g" )
 TARGET=xca-$(TVERSION)
 
 SUBDIRS=ui lib widgets view
-OBJECTS=ui/ui.obj lib/lib.obj widgets/widgets.obj view/view.obj
+OBJECTS=$(patsubst %, %/t.obj, $(SUBDIRS))
 
-all: $(SUBDIRS) xca
+all: headers xca
 re: clean all
 
 xca: $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) $(LIBS) -o xca
 	@echo -e "\n\n\nOk, compilation was successfull. \nNow do as root: 'make install'\n"
 
-$(SUBDIRS):
-	$(MAKE) -C $@ all
+headers:
+	$(MAKE) -C ui $@
+
+%/t.obj: headers
+	$(MAKE) -C $* t.obj
 
 clean:
 	for x in $(SUBDIRS); do \

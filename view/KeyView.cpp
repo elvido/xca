@@ -196,7 +196,6 @@ void KeyView::store()
 
 
 void KeyView::popupMenu(QListViewItem *item, const QPoint &pt, int x) {
-	CERR( " popup key" );
 	QPopupMenu *menu = new QPopupMenu(this);
 	if (!item) {
 		menu->insertItem(tr("New Key"), this, SLOT(newItem()));

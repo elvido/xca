@@ -14,7 +14,5 @@ OBJS=$(patsubst %, %.o, $(NAMES) $(MOCNAMES)) $(patsubst %, moc_%.o, $(MOCNAMES)
 
 DELFILES=$(patsubst %,moc_%.cpp,$(MOCNAMES))
 
-all: lib.obj
-
 include ../Rules.mak
   

@@ -200,10 +200,8 @@ void XcaListView::load_default(load_base &load)
 		}
 		catch (errorEx &err) {
 			Error(err);
-			if (item) {
+			if (item)
 				delete item;
-				item = NULL;
-			}
 		}
 		dlgi->addItem(item);
 	}
@@ -248,15 +246,13 @@ void XcaListView::updateView()
 		pki->updateView();
 	}
 }
-#if 0
-pki_base *XcaListView::loadItem(QString) { CERR("Virtual called..."); return NULL; }
-#endif
-void XcaListView::newItem(void) { CERR("Virtual called..."); }
-void XcaListView::deleteItem(void) { CERR("Virtual called..."); }
-void XcaListView::load(void) { CERR("Virtual called..."); }
-void XcaListView::store(void) { CERR("Virtual called..."); }
-void XcaListView::popupMenu(QListViewItem *, QPoint const &, int) { CERR("Virtual called..."); }
-void XcaListView::showItem(pki_base *, bool) { CERR("Virtual called...");}
+
+void XcaListView::newItem(void) { }
+void XcaListView::deleteItem(void) { }
+void XcaListView::load(void) { }
+void XcaListView::store(void) { }
+void XcaListView::popupMenu(QListViewItem *, QPoint const &, int) { }
+void XcaListView::showItem(pki_base *, bool) { }
 
 QPixmap *XcaListView::loadImg(const char *name )
 {

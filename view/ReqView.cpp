@@ -52,7 +52,6 @@
 
 #include "ReqView.h"
 #include "widgets/ReqDetail.h"
-#include "widgets/KeyDetail.h"
 #include <qpopupmenu.h>
 #include <qmessagebox.h>
 #include <qfiledialog.h>
@@ -116,7 +115,7 @@ void ReqView::showItem(pki_base *item, bool import)
 		dlg = new ReqDetail(this,0,true);
 		dlg->setReq((pki_x509req *)item);
 		connect(dlg->privKey, SIGNAL(doubleClicked(QString)),
-			this, SLOT(showKey(QString)));	
+			this, SLOT(dlg_showKey(QString)));	
 		dlg->exec();
     }
     catch (errorEx &err) {
@@ -220,7 +219,6 @@ pki_base *ReqView::insert(pki_base *item)
 #endif
 
 void ReqView::popupMenu(QListViewItem *item, const QPoint &pt, int x) {
-	CERR("hallo popup Req");
 	QPopupMenu *menu = new QPopupMenu(this);
 	QPopupMenu *subExport = new QPopupMenu(this);
 	if (!item) {
@@ -242,24 +240,3 @@ void ReqView::popupMenu(QListViewItem *item, const QPoint &pt, int x) {
 	return;
 }
 
-void ReqView::showKey(QString name)
-{
-	pki_key *key = (pki_key *)MainWindow::keys->getByName(name);
-	showKey(key);
-}
-
-void ReqView::showKey(pki_key *key)
-{
-	KeyDetail *dlg = NULL;
-	if (!key) return;
-	try {   
-		dlg = new KeyDetail(this, 0, true, 0 );
-		dlg->setKey(key);
-		dlg->exec();
-	} 
-	catch (errorEx &err) {
-		Error(err);
-	}
-	if (dlg)
-		delete dlg;
-}

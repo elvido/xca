@@ -52,10 +52,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "NewX509.h"
 #include "ui/MainWindow.h"
 #include "lib/db_key.h"
