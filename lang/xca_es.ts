@@ -49,64 +49,12 @@
         <translation>Detalles del Certificado</translation>
     </message>
     <message>
-        <source>Signed by:</source>
-        <translation type="obsolete">Firmado por:</translation>
-    </message>
-    <message>
-        <source>Key:</source>
-        <translation type="obsolete">Clave:</translation>
-    </message>
-    <message>
-        <source>not available</source>
-        <translation type="obsolete">no disponible</translation>
-    </message>
-    <message>
         <source>Serial:</source>
-        <translation>Num Serie:</translation>
-    </message>
-    <message>
-        <source>SELF SIGNED </source>
-        <translation type="obsolete">AUTO FIRMADO</translation>
-    </message>
-    <message>
-        <source>Subject</source>
-        <translation type="obsolete">Sujeto</translation>
-    </message>
-    <message>
-        <source>name / DNS:</source>
-        <translation type="obsolete">nombre / DNS:</translation>
-    </message>
-    <message>
-        <source>E-Mail:</source>
-        <translation type="obsolete">E-Mail:</translation>
-    </message>
-    <message>
-        <source>Organisation</source>
-        <translation type="obsolete">Organización</translation>
-    </message>
-    <message>
-        <source>Country:</source>
-        <translation type="obsolete">País:</translation>
-    </message>
-    <message>
-        <source>Issuer</source>
-        <translation type="obsolete">Emisor</translation>
-    </message>
-    <message>
-        <source>Org. unit:</source>
-        <translation type="obsolete">Departamento:</translation>
-    </message>
-    <message>
-        <source>Organisation:</source>
-        <translation type="obsolete">Organización:</translation>
+        <translation type="obsolete">Num Serie:</translation>
     </message>
     <message>
         <source>Validity</source>
         <translation>Validez</translation>
-    </message>
-    <message>
-        <source>valid</source>
-        <translation type="obsolete">válido</translation>
     </message>
     <message>
         <source>Fingerprint</source>
@@ -121,28 +69,12 @@
         <translation></translation>
     </message>
     <message>
-        <source>Locality:</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
         <source>CertDetail_UI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&amp;Status</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Name:</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Subject &amp; &amp;Issuer</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>&amp;Extensions</source>
-        <translation type="obsolete"></translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -201,16 +133,16 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>&amp;Extension</source>
+        <source>Serial</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Extensions</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>CertExtend_UI</name>
-    <message>
-        <source>Certificate renewal</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <source>This will create a new certificate as a copy of the old one with a new serial number and adjusted validity values.</source>
         <translation type="unfinished"></translation>
@@ -218,22 +150,6 @@
     <message>
         <source>Validity</source>
         <translation type="unfinished">Validez</translation>
-    </message>
-    <message>
-        <source>365</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Days</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Months</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Years</source>
-        <translation type="obsolete"></translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -244,11 +160,11 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>not Before</source>
+        <source>Not before</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>not After</source>
+        <source>Not after</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -305,42 +221,6 @@
     <message>
         <source>is going to be deleted</source>
         <translation type="unfinished">va a ser eliminado</translation>
-    </message>
-    <message>
-        <source>Certificates ( *.pem *.der *.crt *.cer )</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>All files ( *.* )</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Certificate import</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>PKCS#12 Certificates ( *.p12 *.pfx )</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>PKCS#7 data ( *.p7s *.p7m *.p7b )</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The certificate already exists in the database as</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>and so it was not imported</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The certificate-serial is higher than the next serial of the signer it will be set to </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The certificate CA serial is lower than the highest serial of one signed certificate it will be set to </source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>There was no key found for the Certificate: </source>
@@ -462,6 +342,10 @@
         <source>Error creating: </source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>The key you selected for signing is not a private one.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CrlDetail</name>
@@ -489,6 +373,14 @@
         <source>Verification not possible</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Unknown signer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unknown certificate</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CrlDetail_UI</name>
@@ -506,34 +398,14 @@
     </message>
     <message>
         <source>Signed by:</source>
-        <translation type="unfinished">Firmado por:</translation>
-    </message>
-    <message>
-        <source>Name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Signature:</source>
-        <translation type="unfinished"></translation>
+        <translation type="obsolete">Firmado por:</translation>
     </message>
     <message>
         <source>The internal name of the CRL in the database</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Version:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Issuing dates</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Last Update:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Next Update:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -560,21 +432,33 @@
         <source>&amp;OK</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Signed by</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished">Nombre</translation>
+    </message>
+    <message>
+        <source>Signature</source>
+        <translation type="unfinished">Firma</translation>
+    </message>
+    <message>
+        <source>Version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Last Update</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Next Update</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CrlView</name>
-    <message>
-        <source>Common Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Issuer C-Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Count</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message>
         <source>The Revokation list</source>
         <translation type="unfinished"></translation>
@@ -582,26 +466,6 @@
     <message>
         <source>is going to be deleted</source>
         <translation type="unfinished">va a ser eliminado</translation>
-    </message>
-    <message>
-        <source>Revokation lists ( *.pem *.crl )</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>All files ( *.* )</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Load CRL</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The revokation list already exists in the database as</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>and so it was not imported</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Export Certificate revokation list</source>
@@ -635,6 +499,18 @@
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Internal Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Issuer Common Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Revoked</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ExportCert</name>
@@ -654,10 +530,6 @@
 <context>
     <name>ExportCert_UI</name>
     <message>
-        <source>Cerificate export</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
         <source>Certificate export</source>
         <translation type="unfinished"></translation>
     </message>
@@ -667,21 +539,15 @@
     </message>
     <message>
         <source>Filename:</source>
-        <translation type="unfinished">Fichero:</translation>
+        <translation type="obsolete">Fichero:</translation>
     </message>
     <message>
         <source>...</source>
         <translation type="unfinished">...</translation>
     </message>
     <message>
-        <source>DER is a binary format of the Certificate
-PEM is a base64 encoded Certificate
-PKCS#12 is an encrypted official Key-Certificate exchange format</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
         <source>Export Format:</source>
-        <translation type="unfinished">Formato de exportación:</translation>
+        <translation type="obsolete">Formato de exportación:</translation>
     </message>
     <message>
         <source>Cancel</source>
@@ -704,6 +570,18 @@ PKCS#12 is an encrypted official Key-Certificate exchange format</source>
 PEM is a base64 encoded Certificate
 PKCS#7 is an official Certificate exchange format
 PKCS#12 is an encrypted official Key-Certificate exchange format</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ExportCert_UI</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Filename</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Export Format</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -734,7 +612,7 @@ PKCS#12 is an encrypted official Key-Certificate exchange format</source>
     </message>
     <message>
         <source>Filename:</source>
-        <translation>Fichero:</translation>
+        <translation type="obsolete">Fichero:</translation>
     </message>
     <message>
         <source>...</source>
@@ -750,7 +628,7 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
     </message>
     <message>
         <source>Export Format:</source>
-        <translation>Formato de exportación:</translation>
+        <translation type="obsolete">Formato de exportación:</translation>
     </message>
     <message>
         <source>When exporting the private key it should be encrypted.</source>
@@ -776,6 +654,18 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
         <source>When exporting the private part, it should be encrypted.</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>ExportKey_UI</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Filename</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Export Format</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ExportTinyCA</name>
@@ -791,15 +681,7 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
 <context>
     <name>ExportTinyCA_UI</name>
     <message>
-        <source>CA export</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>TinyCA export</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Templatedir:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -811,15 +693,7 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
         <translation type="unfinished">...</translation>
     </message>
     <message>
-        <source>TinyCA Directory:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>the TinyCA database directory, usually: ~/.TinyCA/</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -828,11 +702,116 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
     </message>
     <message>
         <source>Cancel</source>
-        <translation type="unfinished">Cancelar</translation>
+        <translation type="obsolete">Cancelar</translation>
+    </message>
+    <message>
+        <source>Templatedir</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>TinyCA Directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished">Nombre</translation>
+    </message>
+    <message>
+        <source>&amp;Cancel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ImportMulti</name>
+    <message>
+        <source>Internal name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Common name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Serial</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The type of the Item is not recognized: </source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>OK</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation type="unfinished">Importar</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Details of this item cannot be shown: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The type of the Item is not recognized </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ImportMulti_UI</name>
+    <message>
+        <source>ImportMulti_UI</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import &amp;All</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Import</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Done</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&amp;Remove</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>KeyDetail</name>
+    <message>
+        <source>Not available</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Available</source>
+        <translation type="unfinished">Disponible</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation type="unfinished">Importar</translation>
+    </message>
+    <message>
+        <source>Discard</source>
+        <translation type="unfinished">Abandonar</translation>
     </message>
 </context>
 <context>
@@ -848,10 +827,6 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
     <message>
         <source>Private Exponent</source>
         <translation>Exponente secreto</translation>
-    </message>
-    <message>
-        <source>Available</source>
-        <translation type="obsolete">Disponible</translation>
     </message>
     <message>
         <source>Public Exponent</source>
@@ -881,10 +856,6 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
 <context>
     <name>KeyView</name>
     <message>
-        <source>Common Name</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Keylength</source>
         <translation type="unfinished"></translation>
     </message>
@@ -909,40 +880,8 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
         <translation type="unfinished">va a ser eliminado</translation>
     </message>
     <message>
-        <source>Not available</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Available</source>
-        <translation type="unfinished">Disponible</translation>
-    </message>
-    <message>
         <source>Import</source>
         <translation type="unfinished">Importar</translation>
-    </message>
-    <message>
-        <source>Discard</source>
-        <translation type="unfinished">Abandonar</translation>
-    </message>
-    <message>
-        <source>Import key</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The key is already in the database as</source>
-        <translation type="unfinished">La clave ya aparece en la base de datos como</translation>
-    </message>
-    <message>
-        <source>and is not going to be imported</source>
-        <translation type="unfinished">y no va a ser importada</translation>
-    </message>
-    <message>
-        <source>The database already contains the public part of the imported key as</source>
-        <translation type="unfinished">La base de datos ya contiene la parte pública de la clave importada como</translation>
-    </message>
-    <message>
-        <source>and will be completed by the new, private part of the key</source>
-        <translation type="unfinished">y será completada por la nueva parte secreta de la clave</translation>
     </message>
     <message>
         <source>New Key</source>
@@ -964,6 +903,42 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Internal name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Key size too small !</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You are sure to create a key of the size: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Create</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Please enter the old password of the database.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Database password verify error.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Please enter the new password for the database.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Database password too long: </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Database password changed successfully.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>MainWindow</name>
@@ -976,182 +951,6 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
         <translation>Contraeña incorrecta, inténtelo de nuevo</translation>
     </message>
     <message>
-        <source>The system detected a NULL pointer, maybe the system is out of memory</source>
-        <translation type="obsolete">El sistema detectó un puntero NULL, podría deberse a falta de memoria</translation>
-    </message>
-    <message>
-        <source>The Key: </source>
-        <translation type="obsolete">Clave:</translation>
-    </message>
-    <message>
-        <source> is not consistent:</source>
-        <translation type="obsolete">no es consistente:</translation>
-    </message>
-    <message>
-        <source>Please wait, Key generation is in progress</source>
-        <translation type="obsolete">Espere, generando claves...</translation>
-    </message>
-    <message>
-        <source>Cancel</source>
-        <translation>Cancelar</translation>
-    </message>
-    <message>
-        <source>The key</source>
-        <translation type="obsolete">Clave</translation>
-    </message>
-    <message>
-        <source>is going to be deleted</source>
-        <translation type="obsolete">va a ser eliminado</translation>
-    </message>
-    <message>
-        <source>not available</source>
-        <translation type="obsolete">no disponible</translation>
-    </message>
-    <message>
-        <source>Import</source>
-        <translation>Importar</translation>
-    </message>
-    <message>
-        <source>Discard</source>
-        <translation type="obsolete">Abandonar</translation>
-    </message>
-    <message>
-        <source>The key is already in the database as</source>
-        <translation type="obsolete">La clave ya aparece en la base de datos como</translation>
-    </message>
-    <message>
-        <source>and is not going to be imported</source>
-        <translation type="obsolete">y no va a ser importada</translation>
-    </message>
-    <message>
-        <source>The database already contains the public part of the imported key as</source>
-        <translation type="obsolete">La base de datos ya contiene la parte pública de la clave importada como</translation>
-    </message>
-    <message>
-        <source>and will be completed by the new, private part of the key</source>
-        <translation type="obsolete">y será completada por la nueva parte secreta de la clave</translation>
-    </message>
-    <message>
-        <source>New Key</source>
-        <translation type="obsolete">Nueva clave</translation>
-    </message>
-    <message>
-        <source>Rename</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show Details</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Export</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Delete</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>SIGNER UNKNOWN</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>SELF SIGNED</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Not valid</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Revoked: </source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Really want to delete the Certificate</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Certificates ( *.pem *.der *.crt *.cer)</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>PKCS#12 Certificates ( *.p12 )</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>All files ( *.* )</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Certificate import</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The certificate already exists in the database as</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>and so it was not imported</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>All Files ( *.* )</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>New Certificate</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Trust</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Unrevoke</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Revoke</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Really want to delete the Certificate signing request</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Import Certificate signing request</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>The certificate signing request already exists in the database as</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>and thus was not stored</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>New Request</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>New Template</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>The template</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Create certificate</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Create request</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
         <source>Please enter a password, that will be used to encrypt your private keys in the database-file</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1160,218 +959,26 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Empty</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>CA</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Client</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Server</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Change</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Please enter the new Serial for signing</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
         <source>New Password</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The following error occured</source>
-        <translation type="obsolete"></translation>
     </message>
     <message>
         <source>The following error occured:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The validity times for the certificate need to get adjusted to not exceed those of the signer</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Continue creation</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Abort</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>You requested to copy the subject E-Mail address but it is empty !</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>You requested to copy the issuer alternative name but it is empty !</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>It is actually not a good idea to delete a cert that was signed by you</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Ok</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>There was no key found for the Certificate: </source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>File</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Request</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Serial</source>
+        <source>&amp;OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>CRL days</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Signing Template</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Generate CRL</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Renewal</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Please enter the CRL renewal periode in days</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Please select the default Template for signing</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>CRLs ( *.crl )</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>CRL export</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Export Certificate signing request</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Sign</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>PKCS#7 data ( *.p7s *.p7m )</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>The certificate-serial is higher than the next serial of the signer it will be set to </source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>The certificate CA serial is lower than the highest serial of one signed certificate it will be set to </source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Import PKCS#12</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Import from PKCS#7</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>PKCS#7</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Encrypt</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Name</source>
-        <translation type="unfinished">Nombre</translation>
-    </message>
-    <message>
-        <source>Revokation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Success</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Really want to delete the Revokation list</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Revokation lists ( *.pem *.crl )</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The revokation list already exists in the database as</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Export Certificate revokation list</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>PEM</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>DER</source>
+        <source>Copy to Clipboard</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>MainWindow_UI</name>
     <message>
-        <source>X Certificate and Key management</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>RSA Keys</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Name</source>
-        <translation type="obsolete">Nombre</translation>
-    </message>
-    <message>
-        <source>Item</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Delete</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Certificate signing request</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Certificate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1381,18 +988,6 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
     <message>
         <source>Templates</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Revocation list</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Create</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>C R A S H</source>
-        <translation type="obsolete"></translation>
     </message>
     <message>
         <source>&amp;New Key</source>
@@ -1463,7 +1058,31 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Do NOT press this button :-)</source>
+        <source>Import PFX (PKCS#12)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Change password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation type="unfinished">Importar</translation>
+    </message>
+    <message>
+        <source>Export</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>MainWindow_UI</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Certificate signing requests</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Certificates</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1479,10 +1098,6 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
     </message>
     <message>
         <source>Key properties</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1509,6 +1124,10 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
         <source>The internal name of the new key</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Name</source>
+        <translation type="unfinished">Nombre</translation>
+    </message>
 </context>
 <context>
     <name>NewX509</name>
@@ -1518,27 +1137,19 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
     </message>
     <message>
         <source>Certificate request</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Welcome to the settings for Templates.... (needs more prosa)</source>
-        <translation type="obsolete"></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Template</source>
-        <translation type="obsolete"></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source> change</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Welcome to the settings for Certificates.... (needs more prosa)</source>
-        <translation type="obsolete"></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Certificate</source>
-        <translation type="obsolete"></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Server Template</source>
@@ -1553,65 +1164,39 @@ PKCS#8 es un formato estandar de intercambio de claves</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Welcome to the settings for Certificate signing requests.... (needs more prosa, volunteers ?)</source>
-        <translation type="obsolete"></translation>
+        <source>You are done with entering all parameters for creating a Certificate.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>You are done with entering all parameters for generating a Certificate signing request..... (needs more prosa, volunteers ?)</source>
-        <translation type="obsolete"></translation>
+        <source>Welcome to the settings for certificate signing requests.
+A signing request needs a private key, so it will be created if there isn&apos;t any unused key available in the key database. This signing request can then be given to a Certification authority while the private key of the request and of the resulting certificate returned from the CA does never leave your computer.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>You are done with entering all parameters for generating a Template..... (needs more prosa, volunteers ?)</source>
-        <translation type="obsolete"></translation>
+        <source>You are done with entering all parameters for generating a Certificate signing request. The resulting request should be exported and send to an appropriate CA for signing it.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>You are done with entering all parameters for generating a Certificate..... (needs more prosa, volunteers ?)</source>
-        <translation type="obsolete"></translation>
+        <source>Welcome to the settings for Templates.
+This templates do not refer to any ASN.1 structure but are used to keep default settings for signing requests and certificates. When creating a Request or Certificate the template can preset the needed fields with default settings.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>You are done with entering all parameters for the Template.
+After this step the template can be assigned to one of your CAs to be autoatically applied when signing with this CA.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Welcome to the settings for Certificates.
+The information for the new Certificate can either be grabbed from a given Certificate-request or be filled in by hand. In the case of not signing a request there needs to be at least one unused key. If this is not the case it will be created. If you want to self-sign a request (unusual but nevertheless possible) you need the private key used to create the request.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>NewX509_UI</name>
     <message>
-        <source>Source of the subject and the key</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>E-Mail address:</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Organisation:</source>
-        <translation type="obsolete">Organización:</translation>
-    </message>
-    <message>
-        <source>State or Province</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Organisational unit:</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Common name:</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Key:</source>
-        <translation type="obsolete">Clave:</translation>
-    </message>
-    <message>
-        <source>Locality:</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
         <source>Template</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>For a new certificate you have to enter your personal data into the form and select a key to use.
-For signing a request, please select the appropriate Certificates igning request.
-For a SSL servercertificate choose the DNS name of the server as &quot;Common name&quot;</source>
-        <translation type="obsolete"></translation>
     </message>
     <message>
         <source>CRL distribution point</source>
@@ -1627,22 +1212,6 @@ For a SSL servercertificate choose the DNS name of the server as &quot;Common na
     </message>
     <message>
         <source>Basic Constraints</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>CA:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>FALSE</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>TRUE</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Path length:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1664,10 +1233,6 @@ For a SSL servercertificate choose the DNS name of the server as &quot;Common na
     <message>
         <source>Years</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Page</source>
-        <translation type="obsolete"></translation>
     </message>
     <message>
         <source>Key Usage</source>
@@ -1712,54 +1277,6 @@ For a SSL servercertificate choose the DNS name of the server as &quot;Common na
     <message>
         <source>Extended Key Usage</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>SSL/TLS Web Server Authentication</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>SSL/TLS Web Client Authentication</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Code signing</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>E-mail Protection (S/MIME)</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Trusted Timestamping</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Microsoft Individual Code Signing (authenticode)</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Microsoft Commercial Code Signing (authenticode)</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Microsoft Trust List Signing</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Microsoft Server Gated Crypto</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Microsoft Encrypted File System</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Netscape Server Gated Crypto</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>X Certificate and Key management</source>
-        <translation type="obsolete"></translation>
     </message>
     <message>
         <source>SSL Client</source>
@@ -1826,23 +1343,11 @@ For a SSL servercertificate choose the DNS name of the server as &quot;Common na
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Country code:</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
         <source>Internal name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>365</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
         <source>Sign this Certificate signing &amp;request</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Use &amp;this Certificate for for signing:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2051,14 +1556,6 @@ It also copies the issuer and serial number from the issuer certificate. Normall
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>not Before</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>not After</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Time Range</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2089,16 +1586,6 @@ email:my@other.address, RID:1.2.3.4, DNS: ns.server.tld</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>This is a multi-valued extension that supports all the literal options of subject alternative name. Of the few software packages that currentlyi nterpret this extension most only interpret the URI option.
-Currently each option will set a new DistributionPoint with the fullName field set to the given value.
-Other fields like cRLissuer and reasons cannot currently be set or displayed: at this time no examples were available that used these fields.
-If you see this extension with &lt;UNSUPPORTED&gt; when you attempt to print it out or it doesn&apos;t appear to display correctly then let me know,i ncluding the certificate (mail steve at openssl dot org) .
-Examples:
-URI:http://www.myhost.com/myca.crl
-URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Great picture , heh ?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2106,13 +1593,47 @@ URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</source>
         <source>If you know a more pretty one tell me</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>This is a multi-valued extension that supports all the literal options of subject alternative name. Of the few software packages that currentlyi nterpret this extension most only interpret the URI option.
+Currently each option will set a new DistributionPoint with the fullName field set to the given value.
+Other fields like cRLissuer and reasons cannot currently be set or displayed: at this time no examples were available that used these fields.
+If you see this extension with &lt;UNSUPPORTED&gt; when you attempt to print it out or it doesn&apos;t appear to display correctly then let steve know, including the certificate (mail steve at openssl dot org) .
+Examples:
+URI:http://www.myhost.com/myca.crl
+URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Use &amp;this Certificate for for signing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>CA</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Path length</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not before</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Not after</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>PassRead_UI</name>
-    <message>
-        <source>Passwort</source>
-        <translation>Contraseña</translation>
-    </message>
     <message>
         <source>Password</source>
         <translation>Contraseña</translation>
@@ -2129,16 +1650,8 @@ URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</source>
 <context>
     <name>PassWrite_UI</name>
     <message>
-        <source>Passwort</source>
-        <translation>Contraseña</translation>
-    </message>
-    <message>
         <source>Password</source>
         <translation>Contraseña</translation>
-    </message>
-    <message>
-        <source>Repeat pasword</source>
-        <translation>Repetir contraseña</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -2146,6 +1659,10 @@ URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</source>
     </message>
     <message>
         <source>&amp;OK</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Repeat password</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2157,6 +1674,65 @@ URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</source>
     </message>
     <message>
         <source>&apos; could not be opened</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
+    <message>
+        <source>All Files ( *.* )</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import RSA key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>PKCS#10 CSR ( *.pem *.der *.csr )</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import Request</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Certificates ( *.pem *.der *.crt *.cer )</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import X.509 Certificate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>PKCS#7 data ( *.p7s *.p7m *.p7b )</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import PKCS#7 Certificates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>PKCS#12 Certificates ( *.p12 *.pfx )</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import PKCS#12 Private Certificate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>XCA templates ( *.xca )</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import XCA Templates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Revokation lists ( *.pem *.crl )</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import Certificate Revokation List</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2179,59 +1755,19 @@ URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</source>
     <name>ReqDetail_UI</name>
     <message>
         <source>Details of the request</source>
-        <translation>Detalles de la solicitud</translation>
+        <translation type="obsolete">Detalles de la solicitud</translation>
     </message>
     <message>
         <source>Details of the certificate signing request</source>
         <translation>Detalles de la solicitud</translation>
     </message>
     <message>
-        <source>Certificate name</source>
-        <translation type="obsolete">Id del certificado</translation>
-    </message>
-    <message>
         <source>Signature</source>
         <translation>Firma</translation>
     </message>
     <message>
-        <source>Key</source>
-        <translation type="obsolete">Clave</translation>
-    </message>
-    <message>
-        <source>OK</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>not available</source>
-        <translation type="obsolete">no disponible</translation>
-    </message>
-    <message>
         <source>Subject</source>
         <translation>Sujeto</translation>
-    </message>
-    <message>
-        <source>name / DNS</source>
-        <translation type="obsolete">nombre / DNS</translation>
-    </message>
-    <message>
-        <source>Province</source>
-        <translation type="obsolete">Provincia</translation>
-    </message>
-    <message>
-        <source>Country</source>
-        <translation type="obsolete">País</translation>
-    </message>
-    <message>
-        <source>Org. Unit</source>
-        <translation type="obsolete">Departamento</translation>
-    </message>
-    <message>
-        <source>E-Mail</source>
-        <translation type="obsolete">E-Mail</translation>
-    </message>
-    <message>
-        <source>Organisation</source>
-        <translation type="obsolete">Organización</translation>
     </message>
     <message>
         <source>&amp;Cancel</source>
@@ -2277,19 +1813,7 @@ URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</source>
         <translation type="unfinished">va a ser eliminado</translation>
     </message>
     <message>
-        <source>Import CSR</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Export Certificate signing request</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The certificate signing request already exists in the database as</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>and thus was not stored</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2326,6 +1850,10 @@ URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</source>
     </message>
     <message>
         <source>Delete</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Internal name</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2387,20 +1915,24 @@ URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</source>
         <source>Create request</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Export Template</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation type="unfinished">Importar</translation>
+    </message>
+    <message>
+        <source>Export</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>TrustState_UI</name>
     <message>
-        <source>Trust State</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Set Trustment of the Certificate</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Certificate name</source>
-        <translation type="obsolete">Id del certificado</translation>
     </message>
     <message>
         <source>Select the Truststate</source>
@@ -2493,14 +2025,6 @@ URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</source>
         <translation type="unfinished">Cancelar</translation>
     </message>
     <message>
-        <source>All Files ( *.* )</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The following error occured:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>The system detected a NULL pointer, maybe the system is out of memory</source>
         <translation type="unfinished">El sistema detectó un puntero NULL, podría deberse a falta de memoria</translation>
     </message>
@@ -2513,79 +2037,55 @@ URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</source>
     </message>
 </context>
 <context>
-    <name>db_key</name>
+    <name>db_crl</name>
     <message>
-        <source>Keysize</source>
-        <translation type="obsolete">Tamaño de clave</translation>
+        <source>The revokation list already exists in the database as</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Use count</source>
-        <translation type="obsolete"></translation>
+        <source>and so it was not imported</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
-    <name>db_temp</name>
+    <name>db_key</name>
     <message>
-        <source>Type</source>
-        <translation type="obsolete"></translation>
+        <source>The key is already in the database as</source>
+        <translation type="unfinished">La clave ya aparece en la base de datos como</translation>
     </message>
     <message>
-        <source>Empty</source>
-        <translation type="obsolete"></translation>
+        <source>and is not going to be imported</source>
+        <translation type="unfinished">y no va a ser importada</translation>
     </message>
     <message>
-        <source>CA</source>
-        <translation type="obsolete"></translation>
+        <source>The database already contains the public part of the imported key as</source>
+        <translation type="unfinished">La base de datos ya contiene la parte pública de la clave importada como</translation>
     </message>
     <message>
-        <source>Client</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Server</source>
-        <translation type="obsolete"></translation>
+        <source>and will be completed by the new, private part of the key</source>
+        <translation type="unfinished">y será completada por la nueva parte secreta de la clave</translation>
     </message>
 </context>
 <context>
     <name>db_x509</name>
     <message>
-        <source>Trust state</source>
-        <translation type="obsolete"></translation>
+        <source>The certificate already exists in the database as</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Revokation</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Not trusted</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Trust inherited</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Always Trusted</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Common Name</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>Serial</source>
-        <translation type="obsolete"></translation>
-    </message>
-    <message>
-        <source>not After</source>
-        <translation type="obsolete"></translation>
+        <source>and so it was not imported</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>db_x509req</name>
     <message>
-        <source>Common Name</source>
-        <translation type="obsolete"></translation>
+        <source>The certificate signing request already exists in the database as</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>and thus was not stored</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2638,6 +2138,10 @@ URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</source>
     </message>
     <message>
         <source>Server</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Template file content error</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

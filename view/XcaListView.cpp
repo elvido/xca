@@ -214,11 +214,7 @@ void XcaListView::load_default(load_base &load)
 
 void XcaListView::Error(errorEx &err)
 {
-	if (err.isEmpty()) {
-		return;
-	}
-	QMessageBox::warning(this,tr(XCA_TITLE), tr("The following error occured:") + "\n" +
-		QString::fromLatin1(err.getCString()));
+	MainWindow::Error(err);
 }
 
 bool XcaListView::Error(pki_base *pki)
@@ -255,34 +251,4 @@ void XcaListView::load(void) { }
 void XcaListView::store(void) { }
 void XcaListView::popupMenu(QListViewItem *, QPoint const &, int) { }
 void XcaListView::showItem(pki_base *, bool) { }
-
-QPixmap *XcaListView::loadImg(const char *name )
-{
-#ifdef WIN32
-        static unsigned char PREFIX[100]="";
-        if (PREFIX[0] == '\0') {
-          LONG lRc;
-      HKEY hKey;
-      lRc=RegOpenKeyEx(HKEY_LOCAL_MACHINE, "Software\xca",0,KEY_READ, &hKey);
-      if(lRc!= ERROR_SUCCESS){
-        // No key error
-            QMessageBox::warning(NULL,tr(XCA_TITLE), "Registry Key: 'HKEY_LOCAL_MACHINE->Software->xca' not found");
-                PREFIX[0] = '\0';
-          }
-      else {
-            ULONG dwLength = 100;
-                lRc=RegQueryValueEx(hKey,"Install_Dir",NULL,NULL, PREFIX, &dwLength);
-        if(lRc!= ERROR_SUCCESS){
-            // No key error
-                QMessageBox::warning(NULL,tr(XCA_TITLE), "Registry Key: 'HKEY_LOCAL_MACHINE->Software->xca->Install_Dir' not found");        
-                    PREFIX[0] = '\0';
-                }
-          }
-        lRc=RegCloseKey(hKey);
-        }
-#endif
-        QString path = (char *)PREFIX;
-        path += QDir::separator();
-    return new QPixmap(path + name);
-}
 

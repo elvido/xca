@@ -54,33 +54,31 @@
 #include <qtranslator.h>
 #include <qtextcodec.h>
 #include "widgets/MainWindow.h"
+#include "lib/func.h"
 
 
 int main( int argc, char *argv[] )
 {
     int ret = 0;
     QApplication a( argc, argv );
-    MainWindow *mw = new MainWindow( NULL, "Main Widget");
-    a.setMainWidget( mw );
     // translation file for Qt
     QTranslator qtTr( 0 );
     qtTr.load( QString( "qt_" ) + QTextCodec::locale(), "." );
     a.installTranslator( &qtTr );
     //translation file for application strings
     QTranslator xcaTr( 0 );
-#ifdef WIN32
-    xcaTr.load( QString( "xca_" ) + QTextCodec::locale(), "." );
+    xcaTr.load( QString( "xca_" ) + QTextCodec::locale(), getPrefix() );
+	printf("Locale: %s\nPrefix:%s\n",QTextCodec::locale(), getPrefix().latin1());
     a.installTranslator( &xcaTr );
-#else	
-    xcaTr.load( QString( "xca_" ) + QTextCodec::locale(), PREFIX );
-    a.installTranslator( &xcaTr );
-#endif
+    MainWindow *mw = new MainWindow( NULL, "Main Widget");
+    a.setMainWidget( mw );
     if (mw->exitApp == 0) {
    	mw->show();
 	ret = a.exec();
     }
     delete mw;
-	printf("PKI Counter: %d\nThe PKI counter must be 0, if not contact me.\n",
-		pki_base::get_pki_counter());
+	int pkictr =  pki_base::get_pki_counter();
+	if (pkictr) 
+		printf("PKI Counter (%d)\n", pkictr);
     return ret;
 }

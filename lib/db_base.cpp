@@ -1,3 +1,4 @@
+/* vi: set sw=4 ts=4: */
 /*
  * Copyright (C) 2001 Christian Hohnstaedt.
  *
@@ -55,6 +56,7 @@
 #include <qmessagebox.h>
 #include <qlistview.h>
 #include <qdir.h>
+
 
 db_base::db_base(DbEnv *dbe, QString DBfile, QString DB, DbTxn *global_tid,
 	XcaListView *lvi) 
@@ -145,41 +147,41 @@ int db_base::getInt(QString key)
 }
 
 
-void db_base::putData(void *key, int keylen, void *dat, int datalen)
+void db_base::putData(void *key, int keylen, void *dat, int datalen, DbTxn *tid)
 {
 	
 	Dbt k(key, keylen);
 	Dbt d(dat, datalen);
 	try {
-		data->put(NULL, &k, &d, 0 );
+		data->put(tid, &k, &d, 0 );
 	}
 	catch (DbException &err) {
 		throw errorEx(err.what());
 	}
 }
 
-void db_base::putString(QString key, void *dat, int datalen)
+void db_base::putString(QString key, void *dat, int datalen, DbTxn *tid)
 {
-	putData((void *)key.latin1(), key.length()+1, dat, datalen);
+	putData((void *)key.latin1(), key.length()+1, dat, datalen, tid);
 }
 
-void db_base::putString(QString key, QString dat)
+void db_base::putString(QString key, QString dat, DbTxn *tid)
 {
-	putString(key, (void *)dat.latin1(), dat.length() +1);
+	putString(key, (void *)dat.latin1(), dat.length() +1, tid);
 }
 
-void db_base::putString(char *key, QString dat)
+void db_base::putString(char *key, QString dat, DbTxn *tid)
 {
 	QString x = key;
-	putString(x,dat);
+	putString(x, dat, tid);
 }
 
-void db_base::putInt(QString key, int dat)
+void db_base::putInt(QString key, int dat, DbTxn *tid)
 {
 	char buf[100];
 	sprintf(buf,"%i",dat);
 	QString x = buf;
-	putString(key, x);
+	putString(key, x, tid);
 }
 
 void db_base::loadContainer()
@@ -264,7 +266,6 @@ void db_base::_writePKI(pki_base *pki, bool overwrite, DbTxn *tid)
 		Dbt k((void *)desc.latin1(), desc.length() + 1);
 		Dbt d((void *)p, size);
 		if ((x = data->put(tid, &k, &d, flags ))!=0) {
-			data->err(x,"DB Error put");
 			sprintf(field,"%02i", ++cnt);
 			QString z = field;
 		   	desc = orig + "_" + z ;
@@ -388,7 +389,7 @@ QStringList db_base::getDesc()
 	pki_base *pki;
 	QStringList x;
 	x.clear();
-	for ( pki = container.first(); pki != 0; pki = container.next() )	{
+	for ( pki = container.first(); pki != 0; pki = container.next() ){
 		x.append(pki->getIntName());	
 	}
 	return x;
@@ -408,5 +409,25 @@ pki_base *db_base::insert(pki_base *item)
 {
 	insertPKI(item);
 	return item;
-     
 }
+
+void db_base::writeAll(DbTxn *tid)
+{
+	bool tidwasnull = false;
+	if (tid == NULL) { 
+		tidwasnull = true;
+		dbenv->txn_begin(NULL, &tid, 0);
+	}
+	try {
+		for (pki_base *pki=container.first(); pki!=0; pki=container.next() ) 
+			_writePKI(pki, true, tid);
+	}
+	catch (DbException &err) {
+		DBEX(err);
+		tid->abort();
+		throw errorEx(err.what());
+	}
+	if (tidwasnull)
+		tid->commit(0);
+}
+

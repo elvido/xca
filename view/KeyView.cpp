@@ -51,11 +51,15 @@
 
 #include "KeyView.h"
 #include "ui/NewKey.h"
+#include "ui/PassRead.h"
+#include "ui/PassWrite.h"
 #include "widgets/KeyDetail.h"
 #include "widgets/ExportKey.h"
 #include "widgets/MainWindow.h"
 #include "widgets/clicklabel.h"
+#include "lib/pki_key.h"
 #include <qcombobox.h>
+#include <qregexp.h>
 #include <qlabel.h>
 #include <qprogressdialog.h>
 #include <qpushbutton.h>
@@ -65,7 +69,7 @@
 #include <qpopupmenu.h>
 #include <qcheckbox.h>
 
-const int KeyView::sizeList[] = {256, 512, 1024, 2048, 4096, 0 };
+const int KeyView::sizeList[] = {512, 1024, 2048, 4096, 0 };
 
 KeyView::KeyView(QWidget * parent, const char * name, WFlags f)
 	:XcaListView(parent, name, f)
@@ -79,13 +83,23 @@ void KeyView::newItem()
 {
 	NewKey_UI *dlg = new NewKey_UI(this,0,true,0);
 	QString x;
-	for (int i=0; sizeList[i] != 0; i++ ) 
-	dlg->keyLength->insertItem( x.number(sizeList[i]) +" bit");	
-	dlg->keyLength->setCurrentItem(2);
+	dlg->keyLength->setEditable(true);	
+	for (int i=0; sizeList[i] != 0; i++ ) {
+		dlg->keyLength->insertItem( x.number(sizeList[i]) +" bit");	
+	}
+	dlg->keyLength->setCurrentItem(1);
 	dlg->image->setPixmap(*MainWindow::keyImg);
 	if (dlg->exec()) {
 	  try {
-		int sel = dlg->keyLength->currentItem();
+		QString ksizes = dlg->keyLength->currentText();
+		ksizes.replace( QRegExp("[^0-9]"), "" );
+		int ksize = ksizes.toInt();
+		if (ksize < 32) throw errorEx(tr("Key size too small !"));
+		if (ksize < 512 || ksize > 4096)
+			if (!QMessageBox::warning(this, XCA_TITLE, tr("You are sure to create a key of the size: ")
+				+QString::number(ksize) + " ?", tr("Cancel"), tr("Create") ))
+					return;
+			
 		QProgressDialog *progress = new QProgressDialog(
 			tr("Please wait, Key generation is in progress"),
 			tr("Cancel"),90, 0, 0, true);
@@ -95,7 +109,7 @@ void KeyView::newItem()
 		pki_key *nkey = new pki_key (dlg->keyDesc->text(), 
 			&incProgress,
 			progress,
-			sizeList[sel]);
+			ksize);
 			progress->cancel();
 		delete progress;
 		db->insert(nkey);
@@ -223,3 +237,70 @@ void KeyView::importKey(pki_key *k)
 	db->insert(k);
 }
 
+void KeyView::changePasswd()
+{
+	QString passHash = MainWindow::settings->getString("pwhash");
+	QString pass;
+	bool ret;
+	DbTxn *tid;
+	
+	PassRead_UI *dlg = new PassRead_UI(NULL, 0, true);
+	dlg->image->setPixmap( *MainWindow::keyImg );
+	dlg->title->setText(XCA_TITLE);
+	dlg->description->setText(tr("Please enter the old password of the database."));
+	dlg->pass->setFocus();
+	dlg->setCaption(XCA_TITLE);
+	
+	ret = dlg->exec();
+	if (ret) {
+		pass = dlg->pass->text();
+	}
+	delete dlg;
+	if (!ret) return;
+	if (MainWindow::md5passwd(pass.latin1()) != passHash) {
+		QMessageBox::warning(this, XCA_TITLE, tr("Database password verify error."));
+		return;
+	}
+	
+	PassWrite_UI *dlg1 = new PassWrite_UI(NULL, 0, true);
+	dlg1->image->setPixmap( *MainWindow::keyImg );
+	dlg1->title->setText(XCA_TITLE);
+	dlg1->description->setText(tr("Please enter the new password for the database."));
+	dlg1->passA->setFocus();
+	dlg1->setCaption(XCA_TITLE);
+	QString A = "Irgendwas", B="";
+	ret = dlg1->exec();
+	if (ret) {
+		A = dlg1->passA->text();
+		B = dlg1->passB->text();
+	}
+	delete dlg1;
+	if (!ret) return;
+	if (A != B) {
+		QMessageBox::warning(this, XCA_TITLE, tr("Database password verify error."));
+		return;
+	}
+	if (A.length() >= MAX_PASS_LENGTH) {
+		QMessageBox::warning(this, XCA_TITLE, tr("Database password too long: ") + 
+			QString::number(MAX_PASS_LENGTH));
+		return;
+	}
+	MainWindow::dbenv->txn_begin(NULL, &tid, 0);
+	B = pki_key::passwd;
+	strncpy(pki_key::passwd, A.latin1(), MAX_PASS_LENGTH);
+	try {
+		db->writeAll(tid);
+		MainWindow::settings->putString( "pwhash", MainWindow::md5passwd(pki_key::passwd), tid );
+	}
+	catch (DbException &err) {
+		QString e = err.what();
+		/* recover the old password */
+		tid->abort();
+		strncpy(pki_key::passwd, B.latin1(), MAX_PASS_LENGTH);
+		errorEx er(e);
+		Error(er);
+	}
+	tid->commit(0);
+	QMessageBox::information(this, XCA_TITLE, tr("Database password changed successfully.") );
+}
+		

@@ -75,11 +75,11 @@ class MainWindow: public MainWindow_UI
 	void read_cmdline();
 	QString getBaseDir();
 	DbTxn *global_tid;
-	DbEnv *dbenv;
 			    
    friend class pki_key;
 
    public:
+	static DbEnv *dbenv;
 	static db_x509 *certs;
 	static db_x509req *reqs;
 	static db_key *keys;
@@ -100,8 +100,8 @@ class MainWindow: public MainWindow_UI
 	static void incProgress(int a, int b, void *progress);
 	static void dberr(const char *errpfx, char *msg);
 	static NewX509 *newX509();
-	QString md5passwd();
-	void Error(errorEx &err);
+	static QString md5passwd(const char *pass);
+	static void Error(errorEx &err);
 	
 	static QString getPath();
 	static void setPath(QString path);

@@ -53,6 +53,7 @@
 #include "MainWindow.h"
 #include "ImportMulti.h"
 #include <qapplication.h>
+#include <qclipboard.h>
 #include <qmessagebox.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
@@ -87,6 +88,7 @@ db_x509	*MainWindow::certs = NULL;
 db_temp	*MainWindow::temps = NULL;
 db_base	*MainWindow::settings = NULL;
 db_crl	*MainWindow::crls = NULL;
+DbEnv *MainWindow::dbenv = NULL;
 
 extern void initOIDs(void);
 
@@ -121,6 +123,7 @@ MainWindow::MainWindow(QWidget *parent, const char *name )
 	connect( BNimportKey, SIGNAL(clicked()), keyList, SLOT(load()));
 	connect( BNdetailsKey, SIGNAL(clicked()), keyList, SLOT(showItem()));
 	connect( BNdeleteKey, SIGNAL(clicked()), keyList, SLOT(deleteItem()));
+	connect( BNchangePass, SIGNAL(clicked()), keyList, SLOT(changePasswd()));
 	
 	connect( BNnewReq, SIGNAL(clicked()), reqList, SLOT(newItem()));
 	connect( BNimportReq, SIGNAL(clicked()), reqList, SLOT(load()));
@@ -372,11 +375,11 @@ void MainWindow::initPass()
 			qFatal("Ohne Passwort laeuft hier gaaarnix :-)");
 		}
 		pki_key::passwd[keylen]='\0';
-		settings->putString( "pwhash", md5passwd() );
+		settings->putString( "pwhash", md5passwd(pki_key::passwd) );
 	}
 	else {
 	     int keylen=0;		
-	     while (md5passwd() != passHash) {
+	     while (md5passwd(pki_key::passwd) != passHash) {
 		if (keylen !=0)
 			QMessageBox::warning(this,tr(XCA_TITLE), tr("Password verify error, please try again"));	
 		p.setTitle(tr("Password"));
@@ -433,7 +436,7 @@ int MainWindow::passWrite(char *buf, int size, int rwflag, void *userdata)
 	else return 0;
 }
 
-QString MainWindow::md5passwd()
+QString MainWindow::md5passwd(const char *pass)
 {
 
 	EVP_MD_CTX mdctx;
@@ -443,7 +446,7 @@ QString MainWindow::md5passwd()
 	char zs[4];
 	unsigned char m[EVP_MAX_MD_SIZE];
 	EVP_DigestInit(&mdctx, EVP_md5());
-	EVP_DigestUpdate(&mdctx, pki_key::passwd, strlen(pki_key::passwd));
+	EVP_DigestUpdate(&mdctx, pass, strlen(pass));
 	EVP_DigestFinal(&mdctx, m, &n);
 	for (j=0; j<(int)n; j++) {
 		sprintf(zs, "%02X%c",m[j], (j+1 == (int)n) ?'\0':':');
@@ -455,20 +458,19 @@ QString MainWindow::md5passwd()
 void MainWindow::Error(errorEx &err)
 {
 	if (err.isEmpty()) return;
-	QMessageBox::warning(this, XCA_TITLE,
-		tr("The following error occured:") + "\n" +
-		err.getString()
-	);
+	QString msg =  tr("The following error occured:") + "\n" + err.getString();
+	int ret = QMessageBox::warning(NULL, XCA_TITLE, msg, tr("&OK"), tr("Copy to Clipboard"));
+	printf("RET: %d\n",ret);
+	if (ret == 1) {
+		QClipboard *cb = QApplication::clipboard();
+		cb->setText(msg);
+	}
 }
 
 void MainWindow::dberr(const char *errpfx, char *msg)
 {
-	QString a = errpfx;
-	QString b = msg;
-	QMessageBox::warning(NULL, XCA_TITLE,
-		tr("The following error occured:") + "\n" +
-		errpfx + "\n" + msg
-	);
+	errorEx e(QString(errpfx) + "\n" + msg);
+	Error(e);
 }
 
 QString MainWindow::getPath()
