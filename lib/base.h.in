@@ -5,14 +5,9 @@
 
 #define VER "VERSION"
 
-#define DBEX(x) CERR("DB-error: "<<x.what()<<", Errno: "<<x.get_errno())
-#define CERR(x)
-#define MARK
-
 #if QT_VERSION >= 0x030000
 #define qt3 1
 #endif
-#define BASE_DIR "xca"
 
 #ifdef WIN32
 #include <WINDOWS.H>
