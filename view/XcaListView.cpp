@@ -58,10 +58,6 @@
 #include <qfiledialog.h>
 #include <qmessagebox.h>
 
-#ifdef WIN32
-#include <windows.h>
-#endif
-
 XcaListView::XcaListView( QWidget * parent, const char * name, WFlags f)
 		:QListView(parent, name, f)
 {

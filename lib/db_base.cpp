@@ -423,6 +423,7 @@ void db_base::writeAll(DbTxn *tid)
 			_writePKI(pki, true, tid);
 	}
 	catch (DbException &err) {
+		DBEX(err);
 		tid->abort();
 		throw errorEx(err.what());
 	}
