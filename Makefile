@@ -29,9 +29,6 @@ clean:
 	rm -f *~ xca 
 
 distclean: clean	
-	for x in $(SUBDIRS); do \
-		$(MAKE) -C $${x} distclean; \
-	done
 	rm -f Local.mak
 
 dist: 
@@ -49,7 +46,7 @@ dist:
 	#rm -rf ../$(TARGET)
 	
 install: xca
-	strip xca
+	$(STRIP) xca
 	install -m 755 -d $(destdir)$(prefix)/share/xca $(destdir)$(prefix)/bin \
 			$(destdir)$(prefix)/share/applications \
 			$(destdir)$(prefix)/share/pixmaps
@@ -62,6 +59,6 @@ install: xca
 .PHONY: $(SUBDIRS)
 
 Local.mak: configure
-	CC="$(CC)" LD="$(LD)" prefix="$(prefix)" ./configure
+	STRIP="$(STRIP)" CC="$(CC)" LD="$(LD)" prefix="$(prefix)" ./configure
 
 include Local.mak

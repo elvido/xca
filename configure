@@ -112,7 +112,7 @@ subdirs=""
 search_includes openssl/opensslv.h || err "The OpenSSL library headerfiles were not found."
 search_lib crypto || err "The OpenSSL library was not found."
 
-##### Try to compile them all together and to show the versions.
+##### Try to compile them all together and show the versions.
 cat >conftest.c <<EOF
 #include <openssl/opensslv.h>
 #include <db_cxx.h>
