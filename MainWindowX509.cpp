@@ -627,7 +627,9 @@ void MainWindow::insertP12(pki_pkcs12 *pk12)
 	pki_key *akey;
 
 	try {
+		MARK
 		akey = pk12->getKey();
+		MARK
 		acert = pk12->getCert();
 #ifdef INSERT_WO_ASK
 		insertKey(akey);
@@ -637,13 +639,18 @@ void MainWindow::insertP12(pki_pkcs12 *pk12)
 			insertCert(acert);
 		}
 #else
+		MARK
 		showDetailsKey(akey, true);
+		MARK
 		showDetailsCert(acert,true);
+		MARK
 		for (int i=0; i<pk12->numCa(); i++) {
 			acert = pk12->getCa(i);
 			showDetailsCert(acert, true);
+		MARK
 		}
 #endif			
+		MARK
 		if (keys)
 			keys->updateView();
 	}

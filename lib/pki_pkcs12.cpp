@@ -77,7 +77,7 @@ pki_pkcs12::pki_pkcs12(const string fname, pem_password_cb *cb)
 	certstack = sk_X509_new_null();
 	PASS_INFO p;
 	string title = XCA_TITLE;
-	string description = "Please enter the password to encrypt the PKCS#12 file.";
+	string description = "Please enter the password to decrypt the PKCS#12 file.";
 	p.title = &title;
 	p.description = &description;
 	fp = fopen(fname.c_str(), "rb");
@@ -86,7 +86,9 @@ pki_pkcs12::pki_pkcs12(const string fname, pem_password_cb *cb)
 		CERR("PK12");
 		fclose(fp);
 		openssl_error();
-		passcb(pass, 30, 0, &p);
+		if (passcb(pass, 30, 0, &p) == 0) {
+			throw errorEx("","");
+		}
 		CERR("PK12");
 		PKCS12_parse(pkcs12, pass, &mykey, &mycert, &certstack);
 		CERR("PK12");
@@ -103,6 +105,7 @@ pki_pkcs12::pki_pkcs12(const string fname, pem_password_cb *cb)
 		}
 	}
 	else fopen_error(fname);
+	CERR("PK12");
 }	
 
 
@@ -121,7 +124,8 @@ pki_pkcs12::~pki_pkcs12()
 		CERR( "deleting cert");
 	}
 	CERR("freeing PKCS12");
-	PKCS12_free(pkcs12);
+	if (pkcs12)
+		PKCS12_free(pkcs12);
 	openssl_error();
 }
 

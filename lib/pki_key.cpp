@@ -77,8 +77,13 @@ pki_key::pki_key(const pki_key *pk)
 	:pki_base(pk->desc)
 {
 	init();
+	MARK
 	key = EVP_PKEY_new();
+	MARK
 	openssl_error();	
+	MARK
+	if (pk == NULL) return;
+	MARK
 	key->type = pk->key->type;
 	if (key->type == EVP_PKEY_RSA) {
 		key->pkey.rsa=((RSA *)ASN1_dup( (int (*)())i2d_RSAPrivateKey, (char *(*)())d2i_RSAPrivateKey,(char *)pk->key->pkey.rsa));
