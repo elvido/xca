@@ -214,7 +214,16 @@ void MainWindow::loadReq()
 	}
 }
 
-void MainWindow::writeReq()
+
+void MainWindow::writeReq_pem()
+{
+	writeReq(true);
+}
+void MainWindow::writeReq_der()
+{
+	writeReq(false);
+}
+void MainWindow::writeReq(bool pem)
 {
 	pki_x509req *req;
 	try {
@@ -234,7 +243,8 @@ void MainWindow::writeReq()
 	dlg->setCaption(tr("Export Certificate signing request"));
 	dlg->setFilters(filt);
 	dlg->setMode( QFileDialog::AnyFile );
-	dlg->setSelection( (req->getDescription() + ".pem").c_str() );
+	dlg->setSelection( (req->getDescription() + ".csr").c_str() );
+
 	setPath(dlg);
 	if (dlg->exec()) {
 		s = dlg->selectedFile();
@@ -244,7 +254,7 @@ void MainWindow::writeReq()
 	if (s.isEmpty()) return;
 	s=QDir::convertSeparators(s);
 	try {
-		req->writeReq(s.latin1(),true);
+		req->writeReq(s.latin1(), pem);
 	}
 	catch (errorEx &err) {
 		Error(err);
@@ -303,6 +313,7 @@ pki_x509req *MainWindow::insertReq(pki_x509req *req)
 void MainWindow::showPopupReq(QListViewItem *item, const QPoint &pt, int x) {
 	CERR("hallo popup Req");
 	QPopupMenu *menu = new QPopupMenu(this);
+	QPopupMenu *subExport = new QPopupMenu(this);
 	if (!item) {
 		menu->insertItem(tr("New Request"), this, SLOT(newReq()));
 		menu->insertItem(tr("Import"), this, SLOT(loadReq()));
@@ -311,11 +322,14 @@ void MainWindow::showPopupReq(QListViewItem *item, const QPoint &pt, int x) {
 		menu->insertItem(tr("Rename"), this, SLOT(startRenameReq()));
 		menu->insertItem(tr("Show Details"), this, SLOT(showDetailsReq()));
 		menu->insertItem(tr("Sign"), this, SLOT(signReq()));
-		menu->insertItem(tr("Export"), this, SLOT(writeReq()));
+		menu->insertItem(tr("Export"), subExport);
+		subExport->insertItem(tr("PEM"), this, SLOT(writeReq_pem()));
+		subExport->insertItem(tr("DER"), this, SLOT(writeReq_der()));
 		menu->insertItem(tr("Delete"), this, SLOT(deleteReq()));
 	}
 	menu->exec(pt);
 	delete menu;
+	delete subExport;
 	return;
 }
 

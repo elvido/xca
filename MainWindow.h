@@ -214,9 +214,13 @@ class MainWindow: public MainWindow_UI
 	void deleteCrl();
 	void deleteTemp();
 	void writeKey();
-	void writeReq();
+	void writeReq_pem();
+	void writeReq_der();
+	void writeReq(bool extype = true);
 	void writeCert();
-	void writeCrl();
+	void writeCrl_pem();
+	void writeCrl_der();
+	void writeCrl(bool extype = true);
 	void showPopupCert(QListViewItem *item,const QPoint &pt, int x);
 	void showPopupCrl(QListViewItem *item,const QPoint &pt, int x);
 	void showPopupKey(QListViewItem *item,const QPoint &pt, int x);

@@ -76,7 +76,7 @@ class pki_crl: public pki_base
 	void write(string fname);
 	void addV3ext(int nid, string exttext);
 	void sign(pki_key *key);
-	void writeCrl(const string fname);
+	void writeCrl(const string fname, bool pem = true);
 	pki_x509 *getIssuer();	
 	ASN1_TIME *pki_crl::getDate();
 	virtual void fromData(unsigned char *p, int size);

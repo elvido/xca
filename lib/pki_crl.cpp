@@ -210,13 +210,16 @@ void pki_crl::sign(pki_key *key)
 }
 
 
-void pki_crl::writeCrl(const string fname)
+void pki_crl::writeCrl(const string fname, bool pem)
 {
 	FILE *fp = fopen(fname.c_str(),"w");
 	if (fp != NULL) {
 	   if (crl){
 		CERR("writing CRL");
-		PEM_write_X509_CRL(fp, crl);
+		if (pem)
+			PEM_write_X509_CRL(fp, crl);
+		else
+			i2d_X509_CRL_fp(fp, crl);
 		openssl_error();
 	   }
 	}

@@ -12,7 +12,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>629</width>
+            <width>625</width>
             <height>543</height>
         </rect>
     </property>
@@ -306,17 +306,6 @@
                                 <property stdset="1">
                                     <name>text</name>
                                     <string>&amp;New Request</string>
-                                </property>
-                            </widget>
-                            <widget>
-                                <class>QPushButton</class>
-                                <property stdset="1">
-                                    <name>name</name>
-                                    <cstring>PushButton47</cstring>
-                                </property>
-                                <property stdset="1">
-                                    <name>text</name>
-                                    <string>&amp;Export</string>
                                 </property>
                             </widget>
                             <widget>
@@ -858,21 +847,6 @@
                                 <class>QPushButton</class>
                                 <property stdset="1">
                                     <name>name</name>
-                                    <cstring>PushButton13_2_2_5</cstring>
-                                </property>
-                                <property stdset="1">
-                                    <name>text</name>
-                                    <string>&amp;Export</string>
-                                </property>
-                                <property>
-                                    <name>toolTip</name>
-                                    <string>Do NOT press this button :-)</string>
-                                </property>
-                            </widget>
-                            <widget>
-                                <class>QPushButton</class>
-                                <property stdset="1">
-                                    <name>name</name>
                                     <cstring>PushButton13_2_2_2_2</cstring>
                                 </property>
                                 <property stdset="1">
@@ -1044,12 +1018,6 @@
         <slot>loadKey()</slot>
     </connection>
     <connection>
-        <sender>PushButton47</sender>
-        <signal>clicked()</signal>
-        <receiver>MainWindow_UI</receiver>
-        <slot>writeReq()</slot>
-    </connection>
-    <connection>
         <sender>PushButton46</sender>
         <signal>clicked()</signal>
         <receiver>MainWindow_UI</receiver>
@@ -1206,12 +1174,6 @@
         <slot>changeView()</slot>
     </connection>
     <connection>
-        <sender>PushButton13_2_2_5</sender>
-        <signal>clicked()</signal>
-        <receiver>MainWindow_UI</receiver>
-        <slot>writeCrl()</slot>
-    </connection>
-    <connection>
         <sender>PushButton13_2_2_2_2</sender>
         <signal>clicked()</signal>
         <receiver>MainWindow_UI</receiver>
@@ -1289,7 +1251,6 @@
     <tabstop>renameKey</tabstop>
     <tabstop>reqList</tabstop>
     <tabstop>PushButton13</tabstop>
-    <tabstop>PushButton47</tabstop>
     <tabstop>PushButton46</tabstop>
     <tabstop>PushButton25</tabstop>
     <tabstop>PushButton26</tabstop>
