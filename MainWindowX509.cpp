@@ -1137,7 +1137,7 @@ void MainWindow::setCrlDays()
 	bool ok;
 	int nCrlDays = QInputDialog::getInteger (tr(XCA_TITLE),
 			tr("Please enter the CRL renewal periode in days"),
-			crlDays, crlDays, 365, 1, &ok, this );
+			crlDays, 1, 2147483647, 1, &ok, this );
 	if (ok && (crlDays != nCrlDays)) {
 		cert->setCrlDays(nCrlDays);
 		certs->updatePKI(cert);
