@@ -3,13 +3,10 @@
 #
 #####################################################################
 
-UINAMES=CertDetail ExportKey ExportCert KeyDetail MainWindow \
-        NewKey NewX509 PassRead PassWrite ReqDetail TrustState \
-        CertExtend ExportTinyCA CrlDetail ImportMulti
+UINAMES=$(patsubst %.ui, %, $(wildcard *.ui))
+OBJS=$(patsubst %, moc_%.o, $(UINAMES)) $(patsubst %, %.o, $(UINAMES))
 
-OBJS=$(patsubst %,moc_%.o,$(UINAMES)) $(patsubst %,%.o,$(UINAMES))
-
-MOC_CPP=$(patsubst %,moc_%.cpp,$(UINAMES))
+MOC_CPP=$(patsubst %, moc_%.cpp, $(UINAMES))
 UI_CPP=$(patsubst %, %.cpp, $(UINAMES))
 UI_H=$(patsubst %, %.h, $(UINAMES))
 

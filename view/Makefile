@@ -3,11 +3,8 @@
 #
 #########################################################################
 
-NAMES= XcaListView KeyView ReqView TempView CertView CrlView 
-		
-
-OBJS=$(patsubst %,moc_%.o,$(NAMES)) $(patsubst %,%.o,$(NAMES)) main.o
-
+NAMES=$(patsubst %.h, %, $(wildcard *.h))
+OBJS=$(patsubst %,moc_%.o,$(NAMES)) $(patsubst %,%.o,$(NAMES))
 DELFILES=$(patsubst %,moc_%.cpp,$(NAMES))
 
 include ../Rules.mak
