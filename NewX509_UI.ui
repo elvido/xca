@@ -1831,6 +1831,12 @@ URI:http://www.my.com/my.crl, URI:http://www.oth.com/my.crl</string>
                                         <string>Netscape Server Gated Crypto</string>
                                     </property>
                                 </item>
+                                <item>
+                                    <property>
+                                        <name>text</name>
+                                        <string>Microsoft EFS File Recovery</string>
+                                    </property>
+                                </item>
                                 <property stdset="1">
                                     <name>name</name>
                                     <cstring>ekeyUsage</cstring>

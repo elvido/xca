@@ -100,7 +100,7 @@ void MainWindow::newCert(NewX509 *dlg)
 		keyuse="", keyuse1="", pathstr="", certTypeStr = "";
 	char *ekeyusage[]= {"serverAuth","clientAuth","codeSigning","emailProtection",
 		"timeStamping","msCodeInd","msCodeCom",
-		"msCTLSign","msSGC","msEFS","nsSGC"};
+		"msCTLSign","msSGC","msEFS","nsSGC","1.3.6.1.4.1.311.10.3.4.1"};
 	char *keyusage[] ={"digitalSignature", "nonRepudiation", "keyEncipherment",
 		"dataEncipherment", "keyAgreement", "keyCertSign",
 		"cRLSign", "encipherOnly", "decipherOnly"};
