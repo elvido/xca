@@ -302,7 +302,7 @@ void MainWindow::init_database() {
 		dbenv->set_errcall(&MainWindow::dberr);
 		dbenv->open(baseDir.latin1(), DB_RECOVER | DB_INIT_TXN | \
 				DB_INIT_MPOOL | DB_INIT_LOG | DB_INIT_LOCK | \
-				DB_CREATE , 0600 );
+				DB_CREATE | DB_PRIVATE , 0600 );
 		dbenv->txn_begin(NULL, &global_tid, 0);
 #ifndef DB_AUTO_COMMIT
 #define DB_AUTO_COMMIT 0
