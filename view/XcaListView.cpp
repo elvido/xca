@@ -200,8 +200,10 @@ void XcaListView::load_default(load_base &load)
 		}
 		catch (errorEx &err) {
 			Error(err);
-			if (item)
+			if (item) {
 				delete item;
+				item = NULL;
+			}
 		}
 		dlgi->addItem(item);
 	}
