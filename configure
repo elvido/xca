@@ -1,10 +1,10 @@
 #!/bin/sh
 
 #####################################################
-# this configurescript searches for the needed includes
+# this configure-script searches for the needed includes
 # and libraries.
 #
-# it is MUCH faster, smaller and does what I want.
+# it is MUCH faster, smaller and does what I want. :-)
 #
 # If you have openssl or the Berkeley db installed in 
 # an unusual directory like /home/me/install/ssl
@@ -12,12 +12,14 @@
 # it then searches for headers in /home/me/install/ssl/include
 # and librarys in /home/me/install/ssl/lib
 #
-# if you have a very unusual setup you can edit Local.mak
-# to fit your needs and to reflect your setup
+# if you have a very unusual setup or you are cross-compiling
+# you can edit "Local.mak" to fit your needs and to reflect your setup
+# 
+# The Makefiles should support parrallel builds.
 #
 #######################################################
 
-DIRS="$@ $QTDIR /usr /usr/X11R6 /usr/local"
+DIRS="$QTDIR $@ /usr /usr/X11R6 /usr/local"
 
 CF="-I. -I.."
 LIBS=-lstdc++
@@ -84,7 +86,7 @@ search_lib() {
 ######################## DB
 subdirs="/db /db3 /db4"
 search_includes db_cxx.h || err "The Berkeley DB header files were not found"
-search_lib db4_cxx db3_cxx db_cxx-4 db_cxx-3 db_cxx || err "The Berkeley DB library was not found. Try installing db-dev" 
+search_lib db_cxx db4_cxx db3_cxx db_cxx-4 db_cxx-3 || err "The Berkeley DB library was not found. Try installing db-dev" 
 ## The fun of NPTL... (Thx Enrico Scholz)
 echo 'int main() {}' >conftest.c
 if g++ $LIBS $LDIRS $CF $CFLAGS conftest.c -o conftest &>conftest.log; then
@@ -102,7 +104,7 @@ search_lib c_r || true
 if g++ $LIBS $LDIRS $CF $CFLAGS conftest.c -o conftest &>conftest.log; then
   :
 else
-  search_lib c_r || err "Libc_r needed for FreeBSD ish systems and was not found"
+  search_lib c_r || err "Libc_r needed for FreeBSD systems and was not found"
 fi
 
 ###################### OpenSSL
@@ -124,12 +126,12 @@ EOF
 
 if g++ $LIBS $LDIRS $CF $CFLAGS conftest.c -o conftest &>conftest.log ; then
   ./conftest
+  rm -f conftest.c conftest conftest.log
 else
   err "Unable to compile a minimal application look at 'conftest.log' for errors"
-  exit 1
+  echo "Trying to continue......."
 fi
 
-#rm -f conftest.c conftest conftest.log
 
 
 if test -x $QTDIR/bin/moc; then
