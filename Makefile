@@ -59,6 +59,6 @@ install: xca
 .PHONY: $(SUBDIRS)
 
 Local.mak: configure
-	./configure
+	CC="$(CC)" LD="$(LD)" prefix="$(prefix)" ./configure
 
 include Local.mak

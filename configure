@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 #####################################################
 # this configurescript searches for the needed includes
@@ -7,7 +7,7 @@
 
 DIRS="$@ $QTDIR /usr /usr/X11R6 /usr/local"
 
-CF="-I. -I.."
+CF="$CPPFLAGS -I. -I.."
 LIBS=-lstdc++
 LDIRS=
 MOC=moc
@@ -95,7 +95,7 @@ if test -x $QTDIR/bin/uic; then
 fi
 
 cat >Local.mak <<EOF
-CPPFLAGS=$CF 
+CPPFLAGS="$CF" 
 CFLAGS=${CFLAGS:--Wall}
 
 LDFLAGS=$LDIRS
