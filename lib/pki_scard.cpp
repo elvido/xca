@@ -113,6 +113,7 @@ EVP_PKEY *pki_scard::load_pubkey(pkcs11 &p11, CK_OBJECT_HANDLE object) const
 		EVP_PKEY_assign_DSA(pkey, dsa);
 		break;
 	}
+#ifndef OPENSSL_NO_EC
 	case CKK_EC: {
 		EC_KEY *ec = EC_KEY_new();
 
@@ -137,6 +138,7 @@ EVP_PKEY *pki_scard::load_pubkey(pkcs11 &p11, CK_OBJECT_HANDLE object) const
 		EVP_PKEY_assign_EC_KEY(pkey, ec);
 		break;
 	}
+#endif
 	default:
 		throw errorEx(QString("Unsupported CKA_KEY_TYPE: %1\n").arg(keytype));
 	}
@@ -368,7 +370,9 @@ QList<int> pki_scard::possibleHashNids()
 		switch (mech_list[i]) {
 		case CKM_MD5_RSA_PKCS:    nids << NID_md5; break;
 		case CKM_DSA_SHA1:
+#ifndef OPENSSL_NO_EC
 		case CKM_ECDSA_SHA1:
+#endif
 		case CKM_SHA1_RSA_PKCS:   nids << NID_sha1; break;
 		case CKM_SHA256_RSA_PKCS: nids << NID_sha256; break;
 		case CKM_SHA384_RSA_PKCS: nids << NID_sha384; break;
@@ -389,8 +393,10 @@ const EVP_MD *pki_scard::getDefaultMD()
 		return EVP_sha1();
 	if (mech_list.contains(CKM_DSA_SHA1))
 		return EVP_dss1();
+#ifndef OPENSSL_NO_EC
 	if (mech_list.contains(CKM_ECDSA_SHA1))
 		return EVP_ecdsa();
+#endif
 	if (mech_list.contains(CKM_SHA512_RSA_PKCS))
 		return EVP_sha512();
 	if (mech_list.contains(CKM_SHA384_RSA_PKCS))

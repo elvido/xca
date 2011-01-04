@@ -98,7 +98,7 @@ static const int other_curve_nids[] = {
 	NID_secp384r1,
 	NID_secp521r1
 };
-
+#ifndef OPENSSL_NO_EC
 static void init_curves()
 {
 	pki_evp::num_curves = EC_get_builtin_curves(NULL, 0);
@@ -130,7 +130,7 @@ static void init_curves()
 		}
 	}
 }
-
+#endif
 void MainWindow::enableTokenMenu(bool enable)
 {
 	foreach(QAction* a, scardMenuActions)
@@ -184,9 +184,9 @@ MainWindow::MainWindow(QWidget *parent )
 
 	init_images();
 	homedir = getHomeDir();
-
+#ifndef OPENSSL_NO_EC
 	init_curves();
-
+#endif
 #ifdef MDEBUG
 	CRYPTO_malloc_debug_init();
 	CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_ON);

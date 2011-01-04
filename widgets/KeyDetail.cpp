@@ -24,7 +24,7 @@ KeyDetail::KeyDetail(QWidget *parent)
 	image->setPixmap(*MainWindow::keyImg);
 	keyDesc->setReadOnly(true);
 }
-
+#ifndef OPENSSL_NO_EC
 static QString CurveComment(int nid)
 {
 	for (size_t i=0; i<pki_evp::num_curves; i++) {
@@ -33,7 +33,7 @@ static QString CurveComment(int nid)
 	}
 	return QString();
 }
-
+#endif
 void KeyDetail::setKey(pki_key *key)
 {
 	int nid;
@@ -74,6 +74,7 @@ void KeyDetail::setKey(pki_key *key)
 			keyPubEx->setText(key->subprime());
 			keyModulus->setText(key->pubkey());
 			break;
+#ifndef OPENSSL_NO_EC
 		case EVP_PKEY_EC:
 			nid = key->ecParamNid();
 			tlModulus->setText(tr("Public key"));
@@ -83,6 +84,7 @@ void KeyDetail::setKey(pki_key *key)
 			keyPubEx->setToolTip(CurveComment(nid));
 			keyModulus->setText(key->ecPubKey());
 			break;
+#endif
 		default:
 			tlHeader->setText(tr("Unknown key"));
 	}
