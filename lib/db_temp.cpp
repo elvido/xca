@@ -10,12 +10,12 @@
 #include "func.h"
 #include <widgets/NewX509.h>
 #include <widgets/MainWindow.h>
-#include <QtGui/QFileDialog>
+#include <QtWidgets/QFileDialog>
 #include <QtCore/QDir>
 #include <QtGui/QContextMenuEvent>
-#include <QtGui/QAction>
-#include <QtGui/QInputDialog>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QInputDialog>
+#include <QtWidgets/QMessageBox>
 
 db_temp::db_temp(QString DBfile, MainWindow *mw)
 	:db_x509name(DBfile, mw)
@@ -196,7 +196,7 @@ void db_temp::store()
 		tr("XCA templates ( *.xca);; All files ( * )"));
 	if (s.isEmpty())
 		return;
-	s = QDir::convertSeparators(s);
+	s = QDir::toNativeSeparators(s);
 	mainwin->setPath(s.mid(0, s.lastIndexOf(QRegExp("[/\\\\]")) ));
 	try {
 		temp->writeTemp(s);

@@ -7,8 +7,8 @@
 
 #include "lib/func.h"
 #include "widgets/kvView.h"
-#include <QtGui/QHeaderView>
-#include <QtGui/QLineEdit>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLineEdit>
 
 QWidget *comboDelegate::createEditor(QWidget *parent,
 	const QStyleOptionViewItem &,
@@ -168,7 +168,7 @@ kvView::kvView(QWidget *parent)
 	setAlternatingRowColors(true);
 	horizontalHeader()->setDefaultSectionSize(200);
 	horizontalHeader()->setStretchLastSection(true);
-	verticalHeader()->setMovable(true);
+	verticalHeader()->setSectionsMovable(true);
 	verticalHeader()->setDefaultSectionSize(24);
 	setEditTriggers(QAbstractItemView::AllEditTriggers);
 

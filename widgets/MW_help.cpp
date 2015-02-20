@@ -7,10 +7,10 @@
 
 
 #include "MainWindow.h"
-#include <QtGui/QApplication>
-#include <QtGui/QMimeSource>
+#include <QtWidgets/QApplication>
+#include <QtCore/QMimeData>
 #include <QtGui/QPixmap>
-#include <QtGui/QLabel>
+#include <QtWidgets/QLabel>
 #ifndef OPENSSL_NO_EC
 #include <openssl/ec.h>
 #endif

@@ -8,10 +8,10 @@
 #ifndef __XCATREEVIEW_H
 #define __XCATREEVIEW_H
 
-#include <QtGui/QTreeView>
-#include <QtGui/QItemSelectionModel>
-#include <QtGui/QSortFilterProxyModel>
-#include <QtGui/QHeaderView>
+#include <QtWidgets/QTreeView>
+#include <QtCore/QItemSelectionModel>
+#include <QtCore/QSortFilterProxyModel>
+#include <QtWidgets/QHeaderView>
 #include "lib/db_base.h"
 
 class db_base;
@@ -23,7 +23,7 @@ class XcaHeaderView: public QHeaderView
 	XcaHeaderView()
 		:QHeaderView(Qt::Horizontal)
 	{
-		setMovable(true);
+		setSectionsMovable(true);
 	}
 	void contextMenuEvent(QContextMenuEvent *e);
     public slots:

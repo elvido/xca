@@ -8,8 +8,8 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
-#include <QtGui/QApplication>
-#include <QtGui/QAction>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QAction>
 #include <QtCore/QTranslator>
 #include <QtCore/QLocale>
 #include "widgets/MainWindow.h"

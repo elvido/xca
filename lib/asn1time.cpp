@@ -45,7 +45,7 @@ int a1time::from_asn1(const ASN1_TIME *a)
 	gt = ASN1_TIME_to_generalizedtime((ASN1_TIME*)a, NULL);
 	if (!gt)
 		return -1;
-	t = QString::fromAscii((char*)gt->data, gt->length);
+	t = QString::fromLatin1((char*)gt->data, gt->length);
 	ASN1_GENERALIZEDTIME_free(gt);
 	if (t == UNDEFINED_DATE) {
 		setUndefined();
@@ -63,7 +63,7 @@ int a1time::set_asn1(QString str, int type)
 	if (!atime)
 		return -1;
 	atime->type = type;
-	if (ASN1_STRING_set(atime, str.toAscii(), str.length()))
+	if (ASN1_STRING_set(atime, str.toLatin1(), str.length()))
 		return -1;
 	return 0;
 }

@@ -7,7 +7,7 @@
 
 #include "clicklabel.h"
 
-#include <QtGui/QToolTip>
+#include <QtWidgets/QToolTip>
 #include <QtGui/QPalette>
 #include <QtGui/QColor>
 

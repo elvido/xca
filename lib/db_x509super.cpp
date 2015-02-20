@@ -10,7 +10,7 @@
 #include "widgets/MainWindow.h"
 #include "ui_About.h"
 #include "oid.h"
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 
 db_x509name::db_x509name(QString db, MainWindow *mw)
 	:db_base(db, mw)
@@ -138,7 +138,7 @@ void db_x509super::toOpenssl() const
 		tr("Config files ( *.conf *.cnf);; All files ( * )"));
 	if (fname.isEmpty())
 		return;
-	fname = QDir::convertSeparators(fname);
+	fname = QDir::toNativeSeparators(fname);
 	mainwin->setPath(fname.mid(0, fname.lastIndexOf(QRegExp("[/\\\\]")) ));
 	pki->opensslConf(fname);
 }

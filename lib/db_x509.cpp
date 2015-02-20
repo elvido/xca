@@ -20,9 +20,9 @@
 #include "ui_CaProperties.h"
 #include "ui_About.h"
 #include "ui_Revoke.h"
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QContextMenuEvent>
-#include <QtGui/QAction>
+#include <QtWidgets/QAction>
 
 bool db_x509::treeview = true;
 
@@ -282,7 +282,7 @@ void db_x509::writeAllCerts(const QString fname, bool onlyTrusted)
 	bool append = false;
 	FOR_ALL_pki(pki, pki_x509) {
 		if (onlyTrusted && pki->getTrust() != 2) continue;
-		pki->writeCert(fname.toAscii(), true, append);
+		pki->writeCert(fname.toLatin1(), true, append);
 		append = true;
 	}
 }
@@ -810,7 +810,7 @@ void db_x509::writePKCS12(pki_x509 *cert, QString s, bool chain)
 		}
 		if (s.isEmpty())
 			return;
-		s = QDir::convertSeparators(s);
+		s = QDir::toNativeSeparators(s);
 		pki_pkcs12 *p12 = new pki_pkcs12(cert->getIntName(), cert, privkey);
 		pki_x509 *signer = cert->getSigner();
 		while ((signer != NULL ) && (signer != cert) && chain) {
@@ -891,7 +891,7 @@ void ::signP7()
 	pki_pkcs7 * p7 = new pki_pkcs7("");
 	for ( QStringList::Iterator it = slist.begin(); it != slist.end(); ++it ) {
 		s = *it;
-		s = QDir::convertSeparators(s);
+		s = QDir::toNativeSeparators(s);
 		p7->signFile(cert, s);
 		p7->writeP7((s + ".p7s"), true);
 	}
@@ -930,7 +930,7 @@ void CertView::encryptP7()
 	pki_pkcs7 * p7 = new pki_pkcs7("");
 	for ( QStringList::Iterator it = slist.begin(); it != slist.end(); ++it ) {
 		s = *it;
-		s = QDir::convertSeparators(s);
+		s = QDir::toNativeSeparators(s);
 		p7->encryptFile(cert, s);
 		p7->writeP7((s + ".p7m"), true);
 	}

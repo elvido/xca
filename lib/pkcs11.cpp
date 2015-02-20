@@ -17,7 +17,7 @@
 #include <openssl/rand.h>
 #include <openssl/engine.h>
 #include <openssl/evp.h>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QtCore/QThread>
 
 #include <ltdl.h>
@@ -343,7 +343,7 @@ void pkcs11::changePin(slotid slot, bool so)
 	p.setPin();
 
 	if (PwDialog::execute(&p, &newPin, true) == 1) {
-		pinp = pin.toAscii();
+		pinp = pin.toLatin1();
 		setPin(pinp.constUchar(), pinp.size(),
 			newPin.constUchar(), newPin.size());
 	}

@@ -18,10 +18,10 @@
 #include "lib/db_x509super.h"
 #include "ui_Options.h"
 #include "widgets/hashBox.h"
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtGui/QClipboard>
-#include <QtGui/QMenuBar>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMessageBox>
 
 class myLang
 {
@@ -320,7 +320,7 @@ void MainWindow::setOptions()
 void MainWindow::setOptFlags_old(QString flags)
 {
 	int s = flags.size(), i;
-	QByteArray b = flags.toAscii();
+	QByteArray b = flags.toLatin1();
 
 	pki_base::suppress_messages = false;
 	pki_x509::dont_colorize_expiries = false;

@@ -9,7 +9,7 @@
 #ifndef __DB_X509_H
 #define __DB_X509_H
 
-#include <QtGui/QListView>
+#include <QtWidgets/QListView>
 #include <QtCore/QObject>
 #include <QtGui/QPixmap>
 #include "db_key.h"

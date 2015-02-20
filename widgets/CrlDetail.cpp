@@ -11,9 +11,9 @@
 #include "lib/pki_crl.h"
 #include "widgets/distname.h"
 #include "widgets/clicklabel.h"
-#include <QtGui/QLabel>
-#include <QtGui/QTextEdit>
-#include <QtGui/QLineEdit>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QTextEdit>
+#include <QtWidgets/QLineEdit>
 
 CrlDetail::CrlDetail(MainWindow *mainwin)
 	:QDialog(mainwin)

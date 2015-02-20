@@ -42,7 +42,7 @@ class errorEx
 		}
 		const char *getCString() const
 		{
-			return msg.toAscii();
+			return msg.toLatin1();
 		}
 		bool isEmpty() const
 		{

@@ -12,8 +12,8 @@
 #include "lib/pki_scard.h"
 #include <QtCore/QDir>
 #include <QtCore/QDebug>
-#include <QtGui/QStatusBar>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QStatusBar>
+#include <QtWidgets/QMessageBox>
 #include "lib/db_base.h"
 #include "lib/func.h"
 #include "widgets/ImportMulti.h"

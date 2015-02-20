@@ -7,14 +7,14 @@
 
 
 #include "NewX509.h"
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
-#include <QtGui/QRadioButton>
-#include <QtGui/QMessageBox>
-#include <QtGui/QLineEdit>
-#include <QtGui/QLabel>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QRadioButton>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QLabel>
 #include <QtGui/QPixmap>
-#include <QtGui/QPushButton>
+#include <QtWidgets/QPushButton>
 #include <QtGui/QValidator>
 #include "MainWindow.h"
 #include "v3ext.h"

@@ -9,8 +9,8 @@
 #include "XcaTreeView.h"
 #include "lib/db_base.h"
 #include <QtCore/QAbstractItemModel>
-#include <QtGui/QAbstractItemView>
-#include <QtGui/QHeaderView>
+#include <QtWidgets/QAbstractItemView>
+#include <QtWidgets/QHeaderView>
 #include <QtGui/QContextMenuEvent>
 #include <QtCore/QVariant>
 #include <QtCore/QRegExp>
@@ -34,7 +34,7 @@ XcaTreeView::XcaTreeView(QWidget *parent)
 	basemodel = NULL;
 	connect(header(), SIGNAL(sectionHandleDoubleClicked(int)),
 		this, SLOT(resizeColumnToContents(int)));
-	header()->setClickable(true);
+	header()->setSectionsClickable(true);
 }
 
 XcaTreeView::~XcaTreeView()

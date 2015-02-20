@@ -20,10 +20,10 @@
 #include <openssl/rand.h>
 #include <openssl/bn.h>
 
-#include <QtGui/QProgressDialog>
-#include <QtGui/QApplication>
+#include <QtWidgets/QProgressDialog>
+#include <QtWidgets/QApplication>
 #include <QtCore/QDir>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QtCore/QThread>
 #include <ltdl.h>
 

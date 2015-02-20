@@ -11,7 +11,7 @@
 #include "widgets/MainWindow.h"
 #include "widgets/CrlDetail.h"
 #include "widgets/NewCrl.h"
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QtGui/QContextMenuEvent>
 #include "ui_NewCrl.h"
 

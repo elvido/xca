@@ -10,8 +10,8 @@
 
 #include <QtCore/QString>
 #include <QtCore/QList>
-#include <QtGui/QAction>
-#include <QtGui/QHeaderView>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QHeaderView>
 #include <openssl/objects.h>
 #include "db.h"
 #include "func.h"

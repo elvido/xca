@@ -69,8 +69,8 @@ Section "xca (required)" SecMain
   File "doc\*.html"
   File "${BDIR}\mingwm10.dll"
 
-  File "${QTDIR}\bin\QtGui4.dll"
-  File "${QTDIR}\bin\QtCore4.dll"
+  File "${QTDIR}\bin\QtGui5.dll"
+  File "${QTDIR}\bin\QtCore5.dll"
   File /nonfatal "${QTDIR}\bin\libgcc_s_dw2-1.dll"
 
   File "${INSTALLDIR}\bin\libltdl-7.dll"

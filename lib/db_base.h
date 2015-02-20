@@ -11,7 +11,7 @@
 #include "db.h"
 #include "base.h"
 #include "load_obj.h"
-#include <QtGui/QListView>
+#include <QtWidgets/QListView>
 #include <QtGui/QPixmap>
 #include <QtGui/QContextMenuEvent>
 #include <QtCore/QStringList>

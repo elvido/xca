@@ -14,8 +14,8 @@
 #include "db_base.h"
 #include "func.h"
 #include "exception.h"
-#include <QtGui/QMessageBox>
-#include <QtGui/QListView>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QListView>
 #include <QtGui/QClipboard>
 #include <QtCore/QDir>
 #include <QtCore/QDebug>

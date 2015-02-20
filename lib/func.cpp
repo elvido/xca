@@ -17,19 +17,19 @@
 #include <openssl/buffer.h>
 
 #if defined(Q_WS_MAC)
-#include <QtGui/QDesktopServices>
+#include <QtWidgets/QDesktopServices>
 #endif
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QStringList>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QComboBox>
-#include <QtGui/QMessageBox>
-#include <QtGui/QApplication>
-#include <QtGui/QPushButton>
-#include <QtGui/QProgressBar>
-#include <QtGui/QTextEdit>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QProgressBar>
+#include <QtWidgets/QTextEdit>
 
 #ifdef WIN32
 #include <windows.h>
@@ -324,7 +324,7 @@ QString OBJ_obj2QString(ASN1_OBJECT *a, int no_name)
 
 	len = OBJ_obj2txt(buf, 256, a, no_name);
 	openssl_error();
-	return QString::fromAscii(buf, len);
+	return QString::fromLatin1(buf, len);
 }
 
 QByteArray i2d_bytearray(int(*i2d)(const void*, unsigned char **),

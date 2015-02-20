@@ -10,11 +10,11 @@
 #include "MainWindow.h"
 #include "lib/base.h"
 
-#include <QtGui/QComboBox>
-#include <QtGui/QLineEdit>
-#include <QtGui/QFileDialog>
-#include <QtGui/QPushButton>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QMessageBox>
 #include <QtCore/QStringList>
 
 ExportDialog::ExportDialog(QWidget *parent, QString fname, pki_base *pki)
@@ -34,7 +34,7 @@ void ExportDialog::on_fileBut_clicked()
 		QFileDialog::DontConfirmOverwrite);
 
 	if (!s.isEmpty()) {
-		QDir::convertSeparators(s);
+		QDir::toNativeSeparators(s);
 		filename->setText(s);
 	}
 }

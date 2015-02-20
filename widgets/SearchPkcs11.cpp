@@ -11,11 +11,11 @@
 #include "lib/func.h"
 #include "lib/pkcs11_lib.h"
 
-#include <QtGui/QComboBox>
-#include <QtGui/QLineEdit>
-#include <QtGui/QFileDialog>
-#include <QtGui/QPushButton>
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QMessageBox>
 #include <QtCore/QStringList>
 #include <QtCore/QFile>
 
@@ -42,7 +42,7 @@ void SearchPkcs11::on_fileBut_clicked()
 		filename->text());
 
 	if (!s.isEmpty()) {
-		QDir::convertSeparators(s);
+		QDir::toNativeSeparators(s);
 		filename->setText(s);
 	}
 }

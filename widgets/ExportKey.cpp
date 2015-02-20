@@ -10,8 +10,8 @@
 #include "MainWindow.h"
 #include "lib/base.h"
 
-#include <QtGui/QCheckBox>
-#include <QtGui/QComboBox>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
 #include <QtCore/QStringList>
 
 ExportKey::ExportKey(QWidget *parent, QString fname, pki_key *key)

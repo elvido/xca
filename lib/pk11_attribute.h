@@ -15,7 +15,7 @@
 #include "exception.h"
 
 #define UTF8QSTRING(x,s) QString::fromUtf8((const char*)(x), s).trimmed()
-#define ASCIIQSTRING(x,s) QString::fromAscii((const char*)(x), s).trimmed()
+#define ASCIIQSTRING(x,s) QString::fromLatin1((const char*)(x), s).trimmed()
 
 class pk11_attlist;
 

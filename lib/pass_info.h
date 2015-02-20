@@ -10,7 +10,7 @@
 
 #include <QtCore/QString>
 #include <QtCore/QObject>
-#include <QtGui/QWidget>
+#include <QtWidgets/QWidget>
 
 #include "widgets/MainWindow.h"
 

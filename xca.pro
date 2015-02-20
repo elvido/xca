@@ -16,6 +16,8 @@ macx {
 	QMAKE_BUNDLE_DATA += XCA_RESOURCES
 }
 
+QT += widgets
+
 LIBS += -lcrypto -lltdl
 QMAKE_CXXFLAGS = -Wno-unused-parameters -DPREFIX=\\\"/usr/local\\\" -DETC=\\\"/etc\\\" -DDOCDIR=\\\"/usr/local/doc/xca\\\"
 

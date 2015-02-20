@@ -12,9 +12,9 @@
 #include "widgets/distname.h"
 #include "widgets/clicklabel.h"
 #include "lib/pkcs11.h"
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QLineEdit>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QLineEdit>
 #include <QtCore/QStringList>
 
 struct typelist {
@@ -303,7 +303,7 @@ int NewKey::setDefault(QString def)
 	if (type == -1)
 		return -2;
 	if (type == EVP_PKEY_EC) {
-		nid = OBJ_txt2nid(sl[1].toAscii());
+		nid = OBJ_txt2nid(sl[1].toLatin1());
 		if (nid == NID_undef)
 			return -3;
 		defaultEcNid = nid;

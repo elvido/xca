@@ -9,10 +9,10 @@
 #define __KVVIEW_H
 
 #include <QtCore/QAbstractItemModel>
-#include <QtGui/QTableView>
-#include <QtGui/QComboBox>
-#include <QtGui/QItemDelegate>
-#include <QtGui/QLabel>
+#include <QtWidgets/QTableView>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QItemDelegate>
+#include <QtWidgets/QLabel>
 
 #include "lib/base.h"
 

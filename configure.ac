@@ -87,27 +87,27 @@ if test -n "${_QTDIR}" && test -d "${_QTDIR}"; then
   DYLD_LIBRARY_PATH="${_QTDIR}/lib:${DYLD_LIBRARY_PATH}"
 fi
 
-PKG_CHECK_MODULES(QT, [QtCore >= 4.6, QtCore < 5.0, QtGui >= 4.6, QtGui < 5.0], [
-  QT_MOC="`pkg-config --variable=moc_location QtCore`"
-  QT_UIC="`pkg-config --variable=uic_location QtCore`"
+PKG_CHECK_MODULES(QT, [Qt5Core >= 5.0, Qt5Gui >= 5.0], [
+  QT_MOC="`pkg-config --variable=moc_location Qt5Core`"
+  QT_UIC="`pkg-config --variable=uic_location Qt5Core`"
   if test -n "$DARWIN"; then
     QT_CFLAGS="$QT_CFLAGS -F`pkg-config --variable=libdir QtCore`"
   fi
 ], [
   if test -z "$DARWIN"; then
-    QT_LIBS=" -lQtCore -lQtGui "
+    QT_LIBS=" -lQt5Core -lQt5Gui "
   else
-    QT_LIBS=" -framework QtGui -framework QtCore "
+    QT_LIBS=" -framework Qt5Gui -framework Qt5Core "
   fi
   AC_MSG_WARN([Qt pkg-config failed, using fallback defaults (${QT_LIBS})]);
 ])
 
 # Setup MOC UIC RCC LRELEASE with absolute PATH
 if test "x${QT_MOC}" = "x"; then
-  QT_MOC="`which moc-qt4 || which moc`"
+  QT_MOC="`which moc-qt5 || which moc`"
 fi
 if test "x${QT_UIC}" = "x"; then
-  QT_UIC="`which uic-qt4 || which uic`"
+  QT_UIC="`which uic-qt5 || which uic`"
 fi
 QT_LRELEASE=`echo ${QT_MOC} | sed 's/moc/lrelease/'`
 if test -n "$DARWIN"; then

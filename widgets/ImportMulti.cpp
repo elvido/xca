@@ -18,11 +18,12 @@
 #include "widgets/CrlDetail.h"
 #include "widgets/CertDetail.h"
 #include "widgets/KeyDetail.h"
-#include <QtGui/QPushButton>
-#include <QtGui/QMessageBox>
-#include <QtGui/QLabel>
-#include <QtGui/QInputDialog>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QInputDialog>
 #include <QtCore/QUrl>
+#include <QtCore/QMimeData>
 
 ImportMulti::ImportMulti(MainWindow *parent)
 	:QDialog(parent)

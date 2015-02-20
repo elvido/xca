@@ -5,7 +5,7 @@
  * All rights reserved.
  */
 
-#include <QtGui/QApplication>
+#include <QtWidgets/QApplication>
 #include <QtCore/QTranslator>
 #include <QtCore/QTextCodec>
 #include <QtCore/QDir>
@@ -210,7 +210,7 @@ int main( int argc, char *argv[] )
 	mw = new MainWindow(NULL);
 	try {
 		a.setMainwin(mw);
-		mw->read_cmdline();
+		mw->read_cmdline(argc, argv);
 		if (mw->exitApp == 0) {
 			mw->load_history();
 			if (mw->open_default_db() != 2) {

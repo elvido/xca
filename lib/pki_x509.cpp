@@ -14,7 +14,7 @@
 #include "exception.h"
 #include "pass_info.h"
 #include "widgets/MainWindow.h"
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QtCore/QDir>
 #include <openssl/rand.h>
 

@@ -6,8 +6,8 @@
  */
 
 #include <QtCore/QString>
-#include <QtGui/QWidget>
-#include <QtGui/QApplication>
+#include <QtWidgets/QWidget>
+#include <QtWidgets/QApplication>
 
 #include "pass_info.h"
 

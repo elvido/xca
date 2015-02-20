@@ -10,7 +10,7 @@
 
 #include <openssl/err.h>
 #include <QtCore/QString>
-#include <QtGui/QListView>
+#include <QtWidgets/QListView>
 #include "pkcs11_lib.h"
 #include "db.h"
 #include "base.h"
