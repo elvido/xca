@@ -91,7 +91,7 @@ PKG_CHECK_MODULES(QT, [Qt5Core >= 5.0, Qt5Gui >= 5.0], [
   QT_MOC="`pkg-config --variable=moc_location Qt5Core`"
   QT_UIC="`pkg-config --variable=uic_location Qt5Core`"
   if test -n "$DARWIN"; then
-    QT_CFLAGS="$QT_CFLAGS -F`pkg-config --variable=libdir QtCore`"
+    QT_CFLAGS="$QT_CFLAGS -F`pkg-config --variable=libdir Qt5Core`"
   fi
 ], [
   if test -z "$DARWIN"; then
