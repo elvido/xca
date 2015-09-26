@@ -173,23 +173,13 @@ next:
 		}
 	}
 
-	mydb.first();
-	if (!mydb.find(setting, class_name + "_hdView")) {
-		QByteArray ba;
-		char *p;
-		if ((p = (char *)mydb.load(&head))) {
-			ba = QByteArray(p, head.len - sizeof(db_header_t));
-			free(p);
+	QString view = mainwin->getSetting(class_name + "_hdView");
+	if (view.isEmpty()) {
+		for (int i=0; i< allHeaders.count(); i++) {
+			allHeaders[i]->reset();
 		}
-		if (head.version != 5)
-			return;
-		try {
-			allHeaders.fromData(ba);
-		}  catch (errorEx()) {
-			for (int i=0; i< allHeaders.count(); i++) {
-				allHeaders[i]->reset();
-			}
-		}
+	} else {
+		allHeaders.fromData(view);
 	}
 	emit columnsContentChanged();
 	return;
@@ -197,11 +187,11 @@ next:
 
 void db_base::updateHeaders()
 {
-	QByteArray ba = allHeaders.toData();
+	QString s = allHeaders.toData();
 	foreach(dbheader *h, allHeaders)
 		delete h;
 	allHeaders = getHeaders();
-	allHeaders.fromData(ba);
+	allHeaders.fromData(s);
 }
 
 dbheaderList db_base::getHeaders()
@@ -216,12 +206,9 @@ dbheaderList db_base::getHeaders()
 
 void db_base::saveHeaderState()
 {
-	if (dbName.isEmpty())
+	if (!QSqlDatabase::database().isOpen())
 		return;
-	QByteArray ba = allHeaders.toData();
-	db mydb(dbName);
-	mydb.set((const unsigned char *)ba.constData(), ba.size(), 5,
-		setting, class_name + "_hdView");
+	mainwin->storeSetting(class_name + "_hdView", allHeaders.toData());
 }
 
 void db_base::setVisualIndex(int i, int visualIndex)

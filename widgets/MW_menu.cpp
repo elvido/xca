@@ -277,25 +277,18 @@ void MainWindow::setOptions()
 		return;
 	}
 	QString alg = opt->hashAlgo->currentHashName();
-	db mydb(dbfile);
-	mydb.set((const unsigned char *)CCHAR(alg), alg.length()+1, 1,
-			setting, "default_hash");
+	storeSetting("default_hash", alg);
 	hashBox::setDefault(alg);
 
 	mandatory_dn = opt->getExtDnString();
 	explicit_dn = opt->getExpDnString();
-	mydb.set((const unsigned char *)CCHAR(mandatory_dn),
-			mandatory_dn.length()+1, 1, setting, "mandatory_dn");
+	storeSetting("mandatory_dn", mandatory_dn);
 	if (explicit_dn.isEmpty())
 		explicit_dn = explicit_dn_default;
 	if (explicit_dn != explicit_dn_default) {
-		mydb.set((const unsigned char *)CCHAR(explicit_dn),
-			explicit_dn.length()+1, 1, setting, "explicit_dn");
+		storeSetting("explicit_dn", explicit_dn);
 	} else {
-		mydb.first();
-		if (!mydb.find(setting, "explicit_dn")) {
-			mydb.erase();
-		}
+		QSqlQuery query("DELETE FROM settings WHERE key='explicit_dn'");
 	}
 	QString flags = getOptFlags();
 	pki_base::suppress_messages = opt->suppress->checkState();
@@ -306,11 +299,7 @@ void MainWindow::setOptions()
 
 	if (flags != getOptFlags()) {
 		flags = getOptFlags();
-		mydb.set((const unsigned char *)(CCHAR(flags)),
-				flags.length()+1, 1, setting, "optionflags1");
-		mydb.first();
-		if (!mydb.find(setting, "suppress"))
-			mydb.erase();
+		storeSetting("optionflags", flags);
 		certView->showHideSections();
 		reqView->showHideSections();
 	}
@@ -318,14 +307,12 @@ void MainWindow::setOptions()
 	if (opt->getStringOpt() != string_opt) {
 		string_opt = opt->getStringOpt();
 		ASN1_STRING_set_default_mask_asc((char *)CCHAR(string_opt));
-		mydb.set((const unsigned char *)CCHAR(string_opt),
-				string_opt.length()+1, 1, setting,"string_opt");
+		storeSetting("string_opt", string_opt);
 	}
 	QString newpath = opt->getPkcs11Provider();
 	if (newpath != pkcs11path) {
 		pkcs11path = newpath;
-		mydb.set((const unsigned char *) CCHAR(pkcs11path),
-			pkcs11path.length()+1, 1,setting, "pkcs11path");
+		storeSetting("pkcs11path", pkcs11path);
 	}
 	enableTokenMenu(pkcs11::loaded());
 	delete opt;

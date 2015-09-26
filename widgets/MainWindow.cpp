@@ -583,18 +583,14 @@ QString makeSalt(void)
 
 int MainWindow::checkOldGetNewPass(Passwd &pass)
 {
-	QString passHash;
+	QString passHash, cpass;
 	db mydb(dbfile);
 
-	if (!mydb.find(setting, "pwhash")) {
-		char *cpass;
+	cpass = getSetting("pwhash");
+	if (!cpass.isEmpty()) {
 		pass_info p(tr("Current Password"),
 			tr("Please enter the current database password"), this);
 
-		if ((cpass = (char *)mydb.load(NULL))) {
-			passHash = cpass;
-			free(cpass);
-		}
 		/* Try empty password */
 		if (pki_evp::sha512passwd(pass, passHash) != passHash) {
 			/* Not the empty password, check it */
@@ -618,43 +614,28 @@ int MainWindow::checkOldGetNewPass(Passwd &pass)
 void MainWindow::changeDbPass()
 {
 	Passwd pass;
-	QString tempn = dbfile + "{recrypt}";
 
 	if (!checkOldGetNewPass(pass))
 		return;
 
-	try {
-		if (!QFile::copy(dbfile, tempn))
-			throw errorEx("Could not create temporary file: " +
-				tempn);
-
-		QString passhash = updateDbPassword(tempn, pass);
-		QFile new_file(tempn);
-		/* closing the database erases 'dbfile' */
-		QString dbfile_bkup = dbfile;
-		close_database();
-		db mydb(dbfile_bkup);
-		if (mydb.mv(new_file))
-			throw errorEx(QString("Failed to rename %1 to %2").
-						arg(tempn).arg(dbfile_bkup));
-		dbfile = dbfile_bkup;
-		pki_evp::passHash = passhash;
-		pki_evp::passwd = pass;
-		init_database();
-	} catch (errorEx &ex) {
-		QFile::remove(tempn);
-		Error(ex);
-	}
+	QString salt = makeSalt();
+	QString passhash = pki_evp::sha512passwd(pass, salt);
+	// TRANSACTION start
+	exit(1);
+#if 0
+			EVP_PKEY *evp = key->decryptKey();
+			key->set_evp_key(evp);
+			key->encryptKey(pass.constData());
+#endif
+	// TRANSACTION stop
+	pki_evp::passHash = passhash;
+	pki_evp::passwd = pass;
 }
 
+#if 0
 QString MainWindow::updateDbPassword(QString newdb, Passwd pass)
 {
 	db mydb(newdb);
-
-	QString salt = makeSalt();
-	QString passhash = pki_evp::sha512passwd(pass, salt);
-	mydb.set((const unsigned char *)CCHAR(passhash),
-		passhash.length()+1, 1, setting, "pwhash");
 
 	QList<pki_evp*> klist;
 	mydb.first();
@@ -711,13 +692,12 @@ QString MainWindow::updateDbPassword(QString newdb, Passwd pass)
 	}
 	return passhash;
 }
+#endif
 
 int MainWindow::initPass()
 {
-	db mydb(dbfile);
-	char *pass;
 	pki_evp::passHash = QString();
-	QString salt;
+	QString salt, pass;
 	int ret;
 
 	pass_info p(tr("New Password"), tr("Please enter a password, "
@@ -725,20 +705,14 @@ int MainWindow::initPass()
 			"in the database file:\n%1").
 			arg(compressFilename(dbfile)), this);
 
-	if (!mydb.find(setting, "pwhash")) {
-		if ((pass = (char *)mydb.load(NULL))) {
-			pki_evp::passHash = pass;
-			free(pass);
-		}
-	}
+	pki_evp::passHash = getSetting("pwhash");
 	if (pki_evp::passHash.isEmpty()) {
 		ret = PwDialog::execute(&p, &pki_evp::passwd, true, true);
 		if (ret != 1)
 			return ret;
 		salt = makeSalt();
 		pki_evp::passHash = pki_evp::sha512passwd(pki_evp::passwd,salt);
-		mydb.set((const unsigned char *)CCHAR(pki_evp::passHash),
-			pki_evp::passHash.length()+1, 1, setting, "pwhash");
+		storeSetting("pwhash", pki_evp::passHash);
 	} else {
 		ret = 0;
 		while (pki_evp::sha512passwd(pki_evp::passwd, pki_evp::passHash)
@@ -766,10 +740,7 @@ int MainWindow::initPass()
 				salt = makeSalt();
 				pki_evp::passHash = pki_evp::sha512passwd(
 						pki_evp::passwd, salt);
-				mydb.set((const unsigned char *)CCHAR(
-					pki_evp::passHash),
-					pki_evp::passHash.length() +1, 1,
-					setting, "pwhash");
+				storeSetting("pwhash", pki_evp::passHash);
 			}
 		}
 	}
@@ -802,15 +773,8 @@ QString MainWindow::getPath()
 
 void MainWindow::setPath(QString str)
 {
-	db mydb(dbfile);
 	workingdir = str;
-	mydb.set((const unsigned char *)CCHAR(str), str.length()+1, 1, setting, "workingdir");
-}
-
-void MainWindow::setDefaultKey(QString str)
-{
-	db mydb(dbfile);
-	mydb.set((const unsigned char *)CCHAR(str), str.length()+1, 1, setting, "defaultkey");
+	storeSetting("workingdir", str);
 }
 
 void MainWindow::connNewX509(NewX509 *nx)

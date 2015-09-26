@@ -24,6 +24,7 @@
 #include <QFileDialog>
 #include <QMenuBar>
 #include <QList>
+#include <QtSql>
 #include <QMessageBox>
 #include <QMenu>
 #include <QToolTip>
@@ -81,11 +82,13 @@ class MainWindow: public QMainWindow, public Ui::MainWindow
 		QStringList history;
 		tipMenu *historyMenu;
 		void update_history_menu();
-		void set_geometry(char *p, db_header_t *head);
+		void set_geometry(QString geo);
 		QLineEdit *searchEdit;
 		QStringList urlsToOpen;
 		int checkOldGetNewPass(Passwd &pass);
-		QString updateDbPassword(QString newdb, Passwd pass);
+		void checkDB();
+		QSqlError initSqlDB();
+		QSqlError openSqlDB();
 
 	protected:
 		void init_images();
@@ -129,6 +132,10 @@ class MainWindow: public QMainWindow, public Ui::MainWindow
 			return resolver;
 		}
 		static void Error(errorEx &err);
+		static void dbSqlError(QSqlError err = QSqlError());
+		static void storeSetting(QString key, QString value);
+		static QString getSetting(QString key);
+
 		void cmd_version();
 		void cmd_help(const char* msg);
 
@@ -142,7 +149,6 @@ class MainWindow: public QMainWindow, public Ui::MainWindow
 		void dropEvent(QDropEvent *event);
 		void dragEnterEvent(QDragEnterEvent *event);
 		int open_default_db();
-		void setDefaultKey(QString def);
 		void load_history();
 		void update_history(QString file);
 

@@ -34,8 +34,8 @@ export INSTALL_DIR="`pwd`"/install
 export DYLD_LIBRARY_PATH=$INSTALL_DIR/lib
 export QTDIR=$HOME/src/install/Qt485
 
-do_libtool
-do_openssl
+#do_libtool
+#do_openssl
 
 XCA_BUILD="xca-macbuild"
 # configure XCA and build the DMG file
@@ -47,5 +47,5 @@ export CXXFLAGS="-arch i386 -I${INSTALL_DIR}/include -L${INSTALL_DIR}/lib -F$QTD
 
 (cd $XCA_DIR && ./bootstrap)
 $XCA_DIR/configure --with-openssl="$INSTALL_DIR" --with-qt="$QTDIR"
-make -j5
-cp *.dmg ..
+make -j5 xca.app
+#cp *.dmg ..

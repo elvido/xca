@@ -15,32 +15,157 @@
 #include <QDebug>
 #include <QStatusBar>
 #include <QMessageBox>
+#include <QtSql>
 #include "lib/db_base.h"
 #include "lib/func.h"
 #include "widgets/ImportMulti.h"
 #include "widgets/NewKey.h"
 
-void MainWindow::set_geometry(char *p, db_header_t *head)
+#if 0
+	try {
+		db mydb(dbfile);
+
+		while (mydb.find(setting, QString()) == 0) {
+			QString key;
+			db_header_t head;
+			char *p = (char *)mydb.load(&head);
+			if (!p) {
+				if (mydb.next())
+					break;
+				continue;
+			}
+			key = head.name;
+
+			if (key == "workingdir")
+				workingdir = p;
+			else if (key == "pkcs11path")
+				pkcs11path = p;
+			else if (key == "default_hash")
+				hashBox::setDefault(p);
+			else if (key == "mandatory_dn")
+				mandatory_dn = p;
+			else if (key == "explicit_dn")
+				explicit_dn = p;
+			/* what a stupid idea.... */
+			else if (key == "multiple_key_use")
+				mydb.erase();
+			else if (key == "string_opt")
+				string_opt = p;
+			else if (key == "suppress")
+				mydb.erase();
+			else if (key == "optionflags1")
+				setOptFlags((QString(p)));
+			/* Different optionflags, since setOptFlags()
+			 * does an abort() for unknown flags in
+			 * older versions.   *Another stupid idea*
+			 * This is for backward compatibility
+			 */
+			else if (key == "optionflags")
+				setOptFlags_old((QString(p)));
+			else if (key == "defaultkey")
+				NewKey::setDefault((QString(p)));
+			else if (key == "mw_geometry")
+				set_geometry(p, &head);
+			free(p);
+			if (mydb.next())
+				break;
+		}
+	} catch (errorEx &err) {
+		Error(err);
+		return ret;
+	}
+#endif
+
+
+QSqlError MainWindow::initSqlDB()
 {
-	if (head->version != 1)
-		return;
-	QByteArray ba = QByteArray::fromRawData(p, head->len);
-	int w, h, i;
-	w = db::intFromData(ba);
-	h = db::intFromData(ba);
-	i = db::intFromData(ba);
-	resize(w,h);
+	QStringList sl; sl
+
+	<< "CREATE TABLE settings(key CHAR(20) UNIQUE, \
+				  value CHAR)"
+
+	<< "CREATE TABLE items(	id INTEGER PRIMARY KEY, \
+				name VARCHAR, \
+				type INTEGER, \
+				version INTEGER, \
+				comment VARCHAR)"
+
+	<< "CREATE TABLE keys ( item INTEGER, \
+				type INTEGER, \
+				der_public BLOB, \
+				used INTEGER, \
+				token INTEGER, \
+			FOREIGN KEY (item) REFERENCES items (id))"
+
+	<< "CREATE TABLE swkeys (key INTEGER, \
+				 ownPass INTEGER, \
+				 private BLOB, \
+			FOREIGN KEY (key) REFERENCES items (id))"
+
+	<< "CREATE TABLE tokens (key INTEGER, \
+				 card_manufacturer VARCHAR(64), \
+				 card_serial VARCHAR(64), \
+				 card_model VARCHAR(64), \
+				 card_label VARCHAR(64), \
+				 slot_label VARCHAR(64), \
+				 object_id VARCHAR(64), \
+				 mechanisms VARCHAR(64), \
+			FOREIGN KEY (key) REFERENCES items (id))";
+
+	QSqlQuery q;
+	foreach(QString sql, sl) {
+		fprintf(stderr, "EXEC: '%s'\n", CCHAR(sql));
+		if (!q.exec(sql))
+			return q.lastError();
+	}
+	return QSqlError();
+}
+
+QSqlError MainWindow::openSqlDB()
+{
+	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+	db.setDatabaseName(dbfile + ".sql");
+
+	if (!db.open())
+		return db.lastError();
+	QStringList tables = db.tables();
+	if (!tables.contains("items")) {
+		return initSqlDB();
+	}
+	return QSqlError();
+}
+
+void MainWindow::set_geometry(QString geo)
+{
+	QStringList sl = geo.split(",");
+	resize(sl[0].toInt(), sl[1].toInt());
+	int i = sl[2].toInt();
 	if (i != -1)
 		tabView->setCurrentIndex(i);
+}
+
+void MainWindow::dbSqlError(QSqlError err)
+{
+	if (!err.isValid())
+		err = QSqlDatabase::database().lastError();
+
+	if (err.type() != QSqlError::NoError) {
+		fprintf(stderr, "SQL ERROR: '%s'\n", CCHAR(err.text()));
+		XCA_WARN(err.text());
+	}
 }
 
 int MainWindow::init_database()
 {
 	int ret = 2;
+	QSqlError err;
+
 	qDebug("Opening database: %s", QString2filename(dbfile));
 	keys = NULL; reqs = NULL; certs = NULL; temps = NULL; crls = NULL;
 
 	Entropy::seed_rng();
+	err = openSqlDB();
+	dbSqlError(err);
 	certView->setRootIsDecorated(db_x509::treeview);
 
 	try {
@@ -105,57 +230,30 @@ int MainWindow::init_database()
 	certView->setModel(certs);
 	tempView->setModel(temps);
 	crlView->setModel(crls);
-	try {
-		db mydb(dbfile);
 
-		while (mydb.find(setting, QString()) == 0) {
-			QString key;
-			db_header_t head;
-			char *p = (char *)mydb.load(&head);
-			if (!p) {
-				if (mydb.next())
-					break;
-				continue;
-			}
-			key = head.name;
-
-			if (key == "workingdir")
-				workingdir = p;
-			else if (key == "pkcs11path")
-				pkcs11path = p;
-			else if (key == "default_hash")
-				hashBox::setDefault(p);
-			else if (key == "mandatory_dn")
-				mandatory_dn = p;
-			else if (key == "explicit_dn")
-				explicit_dn = p;
-			/* what a stupid idea.... */
-			else if (key == "multiple_key_use")
-				mydb.erase();
-			else if (key == "string_opt")
-				string_opt = p;
-			else if (key == "suppress")
-				mydb.erase();
-			else if (key == "optionflags1")
-				setOptFlags((QString(p)));
-			/* Different optionflags, since setOptFlags()
-			 * does an abort() for unknown flags in
-			 * older versions.   *Another stupid idea*
-			 * This is for backward compatibility
-			 */
-			else if (key == "optionflags")
-				setOptFlags_old((QString(p)));
-			else if (key == "defaultkey")
-				NewKey::setDefault((QString(p)));
-			else if (key == "mw_geometry")
-				set_geometry(p, &head);
-			free(p);
-			if (mydb.next())
-				break;
-		}
-	} catch (errorEx &err) {
-		Error(err);
-		return ret;
+	QSqlQuery query("SELECT key, value FROM settings");
+	while (query.next()) {
+		QString key = query.value(0).toString();
+		fprintf(stderr, "Setting: '%s'\n", CCHAR(key));
+		QString value = query.value(1).toString();
+		if (key == "workingdir")
+			workingdir = value;
+		else if (key == "pkcs11path")
+			pkcs11path = value;
+		else if (key == "default_hash")
+			hashBox::setDefault(value);
+		else if (key == "mandatory_dn")
+			mandatory_dn = value;
+		else if (key == "explicit_dn")
+			explicit_dn = value;
+		else if (key == "string_opt")
+			string_opt = value;
+		else if (key == "optionflags")
+			setOptFlags(value);
+		else if (key == "defaultkey")
+			NewKey::setDefault(value);
+		else if (key == "mw_geometry")
+			set_geometry(value);
 	}
 	ASN1_STRING_set_default_mask_asc((char*)CCHAR(string_opt));
 	if (explicit_dn.isEmpty())
@@ -283,16 +381,37 @@ void MainWindow::default_database()
 
 }
 
+QString MainWindow::getSetting(QString key)
+{
+	QSqlQuery q(QString("SELECT value FROM settings WHERE key='%1'").arg(key));
+	if (q.first()) {
+		fprintf(stderr, "GET Setting: '%s' : '%s'\n", CCHAR(key), CCHAR(q.value(0).toString()));
+		return q.value(0).toString();
+	}
+	dbSqlError(q.lastError());
+	return QString();
+}
+
+void MainWindow::storeSetting(QString key, QString value)
+{
+	QSqlQuery query(QString("UPDATE settings SET value='%2' WHERE key='%1'")
+		.arg(key).arg(value));
+	if (query.numRowsAffected() != 1) {
+		query.exec(QString("INSERT INTO settings (key, value)"
+					"VALUES ('%1', '%2')")
+				.arg(key).arg(value));
+	}
+	dbSqlError(query.lastError());
+}
+
 void MainWindow::close_database()
 {
 	QByteArray ba;
 	if (!dbfile.isEmpty()) {
-		ba += db::intToData(size().width());
-		ba += db::intToData(size().height());
-		ba += db::intToData(tabView->currentIndex());
-		db mydb(dbfile);
-		mydb.set((const unsigned char *)ba.constData(), ba.size(), 1,
-			setting, "mw_geometry");
+		QString s = QString("%1,%2,%3")
+			.arg(size().width()).arg(size().height())
+			.arg(tabView->currentIndex());
+		storeSetting("mw_geometry", s);
 	}
 	setItemEnabled(false);
 	statusBar()->removeWidget(searchEdit);
@@ -320,6 +439,7 @@ void MainWindow::close_database()
 	temps = NULL;
 	keys = NULL;
 
+	QSqlDatabase::database().close();
 	pki_evp::passwd.cleanse();
 	pki_evp::passwd = QByteArray();
 

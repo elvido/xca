@@ -135,21 +135,22 @@ class dbheader
 		}
 		return false;
 	}
-	QByteArray toData()
+	QString toData()
 	{
-		QByteArray ba;
-		ba += db::intToData(visualIndex);
-		ba += db::intToData(sortIndicator);
-		ba += db::intToData(size);
-		ba += db::boolToData(show);
-		return ba;
+		QStringList sl; sl
+		<< QString::number(visualIndex)
+		<< QString::number(sortIndicator)
+		<< QString::number(size)
+		<< QString::number(show);
+		return sl.join(" ");
 	}
-	void fromData(QByteArray &ba)
+	void fromData(QString s)
 	{
-		visualIndex = db::intFromData(ba);
-		sortIndicator = db::intFromData(ba);
-		size = db::intFromData(ba);
-		show = db::boolFromData(ba);
+		QStringList sl = s.split(" ");
+		visualIndex = sl[0].toInt();
+		sortIndicator = sl[1].toInt();
+		size = sl[2].toInt();
+		show = sl[3].toInt();
 	}
 	void setupHeaderView(int sect, QHeaderView *hv)
 	{
@@ -207,42 +208,39 @@ class dbheaderList: public QList<dbheader*>
 	}
 	dbheaderList() :QList<dbheader*>() {
 	}
-	QByteArray toData()
+	QString toData()
 	{
-		QByteArray ba;
+		QStringList sl;
 		for (int i=0; i<count(); i++) {
+			QStringList seq;
 			dbheader *h = at(i);
 			if (!h->mustSave())
 				continue;
-			ba += db::intToData(h->id);
+			seq << QString("%1").arg(h->id);
 			if (h->id > 0) {
-				ASN1_OBJECT *o = OBJ_nid2obj(h->id);
-				ba += i2d_bytearray(I2D_VOID(i2d_ASN1_OBJECT), o);
+				seq << OBJ_obj2QString(
+					OBJ_nid2obj(h->id), 1);
 			}
-			ba += h->toData();
+			seq << h->toData();
+			sl << seq.join(":");
 		}
-		return ba;
+		return sl.join(",");
 	}
-	void fromData(QByteArray &ba)
+	void fromData(QString s)
 	{
-		while (ba.size()) {
-			int id = db::intFromData(ba);
+		QStringList sl = s.split(",");
+		foreach(QString hd, sl) {
+			QStringList sl1 = hd.split(":");
+			int id = sl1.takeFirst().toInt();
 			if (id > 0) {
-				ASN1_OBJECT *o = (ASN1_OBJECT*)d2i_bytearray(D2I_VOID(d2i_ASN1_OBJECT), ba);
-				id = OBJ_obj2nid(o);
-				ASN1_OBJECT_free(o);
+				OBJ_txt2nid(CCHAR(sl1.takeFirst()));
 			}
 			for (int i=0; i<count(); i++) {
 				dbheader *h = at(i);
 				if (h->id == id) {
-					h->fromData(ba);
-					id = 0;
+					h->fromData(sl1.takeFirst());
 					break;
 				}
-			}
-			if (id != 0) {
-				dbheader h("dummy");
-				h.fromData(ba);
 			}
 		}
 	}
