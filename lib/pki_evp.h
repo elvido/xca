@@ -62,6 +62,9 @@ class pki_evp: public pki_key
 		int verify();
 		const EVP_MD *getDefaultMD();
 		QVariant getIcon(dbheader *hd);
+		QSqlError insertSqlData();
+		QSqlError deleteSqlData();
+		QSqlError restoreSql(QVariant sqlId);
 };
 
 #endif

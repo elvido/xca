@@ -22,6 +22,52 @@ pki_x509super::~pki_x509super()
 	privkey = NULL;
 }
 
+QSqlError pki_x509super::insertSqlData()
+{
+	QSqlQuery q;
+
+	q.prepare("INSERT INTO x509super (item, subj_hash, key) "
+		  "VALUES (?, ?, ?)");
+	q.bindValue(0, sqlItemId);
+	q.bindValue(1, (uint)getSubject().hashNum());
+	q.bindValue(2, privkey ? privkey->getSqlItemId() : NULL);
+	q.exec();
+	return q.lastError();
+}
+
+QSqlError pki_x509super::restoreSql(QVariant sqlId)
+{
+	QSqlQuery q;
+	QSqlError e;
+
+	e = pki_base::restoreSql(sqlId);
+	if (e.isValid())
+		return e;
+	q.prepare("SELECT (key) FROM keys WHERE item=?");
+	q.bindValue(0, sqlId);
+	q.exec();
+	e = q.lastError();
+	if (e.isValid())
+		return e;
+	if (!q.first())
+		return QSqlError(QString("XCA database inconsistent"),
+				QString("Item not found %1 %2")
+					.arg(class_name).arg(sqlId.toString()),
+				QSqlError::UnknownError);
+	keySqlId = q.value(0);
+	privkey = NULL;
+	return e;
+}
+
+QSqlError pki_x509super::deleteSqlData()
+{
+	QSqlQuery q;
+	q.prepare("DELETE FROM x509super WHERE item=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
+	return q.lastError();
+}
+
 pki_key *pki_x509super::getRefKey() const
 {
 	return privkey;

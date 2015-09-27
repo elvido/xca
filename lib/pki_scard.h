@@ -90,6 +90,8 @@ class pki_scard: public pki_key
 		int renameOnToken(slotid slot, QString name);
 		QString getMsg(msg_type msg);
 		bool visible();
+		QSqlError insertSqlData();
+		QSqlError deleteSqlData();
 };
 
 #endif

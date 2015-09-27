@@ -65,6 +65,56 @@ QString pki_scard::getMsg(msg_type msg)
 	return pki_base::getMsg(msg);
 }
 
+QSqlError pki_scard::insertSqlData()
+{
+	QSqlQuery q;
+	QSqlError e = pki_key::insertSqlData();
+	if (e.isValid())
+		return e;
+
+	q.prepare("INSERT INTO tokens (item, card_manufacturer, card_serial, "
+					"card_model, card_label, slot_label, "
+					"object_id) "
+		  "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+	q.bindValue(0, sqlItemId);
+	q.bindValue(1, card_manufacturer);
+	q.bindValue(2, card_serial);
+	q.bindValue(3, card_model);
+	q.bindValue(4, card_label);
+	q.bindValue(5, slot_label);
+	q.bindValue(6, object_id);
+	q.exec();
+	e = q.lastError();
+	if (e.isValid())
+		return e;
+	q.prepare("INSERT INTO token_mechanism (item, mechanism) "
+		  "VALUES (?, ?)");
+	q.bindValue(0, sqlItemId);
+	foreach(CK_MECHANISM_TYPE m, mech_list) {
+		q.bindValue(1, QVariant((uint)m));
+		q.exec();
+	}
+	return q.lastError();
+}
+
+QSqlError pki_scard::deleteSqlData()
+{
+	QSqlQuery q;
+	QSqlError e = pki_key::deleteSqlData();
+	if (e.isValid())
+		return e;
+	q.prepare("DELETE FROM tokens WHERE item=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
+	e = q.lastError();
+	if (e.isValid())
+		return e;
+	q.prepare("DELETE FROM token_mechanism WHERE item=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
+	return q.lastError();
+}
+
 EVP_PKEY *pki_scard::load_pubkey(pkcs11 &p11, CK_OBJECT_HANDLE object) const
 {
 	unsigned long keytype;

@@ -43,6 +43,7 @@ class x509name
 		QString getMostPopular() const;
 		QString taggedValues() const;
 		QString hash() const;
+		unsigned long hashNum() const;
 		bool search(const QRegExp &pattern);
 };
 

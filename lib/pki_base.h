@@ -11,6 +11,7 @@
 #include <openssl/err.h>
 #include <QString>
 #include <QListView>
+#include <QtSql>
 #include "pkcs11_lib.h"
 #include "db.h"
 #include "base.h"
@@ -27,13 +28,15 @@ class pki_base : public QObject
 		static int pki_counter;
 	protected:
 		const char *class_name;
-		QString desc;
+		QString desc, comment;
 		int dataVersion;
+		int sqlDataVersion;
 		enum pki_type pkiType;
 		/* model data */
 		pki_base *parent;
 		void my_error(const QString myerr) const;
 		void fopen_error(const QString fname);
+		QVariant sqlItemId;
 
 	public:
 		enum msg_type {
@@ -59,6 +62,14 @@ class pki_base : public QObject
 		virtual bool visible();
 		virtual ~pki_base();
 		QString getIntName() const;
+		QString getComment() const
+		{
+			return comment;
+		}
+		QVariant getSqlItemId()
+		{
+			return sqlItemId;
+		}
 		QString getUnderlinedName() const;
 		void setIntName(const QString &d);
 		QString getClassName();
@@ -68,8 +79,14 @@ class pki_base : public QObject
 			return tr("Internal error: Unexpected message: %1 %2").
 				arg(class_name).arg(msg);
 		};
-		int getVersion();
-		enum pki_type getType();
+		int getVersion() const
+		{
+			return dataVersion;
+		}
+		enum pki_type getType() const
+		{
+			return pkiType;
+		}
 		void setParent(pki_base *p);
 		virtual pki_base *getParent();
 		pki_base *child(int row);
@@ -109,6 +126,17 @@ class pki_base : public QObject
 			(void)hd;
 			return QVariant();
 		}
+		QSqlError insertSql();
+		virtual QSqlError insertSqlData()
+		{
+			return QSqlError();
+		}
+		QSqlError deleteSql();
+		virtual QSqlError deleteSqlData()
+		{
+			return QSqlError();
+		}
+		virtual QSqlError restoreSql(QVariant sqlId);
 };
 
 #endif

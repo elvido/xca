@@ -132,6 +132,11 @@ QString x509name::hash() const
 	return QString("%1").arg(X509_NAME_hash(xn), 8, 16, QChar('0'));
 }
 
+unsigned long x509name::hashNum() const
+{
+	return X509_NAME_hash(xn);
+}
+
 QStringList x509name::entryList(int i) const
 {
 	QStringList sl;

@@ -560,6 +560,52 @@ pki_evp::~pki_evp()
 {
 }
 
+QSqlError pki_evp::insertSqlData()
+{
+	QSqlQuery q;
+	QSqlError e = pki_key::insertSqlData();
+	if (e.isValid())
+		return e;
+
+	q.prepare("INSERT INTO swkeys (item, ownPass, private) "
+		  "VALUES (?, ?, ?)");
+	q.bindValue(0, sqlItemId);
+	q.bindValue(1, ownPass);
+	q.bindValue(2, encKey);
+	q.exec();
+	return q.lastError();
+}
+
+QSqlError pki_evp::restoreSql(QVariant sqlId)
+{
+	QSqlQuery q;
+	QSqlError e;
+
+	e = pki_key::restoreSql(sqlId);
+	if (e.isValid())
+		return e;
+	q.prepare("SELECT (ownPass, private) FROM keys WHERE item=?");
+	q.bindValue(0, sqlId);
+	q.exec();
+	e = q.lastError();
+	if (e.isValid() || !q.first())
+		return e;
+	ownPass = q.value(0).toInt();
+	encKey = q.value(1).toByteArray();
+	return e;
+}
+
+QSqlError pki_evp::deleteSqlData()
+{
+	QSqlQuery q;
+	QSqlError e = pki_key::deleteSqlData();
+	if (e.isValid())
+		return e;
+	q.prepare("DELETE FROM swkeys WHERE item=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
+	return q.lastError();
+}
 
 void pki_evp::writePKCS8(const QString fname, const EVP_CIPHER *enc,
 		pem_password_cb *cb, bool pem)

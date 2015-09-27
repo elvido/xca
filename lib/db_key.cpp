@@ -58,7 +58,6 @@ pki_base *db_key::newPKI(db_header_t *head)
 	return new pki_scard("");
 }
 
-
 QStringList db_key::getPrivateDesc()
 {
 	QStringList x;

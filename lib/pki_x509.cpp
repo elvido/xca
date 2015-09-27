@@ -71,10 +71,68 @@ QString pki_x509::getMsg(msg_type msg)
 	case msg_import: return tr("Successfully imported the certificate '%1'");
 	case msg_delete: return tr("Delete the certificate '%1'?");
 	case msg_create: return tr("Successfully created the certificate '%1'");
-	/* %1: Number of certs; %2: list of cert ames */
+	/* %1: Number of certs; %2: list of cert names */
 	case msg_delete_multi: return tr("Delete the %1 certificates: %2?");
 	}
 	return pki_base::getMsg(msg);
+}
+
+QSqlError pki_x509::insertSqlData()
+{
+	QSqlQuery q;
+	pki_x509 *signer = getSigner();
+	QSqlError e = pki_x509super::insertSqlData();
+	if (e.isValid())
+		return e;
+	q.prepare("INSERT INTO certs (item, cert, iss_hash, "
+					"serial, fpMD5, issuer, ca) "
+		  "VALUES (?, ?, ?, ?, ?, ?, ?)");
+	q.bindValue(0, sqlItemId);
+	q.bindValue(1, i2d());
+	q.bindValue(2, (uint)getIssuer().hashNum());
+	q.bindValue(3, getSerial().toHex());
+	q.bindValue(4, fingerprint(EVP_md5()));
+	q.bindValue(5, signer ? signer->getSqlItemId() : NULL);
+	q.bindValue(6, isCA());
+	q.exec();
+	return q.lastError();
+}
+
+QSqlError pki_x509::restoreSql(QVariant sqlId)
+{
+	QSqlQuery q;
+	QSqlError e;
+
+	e = pki_x509super::restoreSql(sqlId);
+	if (e.isValid())
+		return e;
+	q.prepare("SELECT (cert, issuer) FROM certs item=?");
+	q.bindValue(0, sqlId);
+	q.exec();
+	e = q.lastError();
+	if (e.isValid())
+		return e;
+	if (!q.first())
+		return QSqlError(QString("XCA database inconsistent"),
+				QString("Item not found %1 %2")
+					.arg(class_name).arg(sqlId.toString()),
+				QSqlError::UnknownError);
+	QByteArray ba = q.value(0).toByteArray();
+	d2i(ba);
+	signerSqlId = q.value(1);
+	return e;
+}
+
+QSqlError pki_x509::deleteSqlData()
+{
+	QSqlQuery q;
+	QSqlError e = pki_x509super::deleteSqlData();
+	if (e.isValid())
+		return e;
+	q.prepare("DELETE FROM requests WHERE item=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
+	return q.lastError();
 }
 
 void pki_x509::fromPEM_BIO(BIO *bio, QString name)
@@ -446,19 +504,26 @@ void pki_x509::delSigner(pki_base *s)
 		psigner = NULL;
 }
 
-bool pki_x509::canSign()
+bool pki_x509::isCA() const
 {
-	BASIC_CONSTRAINTS *bc;
+	bool ca;
 	int crit;
+	BASIC_CONSTRAINTS *bc = (BASIC_CONSTRAINTS *)
+		X509_get_ext_d2i(cert, NID_basic_constraints, &crit, NULL);
+	pki_openssl_error();
+	ca = bc && bc->ca;
+	if (bc)
+		BASIC_CONSTRAINTS_free(bc);
+	return ca;
+}
+
+bool pki_x509::canSign() const
+{
 	if (!privkey || privkey->isPubKey())
 		return false;
 	if (privkey->isToken() && !pkcs11::loaded())
 		return false;
-	bc = (BASIC_CONSTRAINTS *)X509_get_ext_d2i(cert, NID_basic_constraints, &crit, NULL);
-	pki_openssl_error();
-	if (!bc || !bc->ca)
-		return false;
-	return true;
+	return isCA();
 }
 
 bool pki_x509::hasExtension(int nid)

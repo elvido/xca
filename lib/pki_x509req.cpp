@@ -40,6 +40,57 @@ pki_x509req::~pki_x509req()
 	pki_openssl_error();
 }
 
+QSqlError pki_x509req::insertSqlData()
+{
+	QSqlQuery q;
+	QSqlError e = pki_x509super::insertSqlData();
+	if (e.isValid())
+		return e;
+	q.prepare("INSERT INTO requests (item, request, signed) "
+		  "VALUES (?, ?, 0)");
+	q.bindValue(0, sqlItemId);
+	q.bindValue(1, i2d());
+	q.exec();
+	return q.lastError();
+}
+
+QSqlError pki_x509req::restoreSql(QVariant sqlId)
+{
+	QSqlQuery q;
+	QSqlError e;
+
+	e = pki_x509super::restoreSql(sqlId);
+	if (e.isValid())
+		return e;
+	q.prepare("SELECT (request, signed) FROM requests WHERE item=?");
+	q.bindValue(0, sqlId);
+	q.exec();
+	e = q.lastError();
+	if (e.isValid())
+		return e;
+	if (!q.first())
+		return QSqlError(QString("XCA database inconsistent"),
+				QString("Item not found %1 %2")
+					.arg(class_name).arg(sqlId.toString()),
+				QSqlError::UnknownError);
+	QByteArray ba = q.value(0).toByteArray();
+	d2i(ba);
+	done = q.value(1).toBool();
+	return e;
+}
+
+QSqlError pki_x509req::deleteSqlData()
+{
+	QSqlQuery q;
+	QSqlError e = pki_x509super::deleteSqlData();
+	if (e.isValid())
+		return e;
+	q.prepare("DELETE FROM requests WHERE item=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
+	return q.lastError();
+}
+
 void pki_x509req::createReq(pki_key *key, const x509name &dn, const EVP_MD *md, extList el)
 {
 	int bad_nids[] = { NID_subject_key_identifier, NID_authority_key_identifier,

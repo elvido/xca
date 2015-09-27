@@ -26,6 +26,7 @@ class pki_x509 : public pki_x509super
 		Q_OBJECT
 	private:
 		pki_x509 *psigner;
+		QVariant signerSqlId;
 		a1time crlExpiry;
 		bool randomSerial;
 		int trust;
@@ -72,7 +73,8 @@ class pki_x509 : public pki_x509super
 		QByteArray toData();
 		void fromData(const unsigned char *p, db_header_t *head);
 		void oldFromData(unsigned char *p, int size);
-		bool canSign();
+		bool isCA() const;
+		bool canSign() const;
 		void writeCert(const QString fname, bool PEM, bool append = false);
 		bool verify(pki_x509 *signer);
 		bool verify_only(pki_x509 *signer);
@@ -169,6 +171,9 @@ class pki_x509 : public pki_x509super
 		}
 		void setRevocations(const x509revList &rl);
 		bool compareNameAndKey(pki_x509 *other);
+		QSqlError insertSqlData();
+		QSqlError deleteSqlData();
+		QSqlError restoreSql(QVariant sqlId);
 };
 
 #endif

@@ -79,6 +79,9 @@ class pki_x509req : public pki_x509super
 		QByteArray i2d_spki();
 		BIO *pem(BIO *, int);
 		bool visible();
+		QSqlError insertSqlData();
+		QSqlError deleteSqlData();
+		QSqlError restoreSql(QVariant sqlId);
 };
 
 #endif

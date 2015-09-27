@@ -269,7 +269,11 @@ void db_base::insertPKI(pki_base *pki)
 		mydb.add((const unsigned char*)ba.constData(), ba.count(),
 			pki->getVersion(), pki->getType(), name);
 	}
+
 	inToCont(pki);
+	QSqlError e = pki->insertSql();
+	mainwin->dbSqlError(e);
+
 	emit columnsContentChanged();
 }
 
@@ -320,6 +324,8 @@ void db_base::deletePKI(QModelIndex idx)
 		db mydb(dbName);
 		mydb.find(pki->getType(), pki->getIntName());
 		mydb.erase();
+		QSqlError e = pki->deleteSql();
+		mainwin->dbSqlError(e);
 		delete pki;
 	} catch (errorEx &err) {
 		MainWindow::Error(err);

@@ -31,6 +31,7 @@ class pki_x509super : public pki_x509name
 {
 		Q_OBJECT
 	protected:
+		QVariant keySqlId;
 		pki_key *privkey;
 		virtual ASN1_OBJECT *sigAlg() {
 			return NULL;
@@ -62,6 +63,9 @@ class pki_x509super : public pki_x509name
 		QVariant column_data(dbheader *hd);
 		void opensslConf(QString fname);
 		bool visible();
+		QSqlError insertSqlData();
+		QSqlError deleteSqlData();
+		QSqlError restoreSql(QVariant sqlId);
 };
 
 #endif

@@ -375,6 +375,61 @@ QVariant pki_key::column_data(dbheader *hd)
 	return pki_base::column_data(hd);
 }
 
+QSqlError pki_key::insertSqlData()
+{
+	QSqlQuery q;
+
+	q.prepare("INSERT INTO keys (item, type, der_public, len) "
+		  "VALUES (?, ?, ?, ?)");
+	q.bindValue(0, sqlItemId);
+	q.bindValue(1, getTypeString());
+	q.bindValue(2, i2d());
+	q.bindValue(3, EVP_PKEY_bits(key));
+	q.exec();
+	return q.lastError();
+}
+
+QSqlError pki_key::restoreSql(QVariant sqlId)
+{
+	QSqlQuery q;
+	QSqlError e;
+
+	e = pki_base::restoreSql(sqlId);
+	if (e.isValid())
+		return e;
+	q.prepare("SELECT (der_public) FROM keys WHERE item=?");
+	q.bindValue(0, sqlId);
+	q.exec();
+	e = q.lastError();
+	if (e.isValid())
+		return e;
+	if (!q.first())
+		return QSqlError(QString("XCA database inconsistent"),
+				QString("Item not found %1 %2")
+					.arg(class_name).arg(sqlId.toString()),
+				QSqlError::UnknownError);
+	QByteArray ba = q.value(0).toByteArray();
+	d2i(ba);
+	return e;
+}
+
+QSqlError pki_key::deleteSqlData()
+{
+	QSqlQuery q;
+	QSqlError e;
+
+	q.prepare("DELETE FROM keys WHERE item=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
+	e = q.lastError();
+	if (e.isValid())
+		return e;
+	q.prepare("UPDATE x509super SET key=NULL WHERE key=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
+	return q.lastError();
+}
+
 BIGNUM *pki_key::ssh_key_data2bn(QByteArray *ba, bool skip)
 {
 	const unsigned char *d = (const unsigned char *)ba->constData();

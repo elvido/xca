@@ -81,37 +81,62 @@ QSqlError MainWindow::initSqlDB()
 {
 	QStringList sl; sl
 
-	<< "CREATE TABLE settings(key CHAR(20) UNIQUE, \
-				  value CHAR)"
+	<< "CREATE TABLE settings(key CHAR(20) UNIQUE, "
+				  "value CHAR)"
+	<< "INSERT INTO settings (key, value) VALUES ('schema', '1')"
 
-	<< "CREATE TABLE items(	id INTEGER PRIMARY KEY, \
-				name VARCHAR, \
-				type INTEGER, \
-				version INTEGER, \
-				comment VARCHAR)"
+	<< "CREATE TABLE items(id INTEGER PRIMARY KEY, "
+				"name VARCHAR, "
+				"type INTEGER, "
+				"version INTEGER, "
+				"comment VARCHAR)"
 
-	<< "CREATE TABLE keys ( item INTEGER, \
-				type INTEGER, \
-				der_public BLOB, \
-				used INTEGER, \
-				token INTEGER, \
-			FOREIGN KEY (item) REFERENCES items (id))"
+	<< "CREATE TABLE keys (item INTEGER, "
+				"type INTEGER, "
+				"der_public BLOB, "
+				"len INTEGER, "
+			"FOREIGN KEY (item) REFERENCES items (id))"
 
-	<< "CREATE TABLE swkeys (key INTEGER, \
-				 ownPass INTEGER, \
-				 private BLOB, \
-			FOREIGN KEY (key) REFERENCES items (id))"
+	<< "CREATE TABLE swkeys (item INTEGER, "
+				"ownPass INTEGER, "
+				"private BLOB, "
+			"FOREIGN KEY (item) REFERENCES items (id))"
 
-	<< "CREATE TABLE tokens (key INTEGER, \
-				 card_manufacturer VARCHAR(64), \
-				 card_serial VARCHAR(64), \
-				 card_model VARCHAR(64), \
-				 card_label VARCHAR(64), \
-				 slot_label VARCHAR(64), \
-				 object_id VARCHAR(64), \
-				 mechanisms VARCHAR(64), \
-			FOREIGN KEY (key) REFERENCES items (id))";
+	<< "CREATE TABLE tokens (item INTEGER, "
+				"card_manufacturer VARCHAR(64), "
+				"card_serial VARCHAR(64), "
+				"card_model VARCHAR(64), "
+				"card_label VARCHAR(64), "
+				"slot_label VARCHAR(64), "
+				"object_id VARCHAR(64), "
+			"FOREIGN KEY (item) REFERENCES items (id))"
 
+	<< "CREATE TABLE token_mechanism (item INTEGER, "
+					"mechanism INTEGER, "
+			"FOREIGN KEY (item) REFERENCES items (id))"
+
+	<< "CREATE TABLE x509super (item INTEGER, "
+				"subj_hash INTEGER, "
+				"key INTEGER, "
+			"FOREIGN KEY (item) REFERENCES items (id), "
+			"FOREIGN KEY (key) REFERENCES items (id)) "
+
+	<< "CREATE TABLE requests (item INTEGER, "
+				"request BLOB, "
+				"signed INTEGER, "
+			"FOREIGN KEY (item) REFERENCES items (id)) "
+
+	<< "CREATE TABLE certs (item INTEGER, "
+				"cert BLOB, "
+				"iss_hash INTEGER, "
+				"serial CHAR, "
+				"fpMD5 CHAR(48), "
+				"issuer INTEGER, "
+				"ca INTEGER, "
+			"FOREIGN KEY (item) REFERENCES items (id), "
+			"FOREIGN KEY (issuer) REFERENCES items (id)) "
+
+	;
 	QSqlQuery q;
 	foreach(QString sql, sl) {
 		fprintf(stderr, "EXEC: '%s'\n", CCHAR(sql));
@@ -149,7 +174,7 @@ void MainWindow::dbSqlError(QSqlError err)
 	if (!err.isValid())
 		err = QSqlDatabase::database().lastError();
 
-	if (err.type() != QSqlError::NoError) {
+	if (err.isValid()) {
 		fprintf(stderr, "SQL ERROR: '%s'\n", CCHAR(err.text()));
 		XCA_WARN(err.text());
 	}
@@ -383,9 +408,13 @@ void MainWindow::default_database()
 
 QString MainWindow::getSetting(QString key)
 {
-	QSqlQuery q(QString("SELECT value FROM settings WHERE key='%1'").arg(key));
+	QSqlQuery q;
+	q.prepare("SELECT value FROM settings WHERE key=?");
+	q.bindValue(0, key);
+	q.exec();
 	if (q.first()) {
-		fprintf(stderr, "GET Setting: '%s' : '%s'\n", CCHAR(key), CCHAR(q.value(0).toString()));
+		fprintf(stderr, "GET Setting: '%s' : '%s'\n",
+			 CCHAR(key), CCHAR(q.value(0).toString()));
 		return q.value(0).toString();
 	}
 	dbSqlError(q.lastError());
@@ -394,14 +423,19 @@ QString MainWindow::getSetting(QString key)
 
 void MainWindow::storeSetting(QString key, QString value)
 {
-	QSqlQuery query(QString("UPDATE settings SET value='%2' WHERE key='%1'")
-		.arg(key).arg(value));
-	if (query.numRowsAffected() != 1) {
-		query.exec(QString("INSERT INTO settings (key, value)"
-					"VALUES ('%1', '%2')")
-				.arg(key).arg(value));
-	}
-	dbSqlError(query.lastError());
+	QSqlQuery q;
+	q.prepare("UPDATE settings SET value=? WHERE key=?");
+	q.bindValue(0, value);
+	q.bindValue(1, key);
+	q.exec();
+	dbSqlError(q.lastError());
+	if (q.numRowsAffected() == 1)
+		return;
+	q.prepare("INSERT INTO settings (key, value) VALUES (?, ?)");
+	q.bindValue(0, key);
+	q.bindValue(1, value);
+	q.exec();
+	dbSqlError(q.lastError());
 }
 
 void MainWindow::close_database()

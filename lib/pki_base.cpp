@@ -26,23 +26,12 @@ pki_base::pki_base(const QString name, pki_base *p)
 	pkiType=none;
 }
 
-int pki_base::getVersion()
-{
-	return dataVersion;
-}
-
-enum pki_type pki_base::getType()
-{
-	return pkiType;
-}
-
 pki_base::~pki_base(void)
 {
 	while (childItems.size() > 0)
 		delete takeFirst();
 	pki_counter--;
 }
-
 
 QString pki_base::getIntName() const
 {
@@ -107,6 +96,98 @@ QString pki_base::rmslashdot(const QString &s)
 	int r = a.lastIndexOf('.');
 	int l = a.lastIndexOf('/');
 	return s.mid(l+1,r-l-1);
+}
+
+QSqlError pki_base::insertSql()
+{
+	QSqlQuery q;
+	QString insert;
+	QSqlError e;
+
+	q.exec("BEGIN TRANSACTION");
+	e = q.lastError();
+	if (!e.isValid()) {
+		q.prepare("INSERT INTO items "
+			  "(id, name, type, version, comment) "
+			  "VALUES (NULL, ?, ?, ?, ?)");
+		q.bindValue(0, getIntName());
+		q.bindValue(1, getType());
+		q.bindValue(2, getVersion());
+		q.bindValue(3, getComment());
+		q.exec();
+		e = q.lastError();
+		if (!e.isValid()) {
+			sqlItemId = q.lastInsertId();
+			e = insertSqlData();
+			if (!e.isValid()) {
+				q.exec("COMMIT");
+			}
+		}
+	}
+	if (e.isValid())
+		q.exec("ROLLBACK");
+	return e;
+}
+
+QSqlError pki_base::restoreSql(QVariant sqlId)
+{
+	QSqlQuery q;
+	QSqlError e;
+
+	q.prepare("SELECT (name, version, comment) "
+			"FROM items WHERE id=?");
+	q.bindValue(0, sqlId);
+	q.exec();
+	e = q.lastError();
+	if (e.isValid())
+		return e;
+	if (!q.first())
+		return QSqlError(QString("XCA database inconsistent"),
+				QString("Item not found %1 %2")
+					.arg(class_name).arg(sqlId.toString()),
+				QSqlError::UnknownError);
+
+	desc = q.value(0).toString();
+	sqlDataVersion = q.value(1).toInt();
+	comment = q.value(2).toString();
+	return e;
+}
+
+QSqlError pki_base::deleteSql()
+{
+	QSqlQuery q;
+	QString insert;
+	QSqlError e;
+
+	if (!sqlItemId.isValid()) {
+		q.prepare("SELECT id FROM items WHERE name=?");
+		q.bindValue(0, getIntName());
+		q.exec();
+		e = q.lastError();
+		if (e.isValid())
+			return e;
+		if (q.first())
+			sqlItemId = q.value(0);
+		else
+			return QSqlError();
+	}
+	q.exec("BEGIN TRANSACTION");
+	e = q.lastError();
+	if (!e.isValid()) {
+		q.prepare("DELETE FROM items WHERE id=?");
+		q.bindValue(0, sqlItemId);
+		q.exec();
+		e = q.lastError();
+		if (!e.isValid()) {
+			e = deleteSqlData();
+			if (!e.isValid()) {
+				q.exec("COMMIT");
+			}
+		}
+	}
+	if (e.isValid())
+		q.exec("ROLLBACK");
+	return e;
 }
 
 pki_base *pki_base::getParent()
