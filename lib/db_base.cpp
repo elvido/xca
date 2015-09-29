@@ -22,10 +22,9 @@
 #include "widgets/MainWindow.h"
 #include "widgets/ImportMulti.h"
 
-db_base::db_base(QString db, MainWindow *mw)
+db_base::db_base(MainWindow *mw)
 	:QAbstractItemModel(NULL)
 {
-	dbName = db;
 	rootItem = newPKI();
 	mainwin = mw;
 	colResizing = 0;
@@ -39,8 +38,9 @@ db_base::~db_base()
 	delete rootItem;
 }
 
-pki_base *db_base::newPKI(db_header_t *)
+pki_base *db_base::newPKI(enum pki_type type)
 {
+	(void)type;
 	return new pki_base("rootItem");
 }
 
@@ -69,6 +69,7 @@ void db_base::remFromCont(QModelIndex &idx)
 	emit columnsContentChanged();
 }
 
+#if 0
 int db_base::handleBadEntry(unsigned char *p, db_header_t *head)
 {
 	QString name = QString::fromUtf8(head->name);
@@ -117,60 +118,35 @@ int db_base::handleBadEntry(unsigned char *p, db_header_t *head)
 
 	return (l == 2);
 }
+#endif
+
+QString db_base::sqlItemSelector()
+{
+	QStringList sl;
+	QString selector;
+
+	foreach(enum pki_type pt, pkitype)
+		sl << QString("type=%1").arg(pt);
+
+	return sl.join(" OR ");
+}
 
 void db_base::loadContainer()
 {
-	db mydb(dbName);
-	unsigned char *p = NULL;
-	db_header_t head;
-	pki_base *pki;
+	QSqlQuery q;
+	QSqlError e;
+	QString stmt;
 
-	for (int i=0; i < pkitype.count(); i++) {
-		mydb.first();
-		while (mydb.find(pkitype[i], QString()) == 0) {
-			QString s;
-			p = mydb.load(&head);
-			if (!p) {
-				qWarning("Load was empty !");
-				goto next;
-			}
-			pki = newPKI(&head);
-			if (pki->getVersion() < head.version) {
-				qWarning("Item[%s]: Version %d "
-					"> known version: %d -> ignored",
-					head.name, head.version,
-					pki->getVersion()
-				);
-				free(p);
-				delete pki;
-				goto next;
-			}
-			pki->setIntName(QString::fromUtf8(head.name));
+	stmt = QString("SELECT id, type FROM items WHERE ") + sqlItemSelector();
+	fprintf(stderr, "%s", CCHAR(stmt));
+	q.exec(stmt);
+	e = q.lastError();
+	mainwin->dbSqlError(e);
 
-			try {
-				pki->fromData(p, &head);
-			}
-			catch (errorEx &err) {
-				err.appendString(pki->getIntName());
-				mainwin->Error(err);
-				delete pki;
-				pki = NULL;
-				try {
-					if (handleBadEntry(p, &head)) {
-						mydb.erase();
-					}
-				} catch (errorEx &err) {
-					mainwin->Error(err);
-				}
-			}
-			free(p);
-			if (pki) {
-				inToCont(pki);
-			}
-next:
-			if (mydb.next())
-				break;
-		}
+	while (q.next()) {
+		enum pki_type t = (enum pki_type)q.value(1).toInt();
+		pki_base *pki = newPKI(t);
+		pki->restoreSql(q.value(0));
 	}
 
 	QString view = mainwin->getSetting(class_name + "_hdView");
@@ -182,7 +158,6 @@ next:
 		allHeaders.fromData(view);
 	}
 	emit columnsContentChanged();
-	return;
 }
 
 void db_base::updateHeaders()
@@ -259,21 +234,9 @@ void db_base::sortIndicatorChanged(int logicalIndex, Qt::SortOrder order)
 
 void db_base::insertPKI(pki_base *pki)
 {
-	QString name;
-	db mydb(dbName);
-	QByteArray ba = pki->toData();
-
-	if (ba.count() > 0) {
-		name = mydb.uniq_name(pki->getIntName(), pkitype);
-		pki->setIntName(name);
-		mydb.add((const unsigned char*)ba.constData(), ba.count(),
-			pki->getVersion(), pki->getType(), name);
-	}
-
 	inToCont(pki);
 	QSqlError e = pki->insertSql();
 	mainwin->dbSqlError(e);
-
 	emit columnsContentChanged();
 }
 
@@ -321,12 +284,8 @@ void db_base::deletePKI(QModelIndex idx)
 
 		remFromCont(idx);
 
-		db mydb(dbName);
-		mydb.find(pki->getType(), pki->getIntName());
-		mydb.erase();
 		QSqlError e = pki->deleteSql();
 		mainwin->dbSqlError(e);
-		delete pki;
 	} catch (errorEx &err) {
 		MainWindow::Error(err);
 	}
@@ -334,14 +293,8 @@ void db_base::deletePKI(QModelIndex idx)
 
 void db_base::updatePKI(pki_base *pki)
 {
-	db mydb(dbName);
-
-	QByteArray ba = pki->toData();
-
-	if (ba.count() > 0) {
-		mydb.set((const unsigned char*)ba.constData(), ba.count(),
-			pki->getVersion(), pki->getType(), pki->getIntName());
-	}
+	(void)pki;
+	fprintf(stderr, "UUUUUUUUUUUUPDATE MIT SQL FEHLER\n");
 }
 
 void db_base::showItem(const QModelIndex &index)
@@ -371,6 +324,10 @@ void db_base::insertChild(pki_base *parent, pki_base *child)
 	endInsertRows();
 }
 
+/* Does all the linking from existing keys, crls, certs
+ * to the new imported or generated item
+ * called before the new item will be inserted into the database
+ */
 void db_base::inToCont(pki_base *pki)
 {
 	insertChild(rootItem, pki);
@@ -560,15 +517,13 @@ bool db_base::setData(const QModelIndex &index, const QVariant &value, int role)
 		on = item->getIntName();
 		if (nn == on)
 			return true;
-		db mydb(dbName);
-		try {
-			mydb.rename(item->getType(), on, nn);
-			item->setIntName(nn);
-			emit dataChanged(index, index);
-			return true;
-		} catch (errorEx &err) {
-			mainwin->Error(err);
-		}
+		QSqlQuery q;
+		q.prepare("UPDATE TABLE items SET name=? WHERE id=?");
+		q.bindValue(0, nn);
+		q.bindValue(1, item->getSqlItemId());
+		item->setIntName(nn);
+		emit dataChanged(index, index);
+		return true;
 	}
 	return false;
 }

@@ -16,8 +16,8 @@
 #include <QInputDialog>
 #include "ui_NewCrl.h"
 
-db_crl::db_crl(QString db, MainWindow *mw)
-	:db_x509name(db,mw)
+db_crl::db_crl(MainWindow *mw)
+	:db_x509name(mw)
 {
 	class_name = "crls";
 	pkitype << revocation;
@@ -38,8 +38,9 @@ dbheaderList db_crl::getHeaders()
 	return h;
 }
 
-pki_base *db_crl::newPKI(db_header_t *)
+pki_base *db_crl::newPKI(enum pki_type type)
 {
+	(void)type;
 	return new pki_crl();
 }
 

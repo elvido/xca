@@ -52,6 +52,57 @@ QString pki_crl::getMsg(msg_type msg)
 	return pki_base::getMsg(msg);
 }
 
+QSqlError pki_crl::insertSqlData()
+{
+	QSqlQuery q;
+
+	q.prepare("INSERT INTO crls (item, crl, hash, num, iss_hash, issuer) "
+		  "VALUES (?, ?, ?, ?, ?, ?)");
+	q.bindValue(0, sqlItemId);
+	q.bindValue(1, i2d());
+	q.bindValue(2, hash());
+	q.bindValue(3, numRev());
+	q.bindValue(4, (uint)getSubject().hashNum());
+	q.bindValue(5, issuer ? issuer->getSqlItemId() : NULL);
+	q.exec();
+	return q.lastError();
+}
+
+QSqlError pki_crl::restoreSql(QVariant sqlId)
+{
+	QSqlQuery q;
+	QSqlError e;
+
+	e = pki_base::restoreSql(sqlId);
+	if (e.isValid())
+		return e;
+	q.prepare("SELECT (crl) FROM crls WHERE item=?");
+	q.bindValue(0, sqlId);
+	q.exec();
+	e = q.lastError();
+	if (e.isValid())
+		return e;
+	if (!q.first())
+		return QSqlError(QString("XCA database inconsistent"),
+				QString("Item not found %1 %2")
+					.arg(class_name).arg(sqlId.toString()),
+				QSqlError::UnknownError);
+	QByteArray ba = q.value(0).toByteArray();
+	d2i(ba);
+	return e;
+}
+
+QSqlError pki_crl::deleteSqlData()
+{
+	QSqlQuery q;
+	QSqlError e;
+
+	q.prepare("DELETE FROM crls WHERE item=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
+	return q.lastError();
+}
+
 void pki_crl::fload(const QString fname)
 {
 	FILE *fp = fopen_read(fname);

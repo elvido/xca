@@ -15,8 +15,8 @@
 #include <QAction>
 
 
-db_x509req::db_x509req(QString DBfile, MainWindow *mw)
-	:db_x509super(DBfile, mw)
+db_x509req::db_x509req(MainWindow *mw)
+	:db_x509super(mw)
 {
 	class_name = "requests";
 	pkitype << x509_req;
@@ -36,8 +36,9 @@ dbheaderList db_x509req::getHeaders()
 	return h;
 }
 
-pki_base *db_x509req::newPKI(db_header_t *)
+pki_base *db_x509req::newPKI(enum pki_type type)
 {
+	(void)type;
 	return new pki_x509req();
 }
 

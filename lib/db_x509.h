@@ -30,8 +30,8 @@ class db_x509: public db_x509super
 
 	public:
 		static bool treeview;
-		db_x509(QString DBfile, MainWindow *mw);
-		pki_base *newPKI(db_header_t *head = NULL);
+		db_x509(MainWindow *mw);
+		pki_base *newPKI(enum pki_type type = none);
 		pki_x509 *findSigner(pki_x509 *client);
 		void updateAfterDbLoad();
 		void updateAfterCrlLoad(pki_x509 *pki);

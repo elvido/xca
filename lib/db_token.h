@@ -21,7 +21,7 @@ class db_token: public db_base
 	private:
 		slotid slot;
 	public:
-		db_token(QString db, MainWindow *mw);
+		db_token(MainWindow *mw);
 		bool setData(const QModelIndex &index,
 			const QVariant &value, int role);
 		void setSlot(slotid s)

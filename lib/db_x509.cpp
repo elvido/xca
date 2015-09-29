@@ -26,8 +26,8 @@
 
 bool db_x509::treeview = true;
 
-db_x509::db_x509(QString DBfile, MainWindow *mw)
-	:db_x509super(DBfile, mw)
+db_x509::db_x509(MainWindow *mw)
+	:db_x509super(mw)
 {
 	rootItem->setIntName("[x509 root]");
 	class_name = "certificates";
@@ -70,8 +70,9 @@ dbheaderList db_x509::getHeaders()
 	return h;
 }
 
-pki_base *db_x509::newPKI(db_header_t *)
+pki_base *db_x509::newPKI(enum pki_type type)
 {
+	(void)type;
 	return new pki_x509();
 }
 

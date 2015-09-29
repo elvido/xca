@@ -52,6 +52,7 @@ class pki_base : public QObject
 		virtual void fload(const QString) {};
 		virtual void writeDefault(const QString) {};
 		static int get_pki_counter(void);
+		unsigned hash();
 		virtual void fromData(const unsigned char *, db_header_t *) {};
 		virtual void oldFromData(unsigned char *, int ) {};
 		virtual QByteArray toData()

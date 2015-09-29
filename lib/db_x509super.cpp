@@ -12,8 +12,8 @@
 #include "oid.h"
 #include <QMessageBox>
 
-db_x509name::db_x509name(QString db, MainWindow *mw)
-	:db_base(db, mw)
+db_x509name::db_x509name(MainWindow *mw)
+	:db_base(mw)
 {
 }
 
@@ -30,8 +30,8 @@ dbheaderList db_x509name::getHeaders()
 	return h;
 }
 
-db_x509super::db_x509super(QString db, MainWindow *mw)
-	:db_x509name(db, mw)
+db_x509super::db_x509super(MainWindow *mw)
+	:db_x509name(mw)
 {
 }
 

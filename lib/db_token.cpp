@@ -3,8 +3,8 @@
 #include "exception.h"
 #include "widgets/MainWindow.h"
 
-db_token::db_token(QString db, MainWindow *mw)
-        :db_base(db, mw)
+db_token::db_token(MainWindow *mw)
+        :db_base(mw)
 {
 	class_name = "manageTokens";
 	updateHeaders();

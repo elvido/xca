@@ -567,7 +567,7 @@ QSqlError pki_evp::insertSqlData()
 	if (e.isValid())
 		return e;
 
-	q.prepare("INSERT INTO swkeys (item, ownPass, private) "
+	q.prepare("INSERT INTO private_keys (item, ownPass, private) "
 		  "VALUES (?, ?, ?)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, ownPass);
@@ -584,7 +584,7 @@ QSqlError pki_evp::restoreSql(QVariant sqlId)
 	e = pki_key::restoreSql(sqlId);
 	if (e.isValid())
 		return e;
-	q.prepare("SELECT (ownPass, private) FROM keys WHERE item=?");
+	q.prepare("SELECT (ownPass, private) FROM private_keys WHERE item=?");
 	q.bindValue(0, sqlId);
 	q.exec();
 	e = q.lastError();

@@ -379,12 +379,13 @@ QSqlError pki_key::insertSqlData()
 {
 	QSqlQuery q;
 
-	q.prepare("INSERT INTO keys (item, type, der_public, len) "
+	q.prepare("INSERT INTO public_keys (item, type, der_public, hash, len) "
 		  "VALUES (?, ?, ?, ?)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, getTypeString());
 	q.bindValue(2, i2d());
-	q.bindValue(3, EVP_PKEY_bits(key));
+	q.bindValue(3, hash());
+	q.bindValue(4, EVP_PKEY_bits(key));
 	q.exec();
 	return q.lastError();
 }

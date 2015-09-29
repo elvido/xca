@@ -33,7 +33,6 @@ class db_base: public QAbstractItemModel
 	Q_OBJECT
 
 	protected:
-		QString dbName;
 		QModelIndex currentIdx;
 		void _writePKI(pki_base *pki, bool overwrite);
 		void _removePKI(pki_base *pki );
@@ -44,7 +43,7 @@ class db_base: public QAbstractItemModel
 		dbheaderList allHeaders;
 		virtual dbheaderList getHeaders();
 		int colResizing;
-		int handleBadEntry(unsigned char *p, db_header_t *head);
+		QString sqlItemSelector();
 		virtual exportType::etype clipboardFormat(QModelIndexList indexes)
 		{
 			(void)indexes;
@@ -52,11 +51,11 @@ class db_base: public QAbstractItemModel
 		}
 
 	public:
+		virtual pki_base *newPKI(enum pki_type type = none);
 		pki_base *rootItem;
-		db_base(QString db, MainWindow *mw);
+		db_base(MainWindow *mw);
 		virtual void updateHeaders();
 		virtual ~db_base();
-		virtual pki_base *newPKI(db_header_t *head = NULL);
 		virtual void insertPKI(pki_base *pki);
 		virtual void updatePKI(pki_base *pki);
 		pki_base *getByName(QString desc);

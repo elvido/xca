@@ -84,14 +84,14 @@ QSqlError pki_x509::insertSqlData()
 	QSqlError e = pki_x509super::insertSqlData();
 	if (e.isValid())
 		return e;
-	q.prepare("INSERT INTO certs (item, cert, iss_hash, "
-					"serial, fpMD5, issuer, ca) "
+	q.prepare("INSERT INTO certs (item, cert, hash, iss_hash, "
+					"serial, issuer, ca) "
 		  "VALUES (?, ?, ?, ?, ?, ?, ?)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, i2d());
-	q.bindValue(2, (uint)getIssuer().hashNum());
-	q.bindValue(3, getSerial().toHex());
-	q.bindValue(4, fingerprint(EVP_md5()));
+	q.bindValue(2, hash());
+	q.bindValue(3, (uint)getIssuer().hashNum());
+	q.bindValue(4, getSerial().toHex());
 	q.bindValue(5, signer ? signer->getSqlItemId() : NULL);
 	q.bindValue(6, isCA());
 	q.exec();
@@ -129,7 +129,13 @@ QSqlError pki_x509::deleteSqlData()
 	QSqlError e = pki_x509super::deleteSqlData();
 	if (e.isValid())
 		return e;
-	q.prepare("DELETE FROM requests WHERE item=?");
+	q.prepare("DELETE FROM certs WHERE item=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
+	e = q.lastError();
+	if (e.isValid())
+		return e;
+	q.prepare("UPDATE crls SET issuer=NULL WHERE issuer=?");
 	q.bindValue(0, sqlItemId);
 	q.exec();
 	return q.lastError();

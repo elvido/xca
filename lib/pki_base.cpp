@@ -10,6 +10,8 @@
 #include "pki_base.h"
 #include "exception.h"
 #include <QString>
+#include <openssl/evp.h>
+#include <openssl/sha.h>
 
 int pki_base::pki_counter = 0;
 int pki_base::suppress_messages = 0;
@@ -289,4 +291,16 @@ bool pki_base::compare(pki_base *refcrl)
 	ret = (i2d() == refcrl->i2d());
 	pki_openssl_error();
 	return ret;
+}
+
+unsigned pki_base::hash()
+{
+	QByteArray ba = i2d();
+	unsigned char md[EVP_MAX_MD_SIZE];
+
+	SHA1((const unsigned char *)ba.constData(), ba.length(), md);
+
+	return (((unsigned)md[0]     ) | ((unsigned)md[1]<<8L) |
+		((unsigned)md[2]<<16L) | ((unsigned)md[3]<<24L)
+		) & 0xffffffffL;
 }

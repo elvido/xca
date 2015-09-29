@@ -24,9 +24,9 @@ class db_temp: public db_x509name
 	dbheaderList getHeaders();
 
     public:
-	db_temp(QString DBfile, MainWindow *mw);
+	db_temp(MainWindow *mw);
 	~db_temp();
-	pki_base *newPKI(db_header_t *head = NULL);
+	pki_base *newPKI(enum pki_type type = none);
 	bool runTempDlg(pki_temp *temp);
 	bool alterTemp(pki_temp *temp);
 	void fillContextMenu(QMenu *menu, const QModelIndex &index);

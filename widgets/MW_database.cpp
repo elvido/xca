@@ -81,60 +81,106 @@ QSqlError MainWindow::initSqlDB()
 {
 	QStringList sl; sl
 
-	<< "CREATE TABLE settings(key CHAR(20) UNIQUE, "
-				  "value CHAR)"
-	<< "INSERT INTO settings (key, value) VALUES ('schema', '1')"
+/*
+ * Configuration settings from the Options dialog,
+ * Column position, window sizes
+ */
+<< "CREATE TABLE settings ("
+	"key CHAR(20) UNIQUE, "
+	"value CHAR)"
+<< "INSERT INTO settings (key, value) VALUES ('schema', '1')"
 
-	<< "CREATE TABLE items(id INTEGER PRIMARY KEY, "
-				"name VARCHAR, "
-				"type INTEGER, "
-				"version INTEGER, "
-				"comment VARCHAR)"
+/*
+ * All items (keys, tokens, requests, certs, crls) are stored
+ * here with the primary key.
+ * The other tables containing the details reference the "id"
+ * as FOREIGN KEY.
+ */
+<< "CREATE TABLE items("
+	"id INTEGER PRIMARY KEY, "
+	"name VARCHAR, "
+	"type INTEGER, "	/* enum pki_type */
+	"version INTEGER, "	/* db version of the item (needed?) */
+	"comment VARCHAR)"
 
-	<< "CREATE TABLE keys (item INTEGER, "
-				"type INTEGER, "
-				"der_public BLOB, "
-				"len INTEGER, "
-			"FOREIGN KEY (item) REFERENCES items (id))"
+/*
+ * Storage of public keys. Private keys and tokens also store
+ * their public part here.
+ */
+<< "CREATE TABLE public_keys ("
+	"item INTEGER, "	/* reference to items(id) */
+	"type INTEGER, "	/* RSA DSA EC (as text) */
+	"der_public BLOB, "	/* DER encoded public key */
+	"hash INTEGER, "	/* 32bit hash */
+	"len INTEGER, "		/* key size in bits */
+	"FOREIGN KEY (item) REFERENCES items (id))"
 
-	<< "CREATE TABLE swkeys (item INTEGER, "
-				"ownPass INTEGER, "
-				"private BLOB, "
-			"FOREIGN KEY (item) REFERENCES items (id))"
+/*
+ * The private part of RSA, DSA, EC keys.
+ * references to "items" and "public_keys"
+ */
+<< "CREATE TABLE private_keys ("
+	"item INTEGER, "	/* reference to items(id) */
+	"ownPass INTEGER, "	/* Encrypted by DB pwd or own pwd */
+	"private BLOB, "	/* Encrypted DER encoded key */
+	"FOREIGN KEY (item) REFERENCES items (id))"
 
-	<< "CREATE TABLE tokens (item INTEGER, "
-				"card_manufacturer VARCHAR(64), "
-				"card_serial VARCHAR(64), "
-				"card_model VARCHAR(64), "
-				"card_label VARCHAR(64), "
-				"slot_label VARCHAR(64), "
-				"object_id VARCHAR(64), "
-			"FOREIGN KEY (item) REFERENCES items (id))"
+/*
+ * Smart cards or othe PKCS#11 tokens
+ * references to "items" and "public_keys"
+ */
+<< "CREATE TABLE tokens ("
+	"item INTEGER, "	/* reference to items(id) */
+	"card_manufacturer VARCHAR(64), " /* Card location data */
+	"card_serial VARCHAR(64), "	  /* as text */
+	"card_model VARCHAR(64), "
+	"card_label VARCHAR(64), "
+	"slot_label VARCHAR(64), "
+	"object_id VARCHAR(64), "	  /* Unique ID on the card */
+	"FOREIGN KEY (item) REFERENCES items (id))"
 
-	<< "CREATE TABLE token_mechanism (item INTEGER, "
-					"mechanism INTEGER, "
-			"FOREIGN KEY (item) REFERENCES items (id))"
+/*
+ * Encryption and hash mechanisms supported by the token
+ */
+<< "CREATE TABLE token_mechanism ("
+	"item INTEGER, "
+	"mechanism INTEGER, "
+	"FOREIGN KEY (item) REFERENCES items (id))"
 
-	<< "CREATE TABLE x509super (item INTEGER, "
-				"subj_hash INTEGER, "
-				"key INTEGER, "
-			"FOREIGN KEY (item) REFERENCES items (id), "
-			"FOREIGN KEY (key) REFERENCES items (id)) "
+<< "CREATE TABLE x509super ("
+	"item INTEGER, "
+	"subj_hash INTEGER, "
+	"key INTEGER, "
+	"FOREIGN KEY (item) REFERENCES items (id), "
+	"FOREIGN KEY (key) REFERENCES items (id)) "
 
-	<< "CREATE TABLE requests (item INTEGER, "
-				"request BLOB, "
-				"signed INTEGER, "
-			"FOREIGN KEY (item) REFERENCES items (id)) "
+<< "CREATE TABLE requests ("
+	"item INTEGER, "
+	"request BLOB, "
+	"hash INTEGER, "
+	"signed INTEGER, "
+	"FOREIGN KEY (item) REFERENCES items (id)) "
 
-	<< "CREATE TABLE certs (item INTEGER, "
-				"cert BLOB, "
-				"iss_hash INTEGER, "
-				"serial CHAR, "
-				"fpMD5 CHAR(48), "
-				"issuer INTEGER, "
-				"ca INTEGER, "
-			"FOREIGN KEY (item) REFERENCES items (id), "
-			"FOREIGN KEY (issuer) REFERENCES items (id)) "
+<< "CREATE TABLE certs ("
+	"item INTEGER, "
+	"cert BLOB, "
+	"hash INTEGER, "
+	"iss_hash INTEGER, "
+	"serial CHAR, "
+	"issuer INTEGER, "
+	"ca INTEGER, "
+	"FOREIGN KEY (item) REFERENCES items (id), "
+	"FOREIGN KEY (issuer) REFERENCES items (id)) "
+
+<< "CREATE TABLE crls ("
+	"item INTEGER, "
+	"crl BLOB, "
+	"hash INTEGER, "
+	"num INTEGER, "
+	"iss_hash INTEGER, "
+	"issuer INTEGER, "
+	"FOREIGN KEY (item) REFERENCES items (id), "
+	"FOREIGN KEY (issuer) REFERENCES items (id)) "
 
 	;
 	QSqlQuery q;
@@ -197,11 +243,11 @@ int MainWindow::init_database()
 		ret = initPass();
 		if (ret == 2)
 			return ret;
-		keys = new db_key(dbfile, this);
-		reqs = new db_x509req(dbfile, this);
-		certs = new db_x509(dbfile, this);
-		temps = new db_temp(dbfile, this);
-		crls = new db_crl(dbfile, this);
+		keys = new db_key(this);
+		reqs = new db_x509req(this);
+		certs = new db_x509(this);
+		temps = new db_temp(this);
+		crls = new db_crl(this);
 		certs->updateAfterDbLoad();
 	}
 	catch (errorEx &err) {

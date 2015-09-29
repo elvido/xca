@@ -28,8 +28,8 @@
 #include "widgets/KeyDetail.h"
 #include "widgets/NewKey.h"
 
-db_key::db_key(QString db, MainWindow *mw)
-	:db_base(db, mw)
+db_key::db_key(MainWindow *mw)
+	:db_base(mw)
 {
 	rootItem->setIntName("[key root]");
 	class_name = "keys";
@@ -51,9 +51,9 @@ dbheaderList db_key::getHeaders()
 	return h;
 }
 
-pki_base *db_key::newPKI(db_header_t *head)
+pki_base *db_key::newPKI(enum pki_type type)
 {
-	if (!head || head->type == asym_key)
+	if (type == asym_key)
 		return new pki_evp("");
 	return new pki_scard("");
 }

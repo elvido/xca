@@ -17,8 +17,8 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-db_temp::db_temp(QString DBfile, MainWindow *mw)
-	:db_x509name(DBfile, mw)
+db_temp::db_temp(MainWindow *mw)
+	:db_x509name(mw)
 {
 	class_name = "templates";
 	pkitype << tmpl;
@@ -62,8 +62,9 @@ db_temp::~db_temp()
 	delete predefs;
 }
 
-pki_base *db_temp::newPKI(db_header_t *)
+pki_base *db_temp::newPKI(enum pki_type type)
 {
+	(void)type;
 	return new pki_temp("");
 }
 

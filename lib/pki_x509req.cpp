@@ -46,10 +46,11 @@ QSqlError pki_x509req::insertSqlData()
 	QSqlError e = pki_x509super::insertSqlData();
 	if (e.isValid())
 		return e;
-	q.prepare("INSERT INTO requests (item, request, signed) "
-		  "VALUES (?, ?, 0)");
+	q.prepare("INSERT INTO requests (item, request, hash, signed) "
+		  "VALUES (?, ?, ?, 0)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, i2d());
+	q.bindValue(2, hash());
 	q.exec();
 	return q.lastError();
 }
