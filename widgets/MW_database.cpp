@@ -81,9 +81,17 @@ QSqlError MainWindow::initSqlDB()
 {
 	QStringList sl; sl
 
+/* The "32bit hash" in public_keys, x509super, requests, certs and crls
+ * is used to faster find items in the DB by reference.
+ * It consists of the first 4 bytes of a SHA1 hash.
+ * Collisions are of course possible.
+ */
+
 /*
- * Configuration settings from the Options dialog,
- * Column position, window sizes
+ * Configuration settings from
+ *  the Options dialog, window size, last export directory,
+ *  default key type and size,
+ *  column (position, sort order, visibility)
  */
 << "CREATE TABLE settings ("
 	"key CHAR(20) UNIQUE, "
@@ -111,7 +119,7 @@ QSqlError MainWindow::initSqlDB()
 	"item INTEGER, "	/* reference to items(id) */
 	"type INTEGER, "	/* RSA DSA EC (as text) */
 	"der_public BLOB, "	/* DER encoded public key */
-	"hash INTEGER, "	/* 32bit hash */
+	"hash INTEGER, "	/* 32 bit hash */
 	"len INTEGER, "		/* key size in bits */
 	"FOREIGN KEY (item) REFERENCES items (id))"
 
@@ -140,45 +148,66 @@ QSqlError MainWindow::initSqlDB()
 	"FOREIGN KEY (item) REFERENCES items (id))"
 
 /*
- * Encryption and hash mechanisms supported by the token
+ * Encryption and hash mechanisms supported by a token
  */
 << "CREATE TABLE token_mechanism ("
-	"item INTEGER, "
-	"mechanism INTEGER, "
+	"item INTEGER, "	/* reference to items(id) */
+	"mechanism INTEGER, "	/* PKCS#11: CK_MECHANISM_TYPE */
 	"FOREIGN KEY (item) REFERENCES items (id))"
 
+/*
+ * An X509 Super class, consisting of a
+ *  - Distinguishd name hash
+ *  - Referenced key in the database
+ * used by Requests and certificates and the use-counter of keys:
+ * "SELECT from x509super WHERE key=?"
+ */
 << "CREATE TABLE x509super ("
-	"item INTEGER, "
-	"subj_hash INTEGER, "
-	"key INTEGER, "
+	"item INTEGER, "	/* reference to items(id) */
+	"subj_hash INTEGER, "	/* 32 bit hash of the Distinguished name */
+	"key INTEGER, "		/* reference to the key items(id) */
 	"FOREIGN KEY (item) REFERENCES items (id), "
 	"FOREIGN KEY (key) REFERENCES items (id)) "
 
+/*
+ * PKCS#10 Certificate request details
+ * also takes information from the "x509super" table.
+ */
 << "CREATE TABLE requests ("
-	"item INTEGER, "
-	"request BLOB, "
-	"hash INTEGER, "
-	"signed INTEGER, "
+	"item INTEGER, "	/* reference to items(id) */
+	"request BLOB, "	/* DER encoded PKCS#10 */
+	"hash INTEGER, "	/* 32 bit hash of the request */
+	"signed INTEGER, "	/* Whether it was once signed. */
 	"FOREIGN KEY (item) REFERENCES items (id)) "
 
+/*
+ * X509 certificate details
+ * also takes information from the "x509super" table.
+ * The content of the columns: hash, iss_hash, serial, ca
+ * can also be retrieved directly from the certificate, but are good
+ * to lurk around for faster lookup
+ */
 << "CREATE TABLE certs ("
-	"item INTEGER, "
-	"cert BLOB, "
-	"hash INTEGER, "
-	"iss_hash INTEGER, "
-	"serial CHAR, "
-	"issuer INTEGER, "
-	"ca INTEGER, "
+	"item INTEGER, "	/* reference to items(id) */
+	"cert BLOB, "		/* DER encoded certificate */
+	"hash INTEGER, "	/* 32 bit hash of the cert */
+	"iss_hash INTEGER, "	/* 32 bit hash of the issuer DN */
+	"serial CHAR, "		/* Serial numbe rof the certificate */
+	"issuer INTEGER, "	/* The items(id) of the issuer or NULL */
+	"ca INTEGER, "		/* CA: yes / no from BasicConstraints */
 	"FOREIGN KEY (item) REFERENCES items (id), "
 	"FOREIGN KEY (issuer) REFERENCES items (id)) "
 
+/*
+ * Storage of CRLs
+ */
 << "CREATE TABLE crls ("
-	"item INTEGER, "
-	"crl BLOB, "
-	"hash INTEGER, "
-	"num INTEGER, "
-	"iss_hash INTEGER, "
-	"issuer INTEGER, "
+	"item INTEGER, "	/* reference to items(id) */
+	"crl BLOB, "		/* DER encoded CRL */
+	"hash INTEGER, "	/* 32 bit hash of the CRL */
+	"num INTEGER, "		/* Number of revoked certificates */
+	"iss_hash INTEGER, "	/* 32 bit hash of the issuer DN */
+	"issuer INTEGER, "	/* The items(id) of the issuer or NULL */
 	"FOREIGN KEY (item) REFERENCES items (id), "
 	"FOREIGN KEY (issuer) REFERENCES items (id)) "
 
