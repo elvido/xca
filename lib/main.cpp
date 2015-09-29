@@ -284,7 +284,7 @@ static void segv_handler_gui(int)
 
 int main( int argc, char *argv[] )
 {
-	int ret = 0, pkictr;
+	int ret = 0;
 	MainWindow *mw;
 
 #ifdef WIN32
@@ -313,9 +313,5 @@ int main( int argc, char *argv[] )
 	}
 
 	delete mw;
-	pkictr = pki_base::get_pki_counter();
-	if (pkictr)
-		fprintf(stderr, "PKI Counter (%d)\n", pkictr);
-
 	return ret;
 }

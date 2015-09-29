@@ -13,7 +13,6 @@
 #include <openssl/evp.h>
 #include <openssl/sha.h>
 
-int pki_base::pki_counter = 0;
 int pki_base::suppress_messages = 0;
 QRegExp pki_base::limitPattern;
 
@@ -22,7 +21,6 @@ pki_base::pki_base(const QString name, pki_base *p)
 	desc = name;
 	class_name = "pki_base";
 	parent = p;
-	pki_counter++;
 	childItems.clear();
 	dataVersion=0;
 	pkiType=none;
@@ -32,7 +30,6 @@ pki_base::~pki_base(void)
 {
 	while (childItems.size() > 0)
 		delete takeFirst();
-	pki_counter--;
 }
 
 QString pki_base::getIntName() const
@@ -50,11 +47,6 @@ bool pki_base::visible()
 	if (limitPattern.isEmpty())
 		return true;
 	return getIntName().contains(limitPattern);
-}
-
-int pki_base::get_pki_counter()
-{
-	return pki_counter;
 }
 
 QString pki_base::getClassName()

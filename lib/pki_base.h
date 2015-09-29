@@ -24,8 +24,7 @@
 class pki_base : public QObject
 {
 		Q_OBJECT
-	private:
-		static int pki_counter;
+
 	protected:
 		const char *class_name;
 		QString desc, comment;
@@ -51,7 +50,6 @@ class pki_base : public QObject
 		pki_base(const QString d = "", pki_base *p = NULL);
 		virtual void fload(const QString) {};
 		virtual void writeDefault(const QString) {};
-		static int get_pki_counter(void);
 		unsigned hash();
 		virtual void fromData(const unsigned char *, db_header_t *) {};
 		virtual void oldFromData(unsigned char *, int ) {};
