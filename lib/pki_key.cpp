@@ -23,7 +23,11 @@ pki_key::pki_key(const QString name)
 {
 	key = EVP_PKEY_new();
 	ucount = 0;
-	class_name = "pki_key";
+}
+
+const char *pki_key::getClassName() const
+{
+	return "pki_key";
 }
 
 pki_key::pki_key(const pki_key *pk)
@@ -380,7 +384,7 @@ QSqlError pki_key::insertSqlData()
 	QSqlQuery q;
 
 	q.prepare("INSERT INTO public_keys (item, type, der_public, hash, len) "
-		  "VALUES (?, ?, ?, ?)");
+		  "VALUES (?, ?, ?, ?, ?)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, getTypeString());
 	q.bindValue(2, i2d());
@@ -405,10 +409,7 @@ QSqlError pki_key::restoreSql(QVariant sqlId)
 	if (e.isValid())
 		return e;
 	if (!q.first())
-		return QSqlError(QString("XCA database inconsistent"),
-				QString("Item not found %1 %2")
-					.arg(class_name).arg(sqlId.toString()),
-				QSqlError::UnknownError);
+		return sqlItemNotFound(sqlId);
 	QByteArray ba = q.value(0).toByteArray();
 	d2i(ba);
 	return e;

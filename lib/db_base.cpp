@@ -26,6 +26,7 @@ db_base::db_base(MainWindow *mw)
 	:QAbstractItemModel(NULL)
 {
 	rootItem = newPKI();
+	rootItem->setIntName(rootItem->getClassName());
 	mainwin = mw;
 	colResizing = 0;
 	currentIdx = QModelIndex();
@@ -138,7 +139,7 @@ void db_base::loadContainer()
 	QString stmt;
 
 	stmt = QString("SELECT id, type FROM items WHERE ") + sqlItemSelector();
-	fprintf(stderr, "%s", CCHAR(stmt));
+	fprintf(stderr, "%s\n", CCHAR(stmt));
 	q.exec(stmt);
 	e = q.lastError();
 	mainwin->dbSqlError(e);
@@ -147,6 +148,7 @@ void db_base::loadContainer()
 		enum pki_type t = (enum pki_type)q.value(1).toInt();
 		pki_base *pki = newPKI(t);
 		pki->restoreSql(q.value(0));
+		insertChild(rootItem, pki);
 	}
 
 	QString view = mainwin->getSetting(class_name + "_hdView");
@@ -181,9 +183,9 @@ dbheaderList db_base::getHeaders()
 
 void db_base::saveHeaderState()
 {
-	if (!QSqlDatabase::database().isOpen())
-		return;
-	mainwin->storeSetting(class_name + "_hdView", allHeaders.toData());
+	if (QSqlDatabase::database(QString(), false).isOpen())
+		mainwin->storeSetting(class_name + "_hdView",
+					allHeaders.toData());
 }
 
 void db_base::setVisualIndex(int i, int visualIndex)

@@ -29,7 +29,6 @@ bool db_x509::treeview = true;
 db_x509::db_x509(MainWindow *mw)
 	:db_x509super(mw)
 {
-	rootItem->setIntName("[x509 root]");
 	class_name = "certificates";
 	pkitype << x509;
 	updateHeaders();

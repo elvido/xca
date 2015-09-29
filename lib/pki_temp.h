@@ -35,8 +35,7 @@ class pki_temp: public pki_x509name
 		int validN, validM;
 
 		// methods
-		extList fromCert(pki_x509super *cert_or_req);
-
+		const char *getClassName() const;
 		pki_temp(const pki_temp *pk);
 		pki_temp(const QString d = QString());
 		void fload(const QString fname);
@@ -51,12 +50,13 @@ class pki_temp: public pki_x509name
 		void writeTemp(QString fname);
 		QVariant column_data(dbheader *hd);
 		QVariant getIcon(dbheader *hd);
-		virtual QString getMsg(msg_type msg);
+		QString getMsg(msg_type msg);
 		x509name getSubject() const;
 		BIO *pem(BIO *b, int format);
 		QByteArray toExportData();
 		void fromPEM_BIO(BIO *, QString);
 		void fromExportData(QByteArray data);
+		extList fromCert(pki_x509super *cert_or_req);
 };
 
 #endif

@@ -52,6 +52,7 @@ class pki_x509 : public pki_x509super
 		pki_x509(const QString name = "");
 		~pki_x509();
 
+		const char *getClassName() const;
 		void fload(const QString fname);
 		void load_token(pkcs11 &p11, CK_OBJECT_HANDLE object);
 		void store_token(bool alwaysSelect);

@@ -239,13 +239,6 @@ int main_extract(int argc, char *argv[])
 	case revocation: pki = new pki_crl(name); break;
 	default: return usage_extract(argv);
 	}
-	if (pki->getVersion() < head.version) {
-		fprintf(stderr, "Item[%s]: Version %d > known version: %d",
-			head.name, head.version, pki->getVersion());
-		free(p);
-		delete pki;
-		return usage_extract(argv);
-	}
 	pki->setIntName(QString::fromUtf8(head.name));
 	try {
 		pki->fromData(p, &head);

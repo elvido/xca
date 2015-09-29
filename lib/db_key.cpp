@@ -31,7 +31,6 @@
 db_key::db_key(MainWindow *mw)
 	:db_base(mw)
 {
-	rootItem->setIntName("[key root]");
 	class_name = "keys";
 	pkitype << asym_key << smartCard;
 	updateHeaders();

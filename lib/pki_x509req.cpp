@@ -22,13 +22,16 @@ pki_x509req::pki_x509req(const QString name)
 	: pki_x509super(name)
 {
 	privkey = NULL;
-	class_name = "pki_x509req";
 	request = X509_REQ_new();
 	pki_openssl_error();
 	spki = NULL;
-	dataVersion=1;
 	pkiType=x509_req;
 	done = false;
+}
+
+const char *pki_x509req::getClassName() const
+{
+	return "pki_x509req";
 }
 
 pki_x509req::~pki_x509req()
@@ -70,10 +73,7 @@ QSqlError pki_x509req::restoreSql(QVariant sqlId)
 	if (e.isValid())
 		return e;
 	if (!q.first())
-		return QSqlError(QString("XCA database inconsistent"),
-				QString("Item not found %1 %2")
-					.arg(class_name).arg(sqlId.toString()),
-				QSqlError::UnknownError);
+		return sqlItemNotFound(sqlId);
 	QByteArray ba = q.value(0).toByteArray();
 	d2i(ba);
 	done = q.value(1).toBool();

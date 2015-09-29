@@ -19,10 +19,8 @@ QRegExp pki_base::limitPattern;
 pki_base::pki_base(const QString name, pki_base *p)
 {
 	desc = name;
-	class_name = "pki_base";
 	parent = p;
 	childItems.clear();
-	dataVersion=0;
 	pkiType=none;
 }
 
@@ -32,15 +30,16 @@ pki_base::~pki_base(void)
 		delete takeFirst();
 }
 
-QString pki_base::getIntName() const
+void pki_base::deleteFromToken() { };
+void pki_base::deleteFromToken(slotid) { };
+void pki_base::writeDefault(const QString) { }
+void pki_base::fromPEM_BIO(BIO *, QString) { }
+void pki_base::fload(const QString) { }
+int pki_base::renameOnToken(slotid, QString)
 {
-	return desc;
+	return 0;
 }
 
-QString pki_base::getUnderlinedName() const
-{
-	return getIntName().replace(QRegExp("[ &;`/\\\\]+"), "_");
-}
 
 bool pki_base::visible()
 {
@@ -49,15 +48,26 @@ bool pki_base::visible()
 	return getIntName().contains(limitPattern);
 }
 
-QString pki_base::getClassName()
+QString pki_base::getMsg(msg_type msg)
 {
-	QString x = class_name;
-	return x;
+	return tr("Internal error: Unexpected message: %1 %2")
+		.arg(getClassName()).arg(msg);
 }
 
-void pki_base::setIntName(const QString &d)
+QByteArray pki_base::i2d()
 {
-	desc = d;
+	return QByteArray();
+}
+
+BIO *pki_base::pem(BIO *, int format)
+{
+	(void)format;
+	return NULL;
+}
+
+const char *pki_base::getClassName() const
+{
+	return "pki_base";
 }
 
 void pki_base::fopen_error(const QString fname)
@@ -80,7 +90,7 @@ void pki_base::my_error(const QString error) const
 {
 	if (!error.isEmpty()) {
 		fprintf(stderr, "%s\n", CCHAR(tr("Error: ") + error));
-		throw errorEx(error, class_name);
+		throw errorEx(error, getClassName());
 	}
 }
 
@@ -102,12 +112,11 @@ QSqlError pki_base::insertSql()
 	e = q.lastError();
 	if (!e.isValid()) {
 		q.prepare("INSERT INTO items "
-			  "(id, name, type, version, comment) "
-			  "VALUES (NULL, ?, ?, ?, ?)");
+			  "(id, name, type, comment) "
+			  "VALUES (NULL, ?, ?, ?)");
 		q.bindValue(0, getIntName());
 		q.bindValue(1, getType());
-		q.bindValue(2, getVersion());
-		q.bindValue(3, getComment());
+		q.bindValue(2, getComment());
 		q.exec();
 		e = q.lastError();
 		if (!e.isValid()) {
@@ -128,7 +137,7 @@ QSqlError pki_base::restoreSql(QVariant sqlId)
 	QSqlQuery q;
 	QSqlError e;
 
-	q.prepare("SELECT (name, version, comment) "
+	q.prepare("SELECT (name, comment) "
 			"FROM items WHERE id=?");
 	q.bindValue(0, sqlId);
 	q.exec();
@@ -136,13 +145,8 @@ QSqlError pki_base::restoreSql(QVariant sqlId)
 	if (e.isValid())
 		return e;
 	if (!q.first())
-		return QSqlError(QString("XCA database inconsistent"),
-				QString("Item not found %1 %2")
-					.arg(class_name).arg(sqlId.toString()),
-				QSqlError::UnknownError);
-
+		return sqlItemNotFound(sqlId);
 	desc = q.value(0).toString();
-	sqlDataVersion = q.value(1).toInt();
 	comment = q.value(2).toString();
 	return e;
 }
@@ -182,6 +186,15 @@ QSqlError pki_base::deleteSql()
 	if (e.isValid())
 		q.exec("ROLLBACK");
 	return e;
+}
+
+QSqlError pki_base::sqlItemNotFound(QVariant sqlId) const
+{
+	return QSqlError(QString("XCA SQL database inconsistent"),
+			QString("Item %2 not found %1")
+				.arg(getClassName())
+				.arg(sqlId.toString()),
+			QSqlError::UnknownError);
 }
 
 pki_base *pki_base::getParent()

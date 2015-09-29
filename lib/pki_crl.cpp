@@ -18,10 +18,13 @@ pki_crl::pki_crl(const QString name )
 {
 	issuer = NULL;
 	crl = X509_CRL_new();
-	class_name="pki_crl";
 	pki_openssl_error();
-	dataVersion=1;
 	pkiType=revocation;
+}
+
+const char *pki_crl::getClassName() const
+{
+	return "pki_crl";
 }
 
 void pki_crl::fromPEM_BIO(BIO *bio, QString name)
@@ -63,7 +66,7 @@ QSqlError pki_crl::insertSqlData()
 	q.bindValue(2, hash());
 	q.bindValue(3, numRev());
 	q.bindValue(4, (uint)getSubject().hashNum());
-	q.bindValue(5, issuer ? issuer->getSqlItemId() : NULL);
+	q.bindValue(5, issuer ? issuer->getSqlItemId() : QVariant());
 	q.exec();
 	return q.lastError();
 }
@@ -83,10 +86,7 @@ QSqlError pki_crl::restoreSql(QVariant sqlId)
 	if (e.isValid())
 		return e;
 	if (!q.first())
-		return QSqlError(QString("XCA database inconsistent"),
-				QString("Item not found %1 %2")
-					.arg(class_name).arg(sqlId.toString()),
-				QSqlError::UnknownError);
+		return sqlItemNotFound(sqlId);
 	QByteArray ba = q.value(0).toByteArray();
 	d2i(ba);
 	return e;

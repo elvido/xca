@@ -32,10 +32,13 @@ QPixmap *pki_evp::icon[2]= { NULL, NULL };
 void pki_evp::init(int type)
 {
 	key->type = type;
-	class_name = "pki_evp";
 	ownPass = ptCommon;
-	dataVersion=2;
 	pkiType=asym_key;
+}
+
+const char *pki_evp::getClassName() const
+{
+	return "pki_evp";
 }
 
 QString pki_evp::removeTypeFromIntName(QString n)
@@ -178,7 +181,7 @@ void pki_evp::openssl_pw_error(QString fname)
 	case ERR_PACK(ERR_LIB_EVP, 0, EVP_R_BAD_DECRYPT):
 		pki_ign_openssl_error();
 		throw errorEx(tr("Failed to decrypt the key (bad password) ")+
-				fname, class_name, E_PASSWD);
+				fname, getClassName(), E_PASSWD);
 	}
 }
 
@@ -374,7 +377,8 @@ EVP_PKEY *pki_evp::decryptKey() const
 		pass_info pi(XCA_TITLE, tr("Please enter the password to decrypt the private key: '%1'").arg(getIntName()));
 		ret = PwDialog::execute(&pi, &ownPassBuf, false);
 		if (ret != 1)
-			throw errorEx(tr("Password input aborted"), class_name);
+			throw errorEx(tr("Password input aborted"),
+					getClassName());
 	} else if (ownPass == ptBogus) { // BOGUS pass
 		ownPassBuf = "Bogus";
 	} else {
@@ -385,7 +389,8 @@ EVP_PKEY *pki_evp::decryptKey() const
 			pass_info p(XCA_TITLE, tr("Please enter the database password for decrypting the key '%1'").arg(getIntName()));
 			ret = PwDialog::execute(&p, &ownPassBuf, false);
 			if (ret != 1)
-				throw errorEx(tr("Password input aborted"), class_name);
+				throw errorEx(tr("Password input aborted"),
+						getClassName());
 		}
 	}
 	p = (unsigned char *)OPENSSL_malloc(encKey.count());
@@ -471,7 +476,7 @@ void pki_evp::encryptKey(const char *password)
 			arg(getIntName()));
 		ret = PwDialog::execute(&p, &ownPassBuf, true);
 		if (ret != 1)
-			throw errorEx("Password input aborted", class_name);
+			throw errorEx("Password input aborted", getClassName());
 	} else if (ownPass == ptBogus) { // BOGUS password
 		ownPassBuf = "Bogus";
 	} else {
@@ -488,7 +493,8 @@ void pki_evp::encryptKey(const char *password)
 			{
 				ret = PwDialog::execute(&p, &ownPassBuf, false);
 				if (ret != 1)
-					throw errorEx("Password input aborted", class_name);
+					throw errorEx("Password input aborted",
+							getClassName());
 			}
 		}
 	}

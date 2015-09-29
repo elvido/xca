@@ -17,8 +17,6 @@ QPixmap *pki_temp::icon=  NULL;
 pki_temp::pki_temp(const pki_temp *pk)
 	:pki_x509name(pk->desc)
 {
-	class_name = pk->class_name;
-	dataVersion=pk->dataVersion;
 	pkiType=pk->pkiType;
 
 	xname=pk->xname;
@@ -54,8 +52,6 @@ pki_temp::pki_temp(const pki_temp *pk)
 pki_temp::pki_temp(const QString d)
 	:pki_x509name(d)
 {
-	class_name = "pki_temp";
-	dataVersion=6;
 	pkiType=tmpl;
 
 	subAltName="";
@@ -85,6 +81,11 @@ pki_temp::pki_temp(const QString d)
 	eKeyUse="";
 	adv_ext="";
 	noWellDefined=false;
+}
+
+const char *pki_temp::getClassName() const
+{
+	return "pki_temp";
 }
 
 QString pki_temp::getMsg(msg_type msg)
@@ -335,7 +336,7 @@ QByteArray pki_temp::toExportData()
 	QByteArray data, header;
 	data = toData();
 	header = db::intToData(data.count());
-	header += db::intToData(dataVersion);
+	header += db::intToData(6);
 	header += data;
 	return header;
 }
@@ -471,7 +472,8 @@ void pki_temp::fromPEM_BIO(BIO *bio, QString name)
 	PEM_read_bio(bio, &nm, &header, &data, &len);
 
 	if (ign_openssl_error())
-		throw errorEx(tr("Not a PEM encoded XCA Template"), class_name);
+		throw errorEx(tr("Not a PEM encoded XCA Template"),
+			getClassName());
 
 	if (!strcmp(nm, PEM_STRING_XCA_TEMPLATE)) {
 		ba = QByteArray::fromRawData((char*)data, len);

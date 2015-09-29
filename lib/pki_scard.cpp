@@ -32,13 +32,16 @@ bool pki_scard::only_token_hashes = false;
 
 void pki_scard::init(void)
 {
-	class_name = "pki_scard";
 	ownPass = ptPin;
-	dataVersion = 2;
 	pkiType = smartCard;
 
 	card_serial = card_manufacturer = card_label = "";
 	card_model = slot_label = "";
+}
+
+const char *pki_scard::getClassName() const
+{
+	return "pki_scard";
 }
 
 pki_scard::pki_scard(const QString name)
@@ -75,7 +78,7 @@ QSqlError pki_scard::insertSqlData()
 	q.prepare("INSERT INTO tokens (item, card_manufacturer, card_serial, "
 					"card_model, card_label, slot_label, "
 					"object_id) "
-		  "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+		  "VALUES (?, ?, ?, ?, ?, ?, ?)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, card_manufacturer);
 	q.bindValue(2, card_serial);

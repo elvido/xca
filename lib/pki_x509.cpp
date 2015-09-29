@@ -31,6 +31,11 @@ pki_x509::pki_x509(X509 *c)
 	pki_openssl_error();
 }
 
+const char *pki_x509::getClassName() const
+{
+	return "pki_x509";
+}
+
 pki_x509::pki_x509(const pki_x509 *crt)
 	:pki_x509super(crt->desc)
 {
@@ -92,7 +97,7 @@ QSqlError pki_x509::insertSqlData()
 	q.bindValue(2, hash());
 	q.bindValue(3, (uint)getIssuer().hashNum());
 	q.bindValue(4, getSerial().toHex());
-	q.bindValue(5, signer ? signer->getSqlItemId() : NULL);
+	q.bindValue(5, signer ? signer->getSqlItemId() : QVariant());
 	q.bindValue(6, isCA());
 	q.exec();
 	return q.lastError();
@@ -113,10 +118,7 @@ QSqlError pki_x509::restoreSql(QVariant sqlId)
 	if (e.isValid())
 		return e;
 	if (!q.first())
-		return QSqlError(QString("XCA database inconsistent"),
-				QString("Item not found %1 %2")
-					.arg(class_name).arg(sqlId.toString()),
-				QSqlError::UnknownError);
+		return sqlItemNotFound(sqlId);
 	QByteArray ba = q.value(0).toByteArray();
 	d2i(ba);
 	signerSqlId = q.value(1);
@@ -201,9 +203,7 @@ void pki_x509::init()
 	caTemplate = "";
 	crlDays = 30;
 	crlExpiry.setUndefined();
-	class_name = "pki_x509";
 	cert = NULL;
-	dataVersion = 4;
 	pkiType = x509;
 	randomSerial = false;
 }

@@ -108,7 +108,6 @@ QSqlError MainWindow::initSqlDB()
 	"id INTEGER PRIMARY KEY, "
 	"name VARCHAR, "
 	"type INTEGER, "	/* enum pki_type */
-	"version INTEGER, "	/* db version of the item (needed?) */
 	"comment VARCHAR)"
 
 /*
@@ -223,7 +222,11 @@ QSqlError MainWindow::initSqlDB()
 
 QSqlError MainWindow::openSqlDB()
 {
-	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+	QStringList drivers = QSqlDatabase::drivers();
+	foreach( QString driver, drivers)
+		fprintf(stderr, "DB driver: '%s'\n", CCHAR(driver));
+
+	QSqlDatabase db = QSqlDatabase::database();
 	db.setDatabaseName(dbfile + ".sql");
 
 	if (!db.open())

@@ -99,6 +99,8 @@ MainWindow::MainWindow(QWidget *parent)
 	wdList << keyButtons << reqButtons << certButtons <<
 		tempButtons <<	crlButtons;
 
+	QSqlDatabase::addDatabase("QSQLITE");
+
 	historyMenu = NULL;
 	init_menu();
 	setItemEnabled(false);

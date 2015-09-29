@@ -30,7 +30,7 @@ QSqlError pki_x509super::insertSqlData()
 		  "VALUES (?, ?, ?)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, (uint)getSubject().hashNum());
-	q.bindValue(2, privkey ? privkey->getSqlItemId() : NULL);
+	q.bindValue(2, privkey ? privkey->getSqlItemId() : QVariant());
 	q.exec();
 	return q.lastError();
 }
@@ -50,10 +50,7 @@ QSqlError pki_x509super::restoreSql(QVariant sqlId)
 	if (e.isValid())
 		return e;
 	if (!q.first())
-		return QSqlError(QString("XCA database inconsistent"),
-				QString("Item not found %1 %2")
-					.arg(class_name).arg(sqlId.toString()),
-				QSqlError::UnknownError);
+		return sqlItemNotFound(sqlId);
 	keySqlId = q.value(0);
 	privkey = NULL;
 	return e;

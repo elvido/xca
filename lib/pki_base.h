@@ -17,7 +17,7 @@
 #include "base.h"
 #include "headerlist.h"
 
-#define __ME QString("(%1:%2)").arg(class_name).arg(getIntName())
+#define __ME QString("(%1:%2)").arg(getClassName()).arg(getIntName())
 #define pki_openssl_error() _openssl_error(__ME, C_FILE, __LINE__)
 #define pki_ign_openssl_error() _ign_openssl_error(__ME, C_FILE, __LINE__)
 
@@ -25,17 +25,19 @@ class pki_base : public QObject
 {
 		Q_OBJECT
 
+	public: /* static */
+		static int suppress_messages;
+		static QRegExp limitPattern;
+		static QString rmslashdot(const QString &fname);
+
 	protected:
-		const char *class_name;
+		QVariant sqlItemId;
 		QString desc, comment;
-		int dataVersion;
-		int sqlDataVersion;
 		enum pki_type pkiType;
 		/* model data */
 		pki_base *parent;
 		void my_error(const QString myerr) const;
 		void fopen_error(const QString fname);
-		QVariant sqlItemId;
 
 	public:
 		enum msg_type {
@@ -44,23 +46,24 @@ class pki_base : public QObject
 			msg_delete_multi,
 			msg_create,
 		};
-		static int suppress_messages;
-		static QRegExp limitPattern;
 		QList<pki_base*> childItems;
+
 		pki_base(const QString d = "", pki_base *p = NULL);
-		virtual void fload(const QString) {};
-		virtual void writeDefault(const QString) {};
-		unsigned hash();
-		virtual void fromData(const unsigned char *, db_header_t *) {};
-		virtual void oldFromData(unsigned char *, int ) {};
-		virtual QByteArray toData()
-		{
-			return QByteArray();
-		}
-		virtual bool compare(pki_base *);
-		virtual bool visible();
 		virtual ~pki_base();
-		QString getIntName() const;
+
+		QString getIntName() const
+		{
+			return desc;
+		}
+		QString getUnderlinedName() const
+		{
+			return getIntName().replace(
+				QRegExp("[ &;`/\\\\]+"), "_");
+		}
+		void setIntName(const QString &d)
+		{
+			desc = d;
+		}
 		QString getComment() const
 		{
 			return comment;
@@ -69,62 +72,60 @@ class pki_base : public QObject
 		{
 			return sqlItemId;
 		}
-		QString getUnderlinedName() const;
-		void setIntName(const QString &d);
-		QString getClassName();
-		static QString rmslashdot(const QString &fname);
-		virtual QString getMsg(msg_type msg)
-		{
-			return tr("Internal error: Unexpected message: %1 %2").
-				arg(class_name).arg(msg);
-		};
-		int getVersion() const
-		{
-			return dataVersion;
-		}
 		enum pki_type getType() const
 		{
 			return pkiType;
 		}
+		virtual QByteArray i2d();
+		virtual bool compare(pki_base *);
+		virtual QString getMsg(msg_type msg);
+		virtual const char *getClassName() const;
+
+		/* Tree View management */
 		void setParent(pki_base *p);
 		virtual pki_base *getParent();
 		pki_base *child(int row);
 		void append(pki_base *item);
 		void insert(int row, pki_base *item);
 		int childCount();
-		int row() const;
 		pki_base *iterate(pki_base *pki = NULL);
 		void takeChild(pki_base *pki);
 		pki_base *takeFirst();
-		virtual QVariant column_data(dbheader *hd);
-		virtual QVariant getIcon(dbheader *hd);
-		const char *className()
-		{
-			return class_name;
-		};
-		uint32_t intFromData(QByteArray &ba);
-		virtual void fromPEM_BIO(BIO *, QString) {};
-		virtual void deleteFromToken() { };
-		virtual void deleteFromToken(slotid) { };
-		virtual int renameOnToken(slotid, QString)
-		{
-			return 0;
-		};
-		virtual QByteArray i2d()
+
+		/* Token handling */
+		virtual void deleteFromToken();
+		virtual void deleteFromToken(slotid);
+		virtual int renameOnToken(slotid, QString);
+
+		/* Import / Export management */
+		virtual BIO *pem(BIO *, int format=0);
+		virtual void fromPEM_BIO(BIO *, QString);
+		void fwrite_ba(FILE *fp, QByteArray ba, QString fname);
+		virtual void fload(const QString);
+		virtual void writeDefault(const QString);
+
+		/* Old database management methods */
+		virtual void fromData(const unsigned char *, db_header_t *) {};
+		virtual void oldFromData(unsigned char *, int ) {};
+		virtual QByteArray toData()
 		{
 			return QByteArray();
 		}
-		virtual BIO *pem(BIO *, int format=0)
-		{
-			(void)format;
-			return NULL;
-		}
-		void fwrite_ba(FILE *fp, QByteArray ba, QString fname);
+		uint32_t intFromData(QByteArray &ba);
+
+		/* Qt Model-View methods */
 		virtual QVariant bg_color(dbheader *hd)
 		{
 			(void)hd;
 			return QVariant();
 		}
+		int row() const;
+		virtual QVariant column_data(dbheader *hd);
+		virtual QVariant getIcon(dbheader *hd);
+		virtual bool visible();
+
+
+		/* SQL management methods */
 		QSqlError insertSql();
 		virtual QSqlError insertSqlData()
 		{
@@ -136,6 +137,8 @@ class pki_base : public QObject
 			return QSqlError();
 		}
 		virtual QSqlError restoreSql(QVariant sqlId);
+		QSqlError sqlItemNotFound(QVariant sqlId) const;
+		unsigned hash();
 };
 
 #endif
