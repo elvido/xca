@@ -383,13 +383,45 @@ QVariant pki_key::column_data(dbheader *hd)
 
 QSqlError pki_key::insertSqlData()
 {
+	unsigned myhash = hash();
 	QSqlQuery q;
+	QList<pki_x509super*> list;
+
+	q.prepare("SELECT item FROM x509super WHERE key_hash=? AND key IS NULL");
+	q.bindValue(0, myhash);
+	q.exec();
+	if (q.lastError().isValid())
+		return q.lastError();
+	while (q.next()) {
+		pki_x509super *x = static_cast<pki_x509super*>(
+				db_base::lookupPki(q.value(0).toULongLong()));
+		if (!x) {
+			qDebug("X509 Super class with id %d not found",
+				q.value(0).toInt());
+			continue;
+		}
+		if (x->compareRefKey(this)) {
+			x->setRefKey(this);
+			list << x;
+		}
+	}
+	q.finish();
+
+	q.prepare("UPDATE x509super SET key=? WHERE item=?");
+	q.bindValue(0, sqlItemId);
+	foreach(pki_x509super* x, list) {
+		q.bindValue(1, x->getSqlItemId());
+		q.exec();
+		if (q.lastError().isValid())
+			return q.lastError();
+	}
+	q.finish();
 
 	q.prepare("INSERT INTO public_keys (item, type, hash, len, public) "
 		  "VALUES (?, ?, ?, ?, ?)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, getTypeString());
-	q.bindValue(2, hash());
+	q.bindValue(2, myhash);
 	q.bindValue(3, EVP_PKEY_bits(key));
 	q.bindValue(4, i2d().toBase64());
 	q.exec();

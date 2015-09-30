@@ -8,6 +8,7 @@
 #include "func.h"
 #include "oid.h"
 #include "pki_x509super.h"
+#include "db_base.h"
 
 pki_x509super::pki_x509super(const QString name)
 	: pki_x509name(name)
@@ -27,10 +28,31 @@ QSqlError pki_x509super::insertSqlData()
 	if (privkey) {
 		hash = privkey->hash();
 	} else {
-		pki_key *pub = getPubKey();
-		hash = pub->hash();
-		delete pub;
+		pki_key *x = getPubKey();
+		hash = x->hash();
+		delete x;
+
+		q.prepare("SELECT item FROM public_keys WHERE hash=?");
+		q.bindValue(0, hash);
+		q.exec();
+		if (q.lastError().isValid())
+			return q.lastError();
+		while (q.next()) {
+			x = static_cast<pki_key*>(
+				db_base::lookupPki(q.value(0).toULongLong()));
+			if (!x) {
+				qDebug("Public key with id %d not found",
+					q.value(0).toInt());
+				continue;
+			}
+			if (compareRefKey(x)) {
+				setRefKey(x);
+				break;
+			}
+		}
+		q.finish();
 	}
+
 	q.prepare("INSERT INTO x509super (item, subj_hash, key, key_hash) "
 		  "VALUES (?, ?, ?, ?)");
 	q.bindValue(0, sqlItemId);

@@ -103,7 +103,7 @@ void db_x509req::toRequest(QModelIndex index)
 		return;
 	newItem(NULL, req);
 }
-
+#if 0 // to be removed
 void db_x509req::inToCont(pki_base *pki)
 {
 	pki_x509req *req = (pki_x509req *)pki;
@@ -120,6 +120,7 @@ void db_x509req::inToCont(pki_base *pki)
 		}
 	}
 }
+#endif
 
 void db_x509req::load(void)
 {
