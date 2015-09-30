@@ -594,9 +594,6 @@ QSqlError pki_evp::restoreSql(QVariant sqlId)
 	q.bindValue(0, sqlId);
 	q.exec();
 	e = q.lastError();
-TRACE
-	fprintf(stderr, "SQL ERROR: '%s'\n", CCHAR(e.text()));
-TRACE
 	if (e.isValid())
 		return e;
 	if (!q.first())
@@ -613,7 +610,7 @@ QByteArray pki_evp::getEncKey() const
 	QSqlError e;
 	QByteArray ba;
 
-	q.prepare("SELECT (private) FROM private_keys WHERE item=?");
+	q.prepare("SELECT private FROM private_keys WHERE item=?");
 	q.bindValue(0, sqlItemId);
 	q.exec();
 	e = q.lastError();

@@ -141,7 +141,6 @@ void db_base::loadContainer()
 	QString stmt;
 
 	stmt = QString("SELECT id, type FROM items WHERE ") + sqlItemSelector();
-	fprintf(stderr, "%s\n", CCHAR(stmt));
 	q.exec(stmt);
 	e = q.lastError();
 	mainwin->dbSqlError(e);
@@ -151,12 +150,10 @@ void db_base::loadContainer()
 		pki_base *pki = newPKI(t);
 		e = pki->restoreSql(q.value(0));
 		if (!e.isValid()) {
-TRACE
 			insertChild(rootItem, pki);
 			lookup[q.value(0).toULongLong()] = pki;
 		} else {
 			mainwin->dbSqlError(e);
-TRACE
 		}
 	}
 

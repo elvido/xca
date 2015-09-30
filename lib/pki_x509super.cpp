@@ -40,7 +40,7 @@ QSqlError pki_x509super::restoreSql(QVariant sqlId)
 	e = pki_base::restoreSql(sqlId);
 	if (e.isValid())
 		return e;
-	q.prepare("SELECT (key) FROM keys WHERE item=?");
+	q.prepare("SELECT key FROM x509super WHERE item=?");
 	q.bindValue(0, sqlId);
 	q.exec();
 	e = q.lastError();

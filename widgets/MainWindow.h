@@ -89,6 +89,7 @@ class MainWindow: public QMainWindow, public Ui::MainWindow
 		void checkDB();
 		QSqlError initSqlDB();
 		QSqlError openSqlDB();
+		QSqlDatabase db;
 
 	protected:
 		void init_images();

@@ -106,7 +106,7 @@ QSqlError MainWindow::initSqlDB()
  */
 << "CREATE TABLE items("
 	"id INTEGER PRIMARY KEY, "
-	"name VARCHAR, "
+	"name VARCHAR, "	/* Internal name of the item */
 	"type INTEGER, "	/* enum pki_type */
 	"comment VARCHAR)"
 
@@ -226,7 +226,6 @@ QSqlError MainWindow::openSqlDB()
 	foreach( QString driver, drivers)
 		fprintf(stderr, "DB driver: '%s'\n", CCHAR(driver));
 
-	QSqlDatabase db = QSqlDatabase::database();
 	db.setDatabaseName(dbfile + ".sql");
 
 	if (!db.open())
@@ -337,7 +336,6 @@ int MainWindow::init_database()
 	QSqlQuery query("SELECT key, value FROM settings");
 	while (query.next()) {
 		QString key = query.value(0).toString();
-		fprintf(stderr, "Setting: '%s'\n", CCHAR(key));
 		QString value = query.value(1).toString();
 		if (key == "workingdir")
 			workingdir = value;
@@ -401,6 +399,9 @@ void MainWindow::dump_database()
 
 void MainWindow::undelete()
 {
+TRACE
+	qDebug("undelete NOT WORKING!");
+#if 0
 	ImportMulti *dlgi = new ImportMulti(this);
 	db_header_t head;
 	db mydb(dbfile);
@@ -438,6 +439,7 @@ void MainWindow::undelete()
 		XCA_INFO(tr("No deleted items found"));
 	}
 	delete dlgi;
+#endif
 }
 
 int MainWindow::open_default_db()
@@ -491,8 +493,6 @@ QString MainWindow::getSetting(QString key)
 	q.bindValue(0, key);
 	q.exec();
 	if (q.first()) {
-		fprintf(stderr, "GET Setting: '%s' : '%s'\n",
-			 CCHAR(key), CCHAR(q.value(0).toString()));
 		return q.value(0).toString();
 	}
 	dbSqlError(q.lastError());
@@ -519,12 +519,15 @@ void MainWindow::storeSetting(QString key, QString value)
 void MainWindow::close_database()
 {
 	QByteArray ba;
-	if (!dbfile.isEmpty()) {
-		QString s = QString("%1,%2,%3")
-			.arg(size().width()).arg(size().height())
-			.arg(tabView->currentIndex());
-		storeSetting("mw_geometry", s);
-	}
+	if (!db.isOpen())
+		return;
+
+	qDebug("Closing database: %s", QString2filename(dbfile));
+	QString s = QString("%1,%2,%3")
+		.arg(size().width()).arg(size().height())
+		.arg(tabView->currentIndex());
+	storeSetting("mw_geometry", s);
+
 	setItemEnabled(false);
 	statusBar()->removeWidget(searchEdit);
 	dbindex->clear();
@@ -559,19 +562,6 @@ void MainWindow::close_database()
 		return;
 	crls = NULL;
 
-
-	try {
-		int ret;
-		db mydb(dbfile);
-		ret = mydb.shrink( DBFLAG_OUTDATED | DBFLAG_DELETED );
-		if (ret == 1)
-			XCA_INFO(tr("Errors detected and repaired while deleting outdated items from the database. A backup file was created"));
-		if (ret == 2)
-			XCA_INFO(tr("Removing deleted or outdated items from the database failed."));
-	}
-	catch (errorEx &err) {
-		MainWindow::Error(err);
-	}
 	update_history(dbfile);
 	pkcs11::remove_libs();
 	enableTokenMenu(pkcs11::loaded());

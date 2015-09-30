@@ -99,9 +99,7 @@ MainWindow::MainWindow(QWidget *parent)
 	wdList << keyButtons << reqButtons << certButtons <<
 		tempButtons <<	crlButtons;
 
-TRACE
-	QSqlDatabase::addDatabase("QSQLITE");
-TRACE
+	db = QSqlDatabase::addDatabase("QSQLITE");
 
 	historyMenu = NULL;
 	init_menu();
@@ -588,7 +586,6 @@ QString makeSalt(void)
 int MainWindow::checkOldGetNewPass(Passwd &pass)
 {
 	QString passHash, cpass;
-	db mydb(dbfile);
 
 	cpass = getSetting("pwhash");
 	if (!cpass.isEmpty()) {
@@ -806,18 +803,8 @@ pki_multi *MainWindow::probeAnything(QString file, int *ret)
 
 	try {
 		if (file.endsWith(".xdb")) {
-			try {
-				int r;
-				db *mydb = new db(file);
-				mydb->verify_magic();
-				delete mydb;
-				r = changeDB(file);
-				delete pki;
-				if (ret)
-					*ret = r;
-				return NULL;
-			} catch (errorEx &err) {
-			}
+TRACE
+			qDebug("FIXME OPEN DATABASE");
 		}
 		pki->probeAnything(file);
 	} catch (errorEx &err) {

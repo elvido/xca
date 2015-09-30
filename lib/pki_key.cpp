@@ -197,10 +197,16 @@ bool pki_key::isPrivKey() const
 int pki_key::getUcount()
 {
 	QSqlQuery q;
-	q.prepare("SELECT item FROM x509super WHERE key=?");
+	int size = -1;
+	q.prepare("SELECT COUNT(item) FROM x509super WHERE key=?");
 	q.bindValue(0, sqlItemId);
 	q.exec();
-	return q.numRowsAffected();
+	if (q.first())
+		size = q.value(0).toInt();
+	else
+		qDebug("Failed to get key count for %s", CCHAR(getIntName()));
+	MainWindow::dbSqlError(q.lastError());
+	return size;
 }
 
 int pki_key::getKeyType()
@@ -402,9 +408,6 @@ QSqlError pki_key::restoreSql(QVariant sqlId)
 	q.bindValue(0, sqlId);
 	q.exec();
 	e = q.lastError();
-TRACE
-	fprintf(stderr, "SQL ERROR: '%s'\n", CCHAR(e.text()));
-TRACE
 	if (e.isValid())
 		return e;
 	if (!q.first())

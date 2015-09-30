@@ -141,9 +141,6 @@ QSqlError pki_base::restoreSql(QVariant sqlId)
 	q.bindValue(0, sqlId);
 	q.exec();
 	e = q.lastError();
-TRACE
-	fprintf(stderr, "SQL ERROR: '%s'\n", CCHAR(e.text()));
-TRACE
 
 	if (e.isValid())
 		return e;
@@ -151,6 +148,7 @@ TRACE
 		return sqlItemNotFound(sqlId);
 	desc = q.value(0).toString();
 	comment = q.value(1).toString();
+	sqlItemId = sqlId;
 	return e;
 }
 

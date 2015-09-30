@@ -79,7 +79,7 @@ QSqlError pki_crl::restoreSql(QVariant sqlId)
 	e = pki_base::restoreSql(sqlId);
 	if (e.isValid())
 		return e;
-	q.prepare("SELECT (crl) FROM crls WHERE item=?");
+	q.prepare("SELECT crl FROM crls WHERE item=?");
 	q.bindValue(0, sqlId);
 	q.exec();
 	e = q.lastError();
