@@ -22,6 +22,8 @@
 #include "widgets/MainWindow.h"
 #include "widgets/ImportMulti.h"
 
+QHash<quint64, pki_base*> db_base::lookup;
+
 db_base::db_base(MainWindow *mw)
 	:QAbstractItemModel(NULL)
 {
@@ -147,8 +149,15 @@ void db_base::loadContainer()
 	while (q.next()) {
 		enum pki_type t = (enum pki_type)q.value(1).toInt();
 		pki_base *pki = newPKI(t);
-		pki->restoreSql(q.value(0));
-		insertChild(rootItem, pki);
+		e = pki->restoreSql(q.value(0));
+		if (!e.isValid()) {
+TRACE
+			insertChild(rootItem, pki);
+			lookup[q.value(0).toULongLong()] = pki;
+		} else {
+			mainwin->dbSqlError(e);
+TRACE
+		}
 	}
 
 	QString view = mainwin->getSetting(class_name + "_hdView");

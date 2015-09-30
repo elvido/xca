@@ -16,6 +16,7 @@
 #include <QContextMenuEvent>
 #include <QStringList>
 #include <QAbstractItemModel>
+#include <QHash>
 #include "widgets/ExportDialog.h"
 #include "pki_base.h"
 #include "headerlist.h"
@@ -32,6 +33,7 @@ class db_base: public QAbstractItemModel
 {
 	Q_OBJECT
 
+		static QHash<quint64, pki_base*> lookup;
 	protected:
 		QModelIndex currentIdx;
 		void _writePKI(pki_base *pki, bool overwrite);
@@ -51,6 +53,10 @@ class db_base: public QAbstractItemModel
 		}
 
 	public:
+		static pki_base *lookupPki(quint64 i)
+		{
+			return lookup[i];
+		}
 		virtual pki_base *newPKI(enum pki_type type = none);
 		pki_base *rootItem;
 		db_base(MainWindow *mw);

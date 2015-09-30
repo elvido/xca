@@ -139,8 +139,6 @@ void MainWindow::init_menu()
 				SLOT(dump_database()));
 	acList += extra->addAction(tr("C&hange DataBase password"), this,
 				SLOT(changeDbPass()));
-	acList += extra->addAction(tr("&Import old db_dump"), this,
-				SLOT(import_dbdump()));
 	acList += extra->addAction(tr("&Undelete items"), this,
 				SLOT(undelete()));
 	extra->addAction(tr("Generate DH parameter"), this,
@@ -209,44 +207,6 @@ void MainWindow::load_database()
 	QString fname = QFileDialog::getOpenFileName(this, l.caption, homedir,
 			l.filter);
 	changeDB(fname);
-}
-
-void MainWindow::import_dbdump()
-{
-	extern int read_dump(const char *, db_base **, char *, int);
-	Passwd pass;
-	char buf[50];
-
-	db_base *dbl[] = { keys, reqs, certs, temps, crls };
-	if (!keys)
-		return;
-	QString file = QFileDialog::getOpenFileName(this, tr(XCA_TITLE), homedir,
-			tr("Database dump ( *.dump );;All files ( * )"));
-
-	if (file.isEmpty())
-		return;
-
-	pass_info p(tr("Import password"),
-		tr("Please enter the password of the old database"), this);
-	if (PwDialog::execute(&p, &pass) != 1)
-		return;
-	try {
-		read_dump(CCHAR(file), dbl, buf, sizeof(buf));
-		if (pki_evp::md5passwd(pass) != buf) {
-			xcaWarning msg(this, tr("Password verification error. Ignore keys ?"));
-			msg.addButton(QMessageBox::Cancel);
-			msg.addButton(QMessageBox::Ok)->setText(
-					tr("Import anyway"));
-
-			if (msg.exec() == QMessageBox::Cancel)
-				return;
-		}
-		pki_evp::oldpasswd = pass;
-		read_dump(CCHAR(file), dbl, NULL, 0);
-		pki_evp::oldpasswd.cleanse();
-	} catch (errorEx &err) {
-		Error(err);
-	}
 }
 
 void MainWindow::setOptions()

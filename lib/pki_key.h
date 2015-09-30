@@ -22,7 +22,8 @@ class pki_key: public pki_base
 {
 		Q_OBJECT
 	protected:
-		int ownPass;
+		int ownPass, key_size;
+		bool isPub;
 		EVP_PKEY *key;
 		QString BN2QString(BIGNUM *bn) const;
 		QString BNoneLine(BIGNUM *bn) const;
@@ -40,18 +41,15 @@ class pki_key: public pki_base
 		const char *getClassName() const;
 		static builtin_curves builtinCurves;
 		enum passType { ptCommon, ptPrivate, ptBogus, ptPin };
+		QString length();
 
 		virtual EVP_PKEY *decryptKey() const
 		{
 			return NULL;
 		}
-		virtual QString length() const
+		bool isPubKey() const
 		{
-			return QString();
-		}
-		virtual bool isPubKey() const
-		{
-			return true;
+			return isPub;
 		}
 		virtual const EVP_MD *getDefaultMD()
 		{
@@ -62,15 +60,12 @@ class pki_key: public pki_base
 		virtual QString getIntNameWithType(void);
 		virtual QList<int> possibleHashNids();
 		virtual QString getMsg(msg_type msg);
-		virtual QString length();
 
 		void writePublic(const QString fname, bool pem);
 		bool compare(pki_base *ref);
 		int getKeyType();
 		static QString removeTypeFromIntName(QString n);
 		bool isPrivKey() const;
-		int incUcount();
-		int decUcount();
 		int getUcount();
 		int getOwnPass(void)
 		{

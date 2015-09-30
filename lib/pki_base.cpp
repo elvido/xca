@@ -137,17 +137,20 @@ QSqlError pki_base::restoreSql(QVariant sqlId)
 	QSqlQuery q;
 	QSqlError e;
 
-	q.prepare("SELECT (name, comment) "
-			"FROM items WHERE id=?");
+	q.prepare("SELECT name, comment FROM items WHERE id=?");
 	q.bindValue(0, sqlId);
 	q.exec();
 	e = q.lastError();
+TRACE
+	fprintf(stderr, "SQL ERROR: '%s'\n", CCHAR(e.text()));
+TRACE
+
 	if (e.isValid())
 		return e;
 	if (!q.first())
 		return sqlItemNotFound(sqlId);
 	desc = q.value(0).toString();
-	comment = q.value(2).toString();
+	comment = q.value(1).toString();
 	return e;
 }
 
@@ -275,19 +278,6 @@ QVariant pki_base::getIcon(dbheader *hd)
 {
 	(void)hd;
 	return QVariant();
-}
-
-uint32_t pki_base::intFromData(QByteArray &ba)
-{
-	/* For import "oldFromData" use the endian dependent version */
-	uint32_t ret;
-	if ((unsigned)(ba.count()) < sizeof(uint32_t)) {
-		ba.clear();
-		return 0;
-	}
-	memcpy(&ret, ba.constData(), sizeof(uint32_t));
-	ba = ba.mid(sizeof(uint32_t));
-	return ret;
 }
 
 bool pki_base::compare(pki_base *refcrl)

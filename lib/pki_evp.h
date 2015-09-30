@@ -20,10 +20,10 @@
 class pki_evp: public pki_key
 {
 		Q_OBJECT
-	protected:
 		QByteArray encKey;
+		QByteArray getEncKey() const;
+	protected:
 		void init(int type = EVP_PKEY_RSA);
-		void veryOldFromData(unsigned char *p, int size);
 		void openssl_pw_error(QString fname);
 	public:
 		static QPixmap *icon[2];
@@ -53,13 +53,10 @@ class pki_evp: public pki_key
 		void fload(const QString fname);
 		void writeDefault(const QString fname);
 		void fromData(const unsigned char *p, db_header_t *head);
-		void oldFromData(unsigned char *p, int size);
-		QByteArray toData();
 		void writeKey(const QString fname, const EVP_CIPHER *enc,
 		pem_password_cb *cb, bool pem);
 		void writePKCS8(const QString fname, const EVP_CIPHER *enc,
 		pem_password_cb *cb, bool pem);
-		bool isPubKey() const;
 		int verify();
 		const EVP_MD *getDefaultMD();
 		QVariant getIcon(dbheader *hd);

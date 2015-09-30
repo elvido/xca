@@ -22,7 +22,8 @@ pki_key::pki_key(const QString name)
         :pki_base(name)
 {
 	key = EVP_PKEY_new();
-	ucount = 0;
+	key_size = 0;
+	isPub = true;
 }
 
 const char *pki_key::getClassName() const
@@ -33,12 +34,13 @@ const char *pki_key::getClassName() const
 pki_key::pki_key(const pki_key *pk)
 	:pki_base(pk->desc)
 {
-	ucount = pk->ucount;
-	key = EVP_PKEY_new();
 	if (pk->key) {
 		QByteArray ba = i2d_bytearray(I2D_VOID(i2d_PUBKEY), pk->key);
 		d2i(ba);
+	} else {
+		key = EVP_PKEY_new();
 	}
+	key_size = pk->key_size;
 }
 
 pki_key::~pki_key()
@@ -105,10 +107,12 @@ BIO *pki_key::pem(BIO *b, int format)
 
 QString pki_key::length()
 {
+	if (key_size == 0)
+		key_size = EVP_PKEY_bits(key);
 	if (key->type == EVP_PKEY_DSA && key->pkey.dsa->p == NULL) {
 		return QString("???");
 	}
-	return QString("%1 bit").arg(EVP_PKEY_bits(key));
+	return QString("%1 bit").arg(key_size);
 }
 
 QString pki_key::getTypeString() const
@@ -190,20 +194,13 @@ bool pki_key::isPrivKey() const
 	return !isPubKey();
 }
 
-int pki_key::incUcount()
-{
-	ucount++;
-	return ucount;
-}
-int pki_key::decUcount()
-{
-	ucount--;
-	return ucount;
-}
-
 int pki_key::getUcount()
 {
-	return ucount;
+	QSqlQuery q;
+	q.prepare("SELECT item FROM x509super WHERE key=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
+	return q.numRowsAffected();
 }
 
 int pki_key::getKeyType()
@@ -336,8 +333,7 @@ QString pki_key::BN2QString(BIGNUM *bn) const
 		return "--";
 	QString x="";
 	char zs[10];
-	int j;
-	int size = BN_num_bytes(bn);
+	int j, size = BN_num_bytes(bn);
 	unsigned char *buf = (unsigned char *)OPENSSL_malloc(size);
 	check_oom(buf);
 	BN_bn2bin(bn, buf);
@@ -402,16 +398,20 @@ QSqlError pki_key::restoreSql(QVariant sqlId)
 	e = pki_base::restoreSql(sqlId);
 	if (e.isValid())
 		return e;
-	q.prepare("SELECT (der_public) FROM keys WHERE item=?");
+	q.prepare("SELECT der_public, len FROM public_keys WHERE item=?");
 	q.bindValue(0, sqlId);
 	q.exec();
 	e = q.lastError();
+TRACE
+	fprintf(stderr, "SQL ERROR: '%s'\n", CCHAR(e.text()));
+TRACE
 	if (e.isValid())
 		return e;
 	if (!q.first())
 		return sqlItemNotFound(sqlId);
 	QByteArray ba = q.value(0).toByteArray();
 	d2i(ba);
+	key_size = q.value(1).toInt();
 	return e;
 }
 
@@ -420,7 +420,7 @@ QSqlError pki_key::deleteSqlData()
 	QSqlQuery q;
 	QSqlError e;
 
-	q.prepare("DELETE FROM keys WHERE item=?");
+	q.prepare("DELETE FROM public_keys WHERE item=?");
 	q.bindValue(0, sqlItemId);
 	q.exec();
 	e = q.lastError();

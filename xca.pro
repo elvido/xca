@@ -127,7 +127,6 @@ SOURCES += lib/asn1int.cpp \
            lib/db_x509req.cpp \
            lib/db_x509super.cpp \
            lib/func.cpp \
-           lib/import.cpp \
            lib/load_obj.cpp \
            lib/main.cpp \
            lib/oid.cpp \

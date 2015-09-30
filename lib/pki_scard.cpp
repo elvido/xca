@@ -704,24 +704,6 @@ pki_scard::~pki_scard()
 {
 }
 
-QByteArray pki_scard::toData()
-{
-	QByteArray ba;
-
-	ba += db::stringToData(card_serial);
-	ba += db::stringToData(card_manufacturer);
-	ba += db::stringToData(card_label);
-	ba += db::stringToData(slot_label);
-	ba += db::stringToData(card_model);
-	ba += db::stringToData(object_id);
-	ba += db::intToData(mech_list.count());
-	for (int i=0; i<mech_list.count(); i++)
-		ba += db::intToData(mech_list[i]);
-
-	ba += i2d();
-	return ba;
-}
-
 void pki_scard::fromData(const unsigned char *p, db_header_t *head )
 {
 	int version, size;
@@ -752,11 +734,6 @@ void pki_scard::fromData(const unsigned char *p, db_header_t *head )
 	if (ba.count() > 0) {
 		my_error(tr("Wrong Size %1").arg(ba.count()));
 	}
-}
-
-bool pki_scard::isPubKey() const
-{
-	return false;
 }
 
 QString pki_scard::getTypeString(void) const

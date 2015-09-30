@@ -99,7 +99,9 @@ MainWindow::MainWindow(QWidget *parent)
 	wdList << keyButtons << reqButtons << certButtons <<
 		tempButtons <<	crlButtons;
 
+TRACE
 	QSqlDatabase::addDatabase("QSQLITE");
+TRACE
 
 	historyMenu = NULL;
 	init_menu();

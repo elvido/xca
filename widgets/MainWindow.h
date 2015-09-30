@@ -162,7 +162,6 @@ class MainWindow: public QMainWindow, public Ui::MainWindow
 		void connNewX509(NewX509 *nx);
 		void about();
 		void help();
-		void import_dbdump();
 		void undelete();
 		void loadPem();
 		bool pastePem(QString text);

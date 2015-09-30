@@ -237,7 +237,16 @@ void pki_x509req::fromData(const unsigned char *p, db_header_t *head )
 
 	size = head->len - sizeof(db_header_t);
 
-	oldFromData((unsigned char *)p, size);
+	QByteArray ba((const char *)p, size);
+	privkey = NULL;
+
+	d2i(ba);
+	if (ba.count() > 0)
+		d2i_spki(ba);
+
+	if (ba.count() > 0) {
+		my_error(tr("Wrong Size %1").arg(ba.count()));
+	}
 }
 
 void pki_x509req::addAttribute(int nid, QString content)
@@ -275,17 +284,6 @@ bool pki_x509req::isSpki() const
 	return spki != NULL;
 }
 
-QByteArray pki_x509req::toData()
-{
-	QByteArray ba;
-
-	ba += i2d();
-	if (spki) {
-		ba += i2d_spki();
-	}
-	pki_openssl_error();
-	return ba;
-}
 void pki_x509req::writeDefault(const QString fname)
 {
 	writeReq(fname + QDir::separator() + getIntName() + ".csr", true);
@@ -510,18 +508,3 @@ bool pki_x509req::visible()
 		return true;
 	return false;
 }
-
-void pki_x509req::oldFromData(unsigned char *p, int size)
-{
-	QByteArray ba((const char *)p, size);
-	privkey = NULL;
-
-	d2i(ba);
-	if (ba.count() > 0)
-		d2i_spki(ba);
-
-	if (ba.count() > 0) {
-		my_error(tr("Wrong Size %1").arg(ba.count()));
-	}
-}
-

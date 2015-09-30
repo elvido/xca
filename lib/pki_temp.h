@@ -43,7 +43,6 @@ class pki_temp: public pki_x509name
 		~pki_temp();
 		void fromData(const unsigned char *p, int size, int version);
 		void fromData(const unsigned char *p, db_header_t *head );
-		void oldFromData(const unsigned char *p, int size);
 
 		QByteArray toData();
 		bool compare(pki_base *ref);

@@ -71,9 +71,7 @@ class pki_x509 : public pki_x509super
 		void setIssuer(const x509name &n);
 		bool caAndPathLen(bool *ca, a1int *pathlen, bool *hasLen);
 
-		QByteArray toData();
 		void fromData(const unsigned char *p, db_header_t *head);
-		void oldFromData(unsigned char *p, int size);
 		bool isCA() const;
 		bool canSign() const;
 		void writeCert(const QString fname, bool PEM, bool append = false);

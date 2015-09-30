@@ -106,13 +106,6 @@ class pki_base : public QObject
 
 		/* Old database management methods */
 		virtual void fromData(const unsigned char *, db_header_t *) {};
-		virtual void oldFromData(unsigned char *, int ) {};
-		virtual QByteArray toData()
-		{
-			return QByteArray();
-		}
-		uint32_t intFromData(QByteArray &ba);
-
 		/* Qt Model-View methods */
 		virtual QVariant bg_color(dbheader *hd)
 		{

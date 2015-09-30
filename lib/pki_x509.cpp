@@ -604,30 +604,6 @@ void pki_x509::fromData(const unsigned char *p, db_header_t *head)
 	pki_openssl_error();
 }
 
-
-QByteArray pki_x509::toData()
-{
-	QByteArray ba;
-
-	ba += i2d(); // cert
-	ba += db::intToData(trust);
-	// version 4: don't store isrevoked, revoked
-
-	// the serial if this is a CA
-	ba += db::stringToData(caSerial.toHex());
-	// the name of the template to use for signing
-	ba += db::stringToData(caTemplate);
-	// version 3
-	ba += db::intToData(crlDays); // the CRL period
-	ba += crlExpiry.i2d(); // last CRL date
-	ba += db::boolToData(randomSerial);
-	ba += db::stringToData(crlNumber.toHex());
-	// version 4: don't store own revocation but client revocations
-	ba += revList.toBA();
-	pki_openssl_error();
-	return ba;
-}
-
 void pki_x509::writeDefault(const QString fname)
 {
 	writeCert(fname + QDir::separator() + getIntName() + ".crt",
@@ -1070,73 +1046,4 @@ QVariant pki_x509::bg_color(dbheader *hd)
 			}
 	}
 	return QVariant();
-}
-
-void pki_x509::oldFromData(unsigned char *p, int size)
-{
-	int version, sRev, sLastCrl;
-	QByteArray ba((char*)p, size);
-	X509 *cert_sik = cert;
-	cert = NULL;
-	version = intFromData(ba);
-	if (version >=1 && version <= 5) {
-		intFromData(ba); /* sCert */
-		d2i(ba);
-		trust = intFromData(ba);
-		sRev = intFromData(ba);
-		if (sRev) {
-			a1time r;
-			r.d2i(ba);
-			if (version != 3) {
-				revocation.setSerial(getSerial());
-				revocation.setDate(r);
-			}
-		} else {
-			revocation = x509rev();
-		}
-
-		if (version == 1) {
-			caTemplate="";
-			caSerial=1;
-			crlExpiry.setUndefined();
-			crlDays=30;
-		}
-
-		if (version >= 2 ) {
-			if (version >= 5)
-				caSerial.setHex(db::stringFromData(ba));
-			else {
-				int i = intFromData(ba);
-				if (i>=0)
-					caSerial = i;
-				else {
-					caSerial = getSerial();
-					++caSerial;
-				}
-			}
-			caTemplate = db::stringFromData(ba);
-		}
-		if (version >= 3 ) {
-			crlDays = intFromData(ba);
-			sLastCrl = intFromData(ba);
-			if (sLastCrl) {
-			   crlExpiry.d2i(ba);
-			}
-		}
-		// version 4 saves a NULL as revoked
-		// version 3 did save a recent date :-((
-	}
-	else { // old version
-		d2i(ba);
-		trust = 1;
-		efftrust = 1;
-	}
-	if (cert)
-		X509_free(cert_sik);
-	else
-		cert = cert_sik;
-
-	if (ba.count() > 0) {
-		my_error(tr("Wrong Size %1").arg(ba.count()));
-	}
 }

@@ -17,9 +17,6 @@ pki_x509super::pki_x509super(const QString name)
 
 pki_x509super::~pki_x509super()
 {
-	if (privkey)
-		privkey->decUcount();
-	privkey = NULL;
 }
 
 QSqlError pki_x509super::insertSqlData()
@@ -80,7 +77,6 @@ void pki_x509super::setRefKey(pki_key *ref)
 	if (ref->compare(mk)) {
 		// this is our key
 		privkey = ref;
-		ref->incUcount();
 	}
 	delete mk;
 }
@@ -89,7 +85,6 @@ void pki_x509super::delRefKey(pki_key *ref)
 {
 	if (ref != privkey || ref == NULL)
 		return;
-	ref->decUcount();
 	privkey = NULL;
 }
 

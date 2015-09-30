@@ -198,13 +198,6 @@ void pki_crl::fromData(const unsigned char *p, db_header_t *head)
 	}
 }
 
-QByteArray pki_crl::toData()
-{
-	QByteArray ba = i2d();
-	pki_openssl_error();
-	return ba;
-}
-
 void pki_crl::addRev(const x509rev &xrev, bool withReason)
 {
 	X509_CRL_add0_revoked(crl, xrev.get(withReason));
@@ -404,14 +397,4 @@ QVariant pki_crl::column_data(dbheader *hd)
 QVariant pki_crl::getIcon(dbheader *hd)
 {
 	return hd->id == HD_internal_name ? QVariant(*icon) : QVariant();
-}
-
-void pki_crl::oldFromData(unsigned char *p, int size)
-{
-	QByteArray ba((const char *)p, size);
-	d2i(ba);
-
-	if (ba.count() > 0) {
-		my_error(tr("Wrong Size %1").arg(ba.count()));
-	}
 }

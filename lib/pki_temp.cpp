@@ -378,34 +378,14 @@ BIO *pki_temp::pem(BIO *b, int format)
 void pki_temp::fromExportData(QByteArray data)
 {
 	int size, version;
-	const int hsize = sizeof(uint32_t);
-	bool oldimport = false;
 
-	if (data.size() < hsize) {
+	if (data.size() < (int)sizeof(uint32_t))
 		my_error(tr("Template file content error (too small)"));
-	}
 
-	QByteArray header = data.mid(0, hsize);
-	size = db::intFromData(header);
-
-	if (size > 65535 || size <0) {
-		/* oldimport templates are prepended by its size in
-		 * host endianess. Recover the size */
-                size = intFromData(data);
-		if (size > 65535 || size <0) {
-			my_error(tr("Template file content error (bad size)"));
-		}
-		oldimport = true;
-	}
-	if (oldimport) {
-		oldFromData((const unsigned char*)data.constData(),
-				data.size());
-	} else {
-		size = db::intFromData(data);
-		version = db::intFromData(data);
-		fromData((const unsigned char*)data.constData(),
-				data.size(), version);
-	}
+	size = db::intFromData(data);
+	version = db::intFromData(data);
+	fromData((const unsigned char*)data.constData(),
+		data.size(), version);
 }
 
 void pki_temp::try_fload(QString fname, const char *mode)
@@ -514,70 +494,3 @@ QVariant pki_temp::getIcon(dbheader *hd)
 {
 	return hd->id == HD_internal_name ? QVariant(*icon) : QVariant();
 }
-
-void pki_temp::oldFromData(const unsigned char *p, int size)
-{
-	int version;
-
-	QByteArray ba((const char*)p, size);
-
-	version=intFromData(ba);
-	intFromData(ba); /* type */
-	if (version == 1) {
-		ca = 2;
-		bool mca = intFromData(ba);
-		if (mca) ca = 1;
-	}
-	bcCrit=db::boolFromData(ba);
-	keyUseCrit=db::boolFromData(ba);
-	eKeyUseCrit=db::boolFromData(ba);
-	subKey=db::boolFromData(ba);
-	authKey=db::boolFromData(ba);
-	db::boolFromData(ba);
-	db::boolFromData(ba);
-	if (version >= 2) {
-		ca = intFromData(ba);
-	}
-	pathLen = QString::number(db::intFromData(ba));
-	if (pathLen == "0")
-		pathLen = "";
-	validN = intFromData(ba);
-	validM = intFromData(ba);
-	keyUse=intFromData(ba);
-	int old=db::intFromData(ba);
-	eKeyUse = old_eKeyUse2QString(old);
-	nsCertType=intFromData(ba);
-	if (version == 1) {
-		xname.addEntryByNid(OBJ_sn2nid("C"), db::stringFromData(ba));
-		xname.addEntryByNid(OBJ_sn2nid("ST"), db::stringFromData(ba));
-		xname.addEntryByNid(OBJ_sn2nid("L"), db::stringFromData(ba));
-		xname.addEntryByNid(OBJ_sn2nid("O"), db::stringFromData(ba));
-		xname.addEntryByNid(OBJ_sn2nid("OU"), db::stringFromData(ba));
-		xname.addEntryByNid(OBJ_sn2nid("CN"), db::stringFromData(ba));
-		xname.addEntryByNid(OBJ_sn2nid("Email"),db::stringFromData(ba));
-	}
-	subAltName=db::stringFromData(ba);
-	issAltName=db::stringFromData(ba);
-	crlDist=db::stringFromData(ba);
-	nsComment=db::stringFromData(ba);
-	nsBaseUrl=db::stringFromData(ba);
-	nsRevocationUrl=db::stringFromData(ba);
-	nsCARevocationUrl=db::stringFromData(ba);
-	nsRenewalUrl=db::stringFromData(ba);
-	nsCaPolicyUrl=db::stringFromData(ba);
-	nsSslServerName=db::stringFromData(ba);
-	// next version:
-	if (version >= 2) {
-		xname.d2i(ba);
-	}
-	if (version >= 3) {
-		authInfAcc=db::stringFromData(ba);
-		certPol=db::stringFromData(ba);
-		validMidn=db::boolFromData(ba);
-	}
-
-	if (ba.count() > 0) {
-		my_error(tr("Wrong Size %1").arg(ba.count()));
-	}
-}
-
