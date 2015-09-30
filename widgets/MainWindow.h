@@ -118,6 +118,10 @@ class MainWindow: public QMainWindow, public Ui::MainWindow
 		static QString explicit_dn;
 		static QString explicit_dn_default;
 		int exitApp;
+		QSqlDatabase *getDb()
+		{
+			return &db;
+		}
 		QString dbfile;
 		QLabel *dbindex;
 

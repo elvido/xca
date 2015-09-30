@@ -89,16 +89,16 @@ QSqlError pki_x509::insertSqlData()
 	QSqlError e = pki_x509super::insertSqlData();
 	if (e.isValid())
 		return e;
-	q.prepare("INSERT INTO certs (item, cert, hash, iss_hash, "
-					"serial, issuer, ca) "
+	q.prepare("INSERT INTO certs (item, hash, iss_hash, "
+					"serial, issuer, ca, cert) "
 		  "VALUES (?, ?, ?, ?, ?, ?, ?)");
 	q.bindValue(0, sqlItemId);
-	q.bindValue(1, i2d());
-	q.bindValue(2, hash());
-	q.bindValue(3, (uint)getIssuer().hashNum());
-	q.bindValue(4, getSerial().toHex());
-	q.bindValue(5, signer ? signer->getSqlItemId() : QVariant());
-	q.bindValue(6, isCA());
+	q.bindValue(1, hash());
+	q.bindValue(2, (uint)getIssuer().hashNum());
+	q.bindValue(3, getSerial().toHex());
+	q.bindValue(4, signer ? signer->getSqlItemId() : QVariant());
+	q.bindValue(5, isCA());
+	q.bindValue(6, i2d().toBase64());
 	q.exec();
 	return q.lastError();
 }
@@ -119,7 +119,7 @@ QSqlError pki_x509::restoreSql(QVariant sqlId)
 		return e;
 	if (!q.first())
 		return sqlItemNotFound(sqlId);
-	QByteArray ba = q.value(0).toByteArray();
+	QByteArray ba = QByteArray::fromBase64(q.value(0).toByteArray());
 	d2i(ba);
 	signerSqlId = q.value(1);
 	return e;

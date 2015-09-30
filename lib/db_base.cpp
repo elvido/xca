@@ -242,9 +242,16 @@ void db_base::sortIndicatorChanged(int logicalIndex, Qt::SortOrder order)
 
 void db_base::insertPKI(pki_base *pki)
 {
+	QSqlDatabase *db = mainwin->getDb();
 	inToCont(pki);
-	QSqlError e = pki->insertSql();
-	mainwin->dbSqlError(e);
+	if (db->transaction()) {
+		QSqlError e = pki->insertSql();
+		mainwin->dbSqlError(e);
+		if (e.isValid())
+			db->rollback();
+		else
+			db->commit();
+	}
 	emit columnsContentChanged();
 }
 
@@ -283,6 +290,7 @@ void db_base::pem2clipboard(QModelIndexList indexes)
 void db_base::deletePKI(QModelIndex idx)
 {
 	pki_base *pki = static_cast<pki_base*>(idx.internalPointer());
+	QSqlDatabase *db = mainwin->getDb();
 	try {
 		try {
 			pki->deleteFromToken();
@@ -292,8 +300,15 @@ void db_base::deletePKI(QModelIndex idx)
 
 		remFromCont(idx);
 
-		QSqlError e = pki->deleteSql();
-		mainwin->dbSqlError(e);
+		if (db->transaction()) {
+			QSqlError e = pki->deleteSql();
+	                mainwin->dbSqlError(e);
+			if (e.isValid())
+				db->rollback();
+			else
+				db->commit();
+			mainwin->dbSqlError(e);
+		}
 	} catch (errorEx &err) {
 		MainWindow::Error(err);
 	}

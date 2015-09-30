@@ -85,9 +85,20 @@ QSqlError MainWindow::initSqlDB()
  * is used to faster find items in the DB by reference.
  * It consists of the first 4 bytes of a SHA1 hash.
  * Collisions are of course possible.
+ *
+ * All binaries are stored Base64 encoded in a column of type
+ * "B64_BLOB" It is defined here by default to "VARCHAR(8000)"
  */
 
+#define B64_BLOB "VARCHAR(10000)"
+
 /*
+ * The B64(DER(something)) function means DER encode something
+ * and then Base64 encode that.
+ * So finally this is PEM without newlines, header and footer
+ *
+ *
+ *
  * Configuration settings from
  *  the Options dialog, window size, last export directory,
  *  default key type and size,
@@ -116,10 +127,10 @@ QSqlError MainWindow::initSqlDB()
  */
 << "CREATE TABLE public_keys ("
 	"item INTEGER, "	/* reference to items(id) */
-	"type INTEGER, "	/* RSA DSA EC (as text) */
-	"der_public BLOB, "	/* DER encoded public key */
+	"type CHAR(4), "	/* RSA DSA EC (as text) */
 	"hash INTEGER, "	/* 32 bit hash */
 	"len INTEGER, "		/* key size in bits */
+	"public "B64_BLOB", "	/* B64(DER(public key)) */
 	"FOREIGN KEY (item) REFERENCES items (id))"
 
 /*
@@ -129,7 +140,7 @@ QSqlError MainWindow::initSqlDB()
 << "CREATE TABLE private_keys ("
 	"item INTEGER, "	/* reference to items(id) */
 	"ownPass INTEGER, "	/* Encrypted by DB pwd or own pwd */
-	"private BLOB, "	/* Encrypted DER encoded key */
+	"private "B64_BLOB", "	/* B64(Encrypt(DER(private key))) */
 	"FOREIGN KEY (item) REFERENCES items (id))"
 
 /*
@@ -174,9 +185,9 @@ QSqlError MainWindow::initSqlDB()
  */
 << "CREATE TABLE requests ("
 	"item INTEGER, "	/* reference to items(id) */
-	"request BLOB, "	/* DER encoded PKCS#10 */
 	"hash INTEGER, "	/* 32 bit hash of the request */
 	"signed INTEGER, "	/* Whether it was once signed. */
+	"request "B64_BLOB", "	/* B64(DER(PKCS#10 request)) */
 	"FOREIGN KEY (item) REFERENCES items (id)) "
 
 /*
@@ -188,12 +199,12 @@ QSqlError MainWindow::initSqlDB()
  */
 << "CREATE TABLE certs ("
 	"item INTEGER, "	/* reference to items(id) */
-	"cert BLOB, "		/* DER encoded certificate */
 	"hash INTEGER, "	/* 32 bit hash of the cert */
 	"iss_hash INTEGER, "	/* 32 bit hash of the issuer DN */
 	"serial CHAR, "		/* Serial numbe rof the certificate */
 	"issuer INTEGER, "	/* The items(id) of the issuer or NULL */
 	"ca INTEGER, "		/* CA: yes / no from BasicConstraints */
+	"cert "B64_BLOB", "	/* B64(DER(certificate)) */
 	"FOREIGN KEY (item) REFERENCES items (id), "
 	"FOREIGN KEY (issuer) REFERENCES items (id)) "
 
@@ -202,11 +213,11 @@ QSqlError MainWindow::initSqlDB()
  */
 << "CREATE TABLE crls ("
 	"item INTEGER, "	/* reference to items(id) */
-	"crl BLOB, "		/* DER encoded CRL */
 	"hash INTEGER, "	/* 32 bit hash of the CRL */
 	"num INTEGER, "		/* Number of revoked certificates */
 	"iss_hash INTEGER, "	/* 32 bit hash of the issuer DN */
 	"issuer INTEGER, "	/* The items(id) of the issuer or NULL */
+	"crl "B64_BLOB", "	/* B64(DER(revocation list)) */
 	"FOREIGN KEY (item) REFERENCES items (id), "
 	"FOREIGN KEY (issuer) REFERENCES items (id)) "
 

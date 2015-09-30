@@ -385,13 +385,13 @@ QSqlError pki_key::insertSqlData()
 {
 	QSqlQuery q;
 
-	q.prepare("INSERT INTO public_keys (item, type, der_public, hash, len) "
+	q.prepare("INSERT INTO public_keys (item, type, hash, len, public) "
 		  "VALUES (?, ?, ?, ?, ?)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, getTypeString());
-	q.bindValue(2, i2d());
-	q.bindValue(3, hash());
-	q.bindValue(4, EVP_PKEY_bits(key));
+	q.bindValue(2, hash());
+	q.bindValue(3, EVP_PKEY_bits(key));
+	q.bindValue(4, i2d().toBase64());
 	q.exec();
 	return q.lastError();
 }
@@ -404,7 +404,7 @@ QSqlError pki_key::restoreSql(QVariant sqlId)
 	e = pki_base::restoreSql(sqlId);
 	if (e.isValid())
 		return e;
-	q.prepare("SELECT der_public, len FROM public_keys WHERE item=?");
+	q.prepare("SELECT public, len FROM public_keys WHERE item=?");
 	q.bindValue(0, sqlId);
 	q.exec();
 	e = q.lastError();
@@ -412,7 +412,7 @@ QSqlError pki_key::restoreSql(QVariant sqlId)
 		return e;
 	if (!q.first())
 		return sqlItemNotFound(sqlId);
-	QByteArray ba = q.value(0).toByteArray();
+	QByteArray ba = QByteArray::fromBase64(q.value(0).toByteArray());
 	d2i(ba);
 	key_size = q.value(1).toInt();
 	return e;

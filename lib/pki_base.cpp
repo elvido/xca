@@ -108,27 +108,18 @@ QSqlError pki_base::insertSql()
 	QString insert;
 	QSqlError e;
 
-	q.exec("BEGIN TRANSACTION");
+	q.prepare("INSERT INTO items "
+		  "(id, name, type, comment) "
+		  "VALUES (NULL, ?, ?, ?)");
+	q.bindValue(0, getIntName());
+	q.bindValue(1, getType());
+	q.bindValue(2, getComment());
+	q.exec();
 	e = q.lastError();
 	if (!e.isValid()) {
-		q.prepare("INSERT INTO items "
-			  "(id, name, type, comment) "
-			  "VALUES (NULL, ?, ?, ?)");
-		q.bindValue(0, getIntName());
-		q.bindValue(1, getType());
-		q.bindValue(2, getComment());
-		q.exec();
-		e = q.lastError();
-		if (!e.isValid()) {
-			sqlItemId = q.lastInsertId();
-			e = insertSqlData();
-			if (!e.isValid()) {
-				q.exec("COMMIT");
-			}
-		}
+		sqlItemId = q.lastInsertId();
+		e = insertSqlData();
 	}
-	if (e.isValid())
-		q.exec("ROLLBACK");
 	return e;
 }
 
@@ -159,33 +150,15 @@ QSqlError pki_base::deleteSql()
 	QSqlError e;
 
 	if (!sqlItemId.isValid()) {
-		q.prepare("SELECT id FROM items WHERE name=?");
-		q.bindValue(0, getIntName());
-		q.exec();
-		e = q.lastError();
-		if (e.isValid())
-			return e;
-		if (q.first())
-			sqlItemId = q.value(0);
-		else
-			return QSqlError();
+		qDebug("INVALID sqlItemId (DELETE %s)", CCHAR(getIntName()));
+			return sqlItemNotFound(QVariant());
 	}
-	q.exec("BEGIN TRANSACTION");
+	q.prepare("DELETE FROM items WHERE id=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
 	e = q.lastError();
-	if (!e.isValid()) {
-		q.prepare("DELETE FROM items WHERE id=?");
-		q.bindValue(0, sqlItemId);
-		q.exec();
-		e = q.lastError();
-		if (!e.isValid()) {
-			e = deleteSqlData();
-			if (!e.isValid()) {
-				q.exec("COMMIT");
-			}
-		}
-	}
-	if (e.isValid())
-		q.exec("ROLLBACK");
+	if (!e.isValid())
+		e = deleteSqlData();
 	return e;
 }
 

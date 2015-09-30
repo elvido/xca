@@ -59,14 +59,14 @@ QSqlError pki_crl::insertSqlData()
 {
 	QSqlQuery q;
 
-	q.prepare("INSERT INTO crls (item, crl, hash, num, iss_hash, issuer) "
+	q.prepare("INSERT INTO crls (item, hash, num, iss_hash, issuer, crl) "
 		  "VALUES (?, ?, ?, ?, ?, ?)");
 	q.bindValue(0, sqlItemId);
-	q.bindValue(1, i2d());
-	q.bindValue(2, hash());
-	q.bindValue(3, numRev());
-	q.bindValue(4, (uint)getSubject().hashNum());
-	q.bindValue(5, issuer ? issuer->getSqlItemId() : QVariant());
+	q.bindValue(1, hash());
+	q.bindValue(2, numRev());
+	q.bindValue(3, (uint)getSubject().hashNum());
+	q.bindValue(4, issuer ? issuer->getSqlItemId() : QVariant());
+	q.bindValue(5, i2d().toBase64());
 	q.exec();
 	return q.lastError();
 }
@@ -87,7 +87,7 @@ QSqlError pki_crl::restoreSql(QVariant sqlId)
 		return e;
 	if (!q.first())
 		return sqlItemNotFound(sqlId);
-	QByteArray ba = q.value(0).toByteArray();
+	QByteArray ba = QByteArray::fromBase64(q.value(0).toByteArray());
 	d2i(ba);
 	return e;
 }

@@ -49,11 +49,11 @@ QSqlError pki_x509req::insertSqlData()
 	QSqlError e = pki_x509super::insertSqlData();
 	if (e.isValid())
 		return e;
-	q.prepare("INSERT INTO requests (item, request, hash, signed) "
-		  "VALUES (?, ?, ?, 0)");
+	q.prepare("INSERT INTO requests (item, hash, signed, request) "
+		  "VALUES (?, ?, 0, ?)");
 	q.bindValue(0, sqlItemId);
-	q.bindValue(1, i2d());
-	q.bindValue(2, hash());
+	q.bindValue(1, hash());
+	q.bindValue(2, i2d().toBase64());
 	q.exec();
 	return q.lastError();
 }
@@ -74,7 +74,7 @@ QSqlError pki_x509req::restoreSql(QVariant sqlId)
 		return e;
 	if (!q.first())
 		return sqlItemNotFound(sqlId);
-	QByteArray ba = q.value(0).toByteArray();
+	QByteArray ba = QByteArray::fromBase64(q.value(0).toByteArray());
 	d2i(ba);
 	done = q.value(1).toBool();
 	return e;

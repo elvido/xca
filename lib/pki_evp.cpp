@@ -575,7 +575,7 @@ QSqlError pki_evp::insertSqlData()
 		  "VALUES (?, ?, ?)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, ownPass);
-	q.bindValue(2, encKey);
+	q.bindValue(2, encKey.toBase64());
 	q.exec();
 	encKey.fill(0);
 	encKey.clear();
@@ -616,7 +616,7 @@ QByteArray pki_evp::getEncKey() const
 	e = q.lastError();
 	if (e.isValid() || !q.first())
 		return QByteArray();
-	return q.value(0).toByteArray();
+	return QByteArray::fromBase64(q.value(0).toByteArray());
 }
 
 QSqlError pki_evp::deleteSqlData()
