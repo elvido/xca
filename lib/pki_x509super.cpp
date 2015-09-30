@@ -22,12 +22,21 @@ pki_x509super::~pki_x509super()
 QSqlError pki_x509super::insertSqlData()
 {
 	QSqlQuery q;
+	unsigned hash;
 
-	q.prepare("INSERT INTO x509super (item, subj_hash, key) "
-		  "VALUES (?, ?, ?)");
+	if (privkey) {
+		hash = privkey->hash();
+	} else {
+		pki_key *pub = getPubKey();
+		hash = pub->hash();
+		delete pub;
+	}
+	q.prepare("INSERT INTO x509super (item, subj_hash, key, key_hash) "
+		  "VALUES (?, ?, ?, ?)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, (uint)getSubject().hashNum());
 	q.bindValue(2, privkey ? privkey->getSqlItemId() : QVariant());
+	q.bindValue(3, hash);
 	q.exec();
 	return q.lastError();
 }

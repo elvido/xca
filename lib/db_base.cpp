@@ -244,8 +244,9 @@ void db_base::insertPKI(pki_base *pki)
 {
 	QSqlDatabase *db = mainwin->getDb();
 	if (db->transaction()) {
-		inToCont(pki);
 		QSqlError e = pki->insertSql();
+		lookup[pki->getSqlItemId().toULongLong()] = pki;
+		inToCont(pki);
 		mainwin->dbSqlError(e);
 		if (e.isValid())
 			db->rollback();

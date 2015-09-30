@@ -51,6 +51,7 @@ QString pki_evp::removeTypeFromIntName(QString n)
 
 void pki_evp::setOwnPass(enum passType x)
 {
+	QSqlQuery q;
 	EVP_PKEY *pk=NULL, *pk_back = key;
 	int oldOwnPass = ownPass;
 
@@ -73,7 +74,29 @@ void pki_evp::setOwnPass(enum passType x)
 		ownPass = oldOwnPass;
 		throw(err);
 	}
-	EVP_PKEY_free(pk_back);
+
+	q.prepare("UPDATE private_keys SET private=?, ownPass=? "
+		"WHERE item=?");
+	q.bindValue(0, encKey.toBase64());
+	q.bindValue(1, ownPass);
+	q.bindValue(2, sqlItemId);
+	q.exec();
+
+	if (q.numRowsAffected() == 0) {
+		EVP_PKEY_free(pk_back);
+		return;
+	}
+
+	if (!q.lastError().isValid()) {
+		/* Success */
+		encKey.fill(0);
+		encKey.clear();
+		EVP_PKEY_free(pk_back);
+	} else {
+		EVP_PKEY_free(pk);
+		key = pk_back;
+		ownPass = oldOwnPass;
+	}
 }
 
 void pki_evp::generate(int bits, int type, QProgressBar *progress, int curve_nid)
@@ -362,7 +385,7 @@ EVP_PKEY *pki_evp::decryptKey() const
 	int outl, decsize;
 	unsigned char iv[EVP_MAX_IV_LENGTH];
 	unsigned char ckey[EVP_MAX_KEY_LENGTH];
-	QByteArray encKey;
+	QByteArray myencKey;
 
 	EVP_PKEY *tmpkey;
 	EVP_CIPHER_CTX ctx;
@@ -392,7 +415,7 @@ EVP_PKEY *pki_evp::decryptKey() const
 		ownPassBuf = "Bogus";
 	} else {
 		ownPassBuf = passwd;
-		while (md5passwd(ownPassBuf) != passHash &&
+		while (sha512passwT(ownPassBuf, passHash) != passHash &&
 			sha512passwd(ownPassBuf, passHash) != passHash)
 		{
 			pass_info p(XCA_TITLE, tr("Please enter the database password for decrypting the key '%1'").arg(getIntName()));
@@ -402,36 +425,40 @@ EVP_PKEY *pki_evp::decryptKey() const
 						getClassName());
 		}
 	}
-	encKey = getEncKey();
 	if (encKey.count() == 0)
+		myencKey = getEncKey();
+	else
+		myencKey = encKey;
+	if (myencKey.count() == 0)
 		return NULL;
-	p = (unsigned char *)OPENSSL_malloc(encKey.count());
+	p = (unsigned char *)OPENSSL_malloc(myencKey.count());
 	check_oom(p);
 	pki_openssl_error();
 	p1 = p;
 	memset(iv, 0, EVP_MAX_IV_LENGTH);
 
-	memcpy(iv, encKey.constData(), 8); /* recover the iv */
+	memcpy(iv, myencKey.constData(), 8); /* recover the iv */
 	passToKey(ownPassBuf, iv, cipher, ckey, 0);
 	EVP_CIPHER_CTX_init(&ctx);
 	EVP_DecryptInit(&ctx, cipher, ckey, iv);
 	EVP_DecryptUpdate(&ctx, p , &outl,
-		(const unsigned char*)encKey.constData() +8, encKey.count() -8);
+		(const unsigned char*)myencKey.constData() +8,
+		myencKey.count() -8);
 
 	decsize = outl;
 	EVP_DecryptFinal(&ctx, p + decsize , &outl);
 	decsize += outl;
-	//printf("Decrypt decsize=%d, encKey_len=%d\n", decsize, encKey.count() -8);
+	//printf("Decrypt decsize=%d, encKey_len=%d\n", decsize, myencKey.count() -8);
 	pki_openssl_error();
 	tmpkey = d2i_PrivateKey(key->type, NULL, &p1, decsize);
 	pki_openssl_error();
-	OPENSSL_cleanse(p, encKey.count());
+	OPENSSL_cleanse(p, myencKey.count());
 	OPENSSL_free(p);
 	EVP_CIPHER_CTX_cleanup(&ctx);
 	pki_openssl_error();
 	if (EVP_PKEY_type(tmpkey->type) == EVP_PKEY_RSA)
 		RSA_blinding_on(tmpkey->pkey.rsa, NULL);
-	encKey.fill(0);
+	myencKey.fill(0);
 	return tmpkey;
 }
 
@@ -484,8 +511,8 @@ void pki_evp::encryptKey(const char *password)
 			int ret = 0;
 			ownPassBuf = passwd;
 			pass_info p(XCA_TITLE, tr("Please enter the database password for encrypting the key"));
-			while (md5passwd(ownPassBuf) != passHash &&
-				sha512passwd(ownPassBuf, passHash) != passHash )
+			while (sha512passwT(ownPassBuf, passHash) != passHash &&
+				sha512passwd(ownPassBuf, passHash) != passHash)
 			{
 				ret = PwDialog::execute(&p, &ownPassBuf, false);
 				if (ret != 1)

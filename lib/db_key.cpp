@@ -88,10 +88,12 @@ void db_key::inToCont(pki_base *pki)
 {
 	db_base::inToCont(pki);
 
-	unsigned hash = pki->hash();
 	pki_key *key = static_cast<pki_key*>(pki);
+	unsigned hash = key->hash();
 	QSqlQuery q;
-	q.prepare("SELECT item FROM x509super WHERE key_hash=? AND key=NULL");
+	QList<pki_x509super*> list;
+
+	q.prepare("SELECT item FROM x509super WHERE key_hash=? AND key IS NULL");
 	q.bindValue(0, hash);
 	q.exec();
 	mainwin->dbSqlError(q.lastError());
@@ -103,10 +105,21 @@ void db_key::inToCont(pki_base *pki)
 				q.value(0).toInt());
 			continue;
 		}
-		fprintf(stderr, "Found ID %d\n", q.value(0).toInt());
-		if (x->compareRefKey(key))
+		if (x->compareRefKey(key)) {
 			x->setRefKey(key);
+			list << x;
+		}
 	}
+	q.finish();
+
+	q.prepare("UPDATE x509super SET key=? WHERE item=?");
+	q.bindValue(0, key->getSqlItemId());
+	foreach(pki_x509super* x, list) {
+		q.bindValue(1, x->getSqlItemId());
+		q.exec();
+		mainwin->dbSqlError(q.lastError());
+	}
+	q.finish();
 	emit newKey((pki_key *)pki);
 }
 
@@ -350,5 +363,4 @@ void db_key::setOwnPass(QModelIndex idx, enum pki_key::passType x)
 		throw errorEx(tr("Tried to change password of a token"));
 	}
 	targetKey->setOwnPass(x);
-	updatePKI(targetKey);
 }

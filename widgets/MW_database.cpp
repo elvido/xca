@@ -176,6 +176,7 @@ QSqlError MainWindow::initSqlDB()
 	"item INTEGER, "	/* reference to items(id) */
 	"subj_hash INTEGER, "	/* 32 bit hash of the Distinguished name */
 	"key INTEGER, "		/* reference to the key items(id) */
+	"key_hash INTEGER, "	/* 32 bit hash of the public key */
 	"FOREIGN KEY (item) REFERENCES items (id), "
 	"FOREIGN KEY (key) REFERENCES items (id)) "
 
