@@ -57,7 +57,12 @@ class pki_x509super : public pki_x509name
 		{
 			return false;
 		}
+		QVariant getKeySqlId()
+		{
+			return keySqlId;
+		}
 		pki_key *getRefKey() const;
+		bool compareRefKey(pki_key* ref) const;
 		void setRefKey(pki_key *ref);
 		void delRefKey(pki_key *ref);
 		QVariant column_data(dbheader *hd);

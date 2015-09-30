@@ -243,8 +243,8 @@ void db_base::sortIndicatorChanged(int logicalIndex, Qt::SortOrder order)
 void db_base::insertPKI(pki_base *pki)
 {
 	QSqlDatabase *db = mainwin->getDb();
-	inToCont(pki);
 	if (db->transaction()) {
+		inToCont(pki);
 		QSqlError e = pki->insertSql();
 		mainwin->dbSqlError(e);
 		if (e.isValid())
@@ -298,9 +298,8 @@ void db_base::deletePKI(QModelIndex idx)
 			MainWindow::Error(err);
 		}
 
-		remFromCont(idx);
-
 		if (db->transaction()) {
+			remFromCont(idx);
 			QSqlError e = pki->deleteSql();
 	                mainwin->dbSqlError(e);
 			if (e.isValid())

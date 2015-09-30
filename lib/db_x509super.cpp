@@ -35,6 +35,23 @@ db_x509super::db_x509super(MainWindow *mw)
 {
 }
 
+void db_x509super::loadContainer()
+{
+	db_x509name::loadContainer();
+	/* Resolve Key references */
+	FOR_ALL_pki(pki, pki_x509super) {
+		QVariant keySqlId = pki->getKeySqlId();
+		if (!keySqlId.isValid())
+			continue;
+		quint64 id = keySqlId.toULongLong();
+		if (!lookup.contains(id))
+			continue;
+		fprintf(stderr,"X509super: '%s' has key '%s'\n",
+			CCHAR(pki->getIntName()), CCHAR(lookup[id]->getIntName()));
+		pki->setRefKey(static_cast<pki_key*>(lookup[id]));
+	}
+}
+
 dbheaderList db_x509super::getHeaders()
 {
 	dbheaderList h = db_x509name::getHeaders();
@@ -73,12 +90,26 @@ dbheaderList db_x509super::getHeaders()
 
 void db_x509super::delKey(pki_key *delkey)
 {
-	FOR_ALL_pki(pki, pki_x509super) { pki->delRefKey(delkey); }
+	FOR_ALL_pki(pki, pki_x509super) {
+		if (pki->getRefKey() == delkey)
+			pki->setRefKey(NULL);
+	}
 }
 
 void db_x509super::newKey(pki_key *newkey)
 {
-	 FOR_ALL_pki(pki,pki_x509super) { pki->setRefKey(newkey); }
+TRACE
+#if 0
+	QSqlQuery q;
+	unsigned hash = newkey->hash();
+	q.prepare("SELECT item from x509super")
+	 FOR_ALL_pki(pki,pki_x509super) {
+		if (pki->getRefKey())
+			continue;
+		if (pki->compareRefKey(newkey))
+			pki->setRefKey(newkey);
+	}
+#endif
 }
 
 pki_key *db_x509super::findKey(pki_x509super *ref)

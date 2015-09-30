@@ -67,25 +67,23 @@ pki_key *pki_x509super::getRefKey() const
 	return privkey;
 }
 
-void pki_x509super::setRefKey(pki_key *ref)
+bool pki_x509super::compareRefKey(pki_key *ref) const
 {
-	if (ref == NULL || privkey != NULL )
-		return;
+	bool x;
+
+	if (ref == NULL)
+		return false;
 	pki_key *mk = getPubKey();
 	if (mk == NULL)
-		return;
-	if (ref->compare(mk)) {
-		// this is our key
-		privkey = ref;
-	}
+		return false;
+	x = ref->compare(mk);
 	delete mk;
+	return x;
 }
 
-void pki_x509super::delRefKey(pki_key *ref)
+void pki_x509super::setRefKey(pki_key *ref)
 {
-	if (ref != privkey || ref == NULL)
-		return;
-	privkey = NULL;
+	privkey = ref;
 }
 
 QString pki_x509super::getSigAlg()

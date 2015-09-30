@@ -29,6 +29,7 @@ class pki_base : public QObject
 		static int suppress_messages;
 		static QRegExp limitPattern;
 		static QString rmslashdot(const QString &fname);
+		static unsigned hash(QByteArray ba);
 
 	protected:
 		QVariant sqlItemId;

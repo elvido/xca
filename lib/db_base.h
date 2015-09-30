@@ -33,8 +33,8 @@ class db_base: public QAbstractItemModel
 {
 	Q_OBJECT
 
-		static QHash<quint64, pki_base*> lookup;
 	protected:
+		static QHash<quint64, pki_base*> lookup;
 		QModelIndex currentIdx;
 		void _writePKI(pki_base *pki, bool overwrite);
 		void _removePKI(pki_base *pki );

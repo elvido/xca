@@ -87,6 +87,26 @@ void db_key::remFromCont(QModelIndex &idx)
 void db_key::inToCont(pki_base *pki)
 {
 	db_base::inToCont(pki);
+
+	unsigned hash = pki->hash();
+	pki_key *key = static_cast<pki_key*>(pki);
+	QSqlQuery q;
+	q.prepare("SELECT item FROM x509super WHERE key_hash=? AND key=NULL");
+	q.bindValue(0, hash);
+	q.exec();
+	mainwin->dbSqlError(q.lastError());
+	while (q.next()) {
+		pki_x509super *x = static_cast<pki_x509super*>(
+					lookup[q.value(0).toULongLong()]);
+		if (!x) {
+			qDebug("X509 Super class with id %d not found",
+				q.value(0).toInt());
+			continue;
+		}
+		fprintf(stderr, "Found ID %d\n", q.value(0).toInt());
+		if (x->compareRefKey(key))
+			x->setRefKey(key);
+	}
 	emit newKey((pki_key *)pki);
 }
 

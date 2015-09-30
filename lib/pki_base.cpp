@@ -259,9 +259,8 @@ bool pki_base::compare(pki_base *refcrl)
 	return ret;
 }
 
-unsigned pki_base::hash()
+unsigned pki_base::hash(QByteArray ba)
 {
-	QByteArray ba = i2d();
 	unsigned char md[EVP_MAX_MD_SIZE];
 
 	SHA1((const unsigned char *)ba.constData(), ba.length(), md);
@@ -269,4 +268,8 @@ unsigned pki_base::hash()
 	return (((unsigned)md[0]     ) | ((unsigned)md[1]<<8L) |
 		((unsigned)md[2]<<16L) | ((unsigned)md[3]<<24L)
 		) & 0xffffffffL;
+}
+unsigned pki_base::hash()
+{
+	return hash(i2d());
 }

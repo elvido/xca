@@ -30,6 +30,7 @@ class db_x509super: public db_x509name
 
 	protected:
 		dbheaderList getHeaders();
+		void loadContainer();
 	public:
 		db_x509super(MainWindow *mw);
 		pki_key *findKey(pki_x509super *ref);
