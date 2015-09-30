@@ -502,9 +502,10 @@ void pki_evp::encryptKey(const char *password)
 	EVP_CIPHER_CTX_init (&ctx);
 	pki_openssl_error();
 
-	/* reserve space for unencrypted and encrypted key */
+	/* reserve space for encrypted key */
 	keylen = i2d_PrivateKey(key, NULL);
 	encKey.resize(keylen + EVP_MAX_KEY_LENGTH + 8);
+	/* allocate space for unencrypted key */
 	punenc1 = punenc = (unsigned char *)OPENSSL_malloc(keylen);
 	check_oom(punenc);
 	keylen = i2d_PrivateKey(key, &punenc1);
@@ -537,9 +538,6 @@ void pki_evp::encryptKey(const char *password)
 	key = pkey1;
 	pki_openssl_error();
 
-	//CRYPTO_mem_ctrl(CRYPTO_MEM_CHECK_OFF);
-
-	//printf("Encrypt: encKey_len=%d\n", encKey_len);
 	return;
 }
 
@@ -768,7 +766,8 @@ QString pki_evp::md5passwd(QByteArray pass)
 	return str;
 }
 
-QString pki_evp::sha512passwd(QByteArray pass, QString salt)
+QString pki_evp::_sha512passwd(QByteArray pass, QString salt,
+				int size, int repeat)
 {
 
 	EVP_MD_CTX mdctx;
@@ -777,20 +776,32 @@ QString pki_evp::sha512passwd(QByteArray pass, QString salt)
 	int j;
 	unsigned char m[EVP_MAX_MD_SIZE];
 
-	if (salt.length() <5)
+	if (salt.length() < size)
 		abort();
 
-	str = salt.left(5);
+	str = salt.left(size);
 	pass = str.toLatin1() + pass;
 
-	EVP_DigestInit(&mdctx, EVP_sha512());
-	EVP_DigestUpdate(&mdctx, pass.constData(), pass.size());
-	EVP_DigestFinal(&mdctx, m, (unsigned*)&n);
-
+	while (repeat--) {
+		EVP_DigestInit(&mdctx, EVP_sha512());
+		EVP_DigestUpdate(&mdctx, pass.constData(), pass.size());
+		EVP_DigestFinal(&mdctx, m, (unsigned*)&n);
+		pass = QByteArray((char*)m, n);
+	}
 	for (j=0; j<n; j++) {
 		char zs[4];
 		sprintf(zs, "%02X",m[j]);
 		str += zs;
 	}
 	return str;
+}
+
+QString pki_evp::sha512passwd(QByteArray pass, QString salt)
+{
+	return _sha512passwd(pass, salt, 5, 1);
+}
+
+QString pki_evp::sha512passwT(QByteArray pass, QString salt)
+{
+	return _sha512passwd(pass, salt, 17, 8000);
 }

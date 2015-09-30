@@ -575,12 +575,13 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
 QString makeSalt(void)
 {
-	unsigned char rand[2];
-	char saltbuf[10];
+	QString s = "T";
+	unsigned char rand[8];
 
-	Entropy::get(rand, 2);
-	snprintf(saltbuf, 10, "S%02X%02X", rand[0], rand[1]);
-	return QString(saltbuf);
+	Entropy::get(rand, sizeof rand);
+	for (unsigned i=0; i< sizeof rand; i++)
+		s += QString("%1").arg(rand[i]);
+	return s;
 }
 
 int MainWindow::checkOldGetNewPass(Passwd &pass)
@@ -712,11 +713,11 @@ int MainWindow::initPass()
 		if (ret != 1)
 			return ret;
 		salt = makeSalt();
-		pki_evp::passHash = pki_evp::sha512passwd(pki_evp::passwd,salt);
+		pki_evp::passHash =pki_evp::sha512passwT(pki_evp::passwd,salt);
 		storeSetting("pwhash", pki_evp::passHash);
 	} else {
 		ret = 0;
-		while (pki_evp::sha512passwd(pki_evp::passwd, pki_evp::passHash)
+		while (pki_evp::sha512passwT(pki_evp::passwd, pki_evp::passHash)
 				!= pki_evp::passHash)
 		{
 			if (ret)
@@ -730,8 +731,24 @@ int MainWindow::initPass()
 				pki_evp::passwd = QByteArray();
 				return ret;
 			}
-			if (pki_evp::passHash.left(1) == "S")
+			switch (pki_evp::passHash.at(0).toLatin1()) {
+			case 'T':
+				/* Fine, current hash function used. */
 				continue;
+			case 'S':
+			/* Start automatic update from sha512 to sha512*8000
+			 * if the password is correct. The sha512 hash does
+			 * start with 'S', while the new hash starts with T. */
+			if (pki_evp::sha512passwd(pki_evp::passwd,
+				pki_evp::passHash) == pki_evp::passHash)
+			{
+				salt = makeSalt();
+				pki_evp::passHash = pki_evp::sha512passwT(
+						pki_evp::passwd, salt);
+				storeSetting("pwhash", pki_evp::passHash);
+			}
+			break;
+			default:
 			/* Start automatic update from md5 to salted sha512
 			 * if the password is correct. my md5 hash does not
 			 * start with 'S', while my new hash does. */
@@ -739,9 +756,10 @@ int MainWindow::initPass()
 						pki_evp::passHash )
 			{
 				salt = makeSalt();
-				pki_evp::passHash = pki_evp::sha512passwd(
+				pki_evp::passHash = pki_evp::sha512passwT(
 						pki_evp::passwd, salt);
 				storeSetting("pwhash", pki_evp::passHash);
+			}
 			}
 		}
 	}
@@ -799,6 +817,7 @@ void MainWindow::importAnything(QString file)
 
 pki_multi *MainWindow::probeAnything(QString file, int *ret)
 {
+	(void)ret;
 	pki_multi *pki = new pki_multi();
 
 	try {

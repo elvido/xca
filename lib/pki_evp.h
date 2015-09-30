@@ -22,6 +22,8 @@ class pki_evp: public pki_key
 		Q_OBJECT
 		QByteArray encKey;
 		QByteArray getEncKey() const;
+		static QString _sha512passwd(QByteArray pass, QString salt,
+						int size, int repeat);
 	protected:
 		void init(int type = EVP_PKEY_RSA);
 		void openssl_pw_error(QString fname);
@@ -32,6 +34,7 @@ class pki_evp: public pki_key
 		static Passwd oldpasswd;
 		static QString md5passwd(QByteArray pass);
 		static QString sha512passwd(QByteArray pass, QString salt);
+		static QString sha512passwT(QByteArray pass, QString salt);
 		void generate(int bits, int type, QProgressBar *progress);
 		void generate(int bits, int type, QProgressBar *progress,
 				int curve_nid);
