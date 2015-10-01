@@ -56,6 +56,7 @@ class pki_base : public QObject
 		{
 			return desc;
 		}
+		virtual QString comboText();
 		QString getUnderlinedName() const
 		{
 			return getIntName().replace(
@@ -135,4 +136,5 @@ class pki_base : public QObject
 		unsigned hash();
 };
 
+Q_DECLARE_METATYPE(pki_base *);
 #endif

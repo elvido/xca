@@ -34,6 +34,7 @@ void CrlDetail::setCrl(pki_crl *crl)
 
 	iss = crl->getIssuer();
 	signCheck->disableToolTip();
+	signCheck->setClickText(crl->getSigAlg());
 	if (iss != NULL) {
 		issuerIntName->setText(iss->getIntName());
 		issuerIntName->setGreen();
@@ -54,6 +55,9 @@ void CrlDetail::setCrl(pki_crl *crl)
 		signCheck->setText(tr("Verification not possible"));
 		signCheck->setDisabled(true);
 	}
+
+	connect(signCheck, SIGNAL(doubleClicked(QString)),
+		MainWindow::getResolver(), SLOT(searchOid(QString)));
 
 	descr->setText(crl->getIntName());
 	lUpdate->setText(crl->getLastUpdate().toPretty());

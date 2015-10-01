@@ -40,7 +40,7 @@ class db_x509: public db_x509super
 		void updateViewAll();
 		void updateViewPKI(pki_base *pki);
 		void remFromCont(QModelIndex &idx);
-		QStringList getSignerDesc();
+		QList<pki_base*> getAllIssuers();
 		void calcEffTrust();
 		QList<pki_x509*> getCerts(bool onlyTrusted);
 		a1int searchSerial(pki_x509 *signer);

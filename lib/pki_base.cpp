@@ -30,6 +30,10 @@ pki_base::~pki_base(void)
 		delete takeFirst();
 }
 
+QString pki_base::comboText()
+{
+	return desc;
+}
 void pki_base::deleteFromToken() { };
 void pki_base::deleteFromToken(slotid) { };
 void pki_base::writeDefault(const QString) { }

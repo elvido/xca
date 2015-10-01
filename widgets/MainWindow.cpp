@@ -799,8 +799,8 @@ void MainWindow::setPath(QString str)
 void MainWindow::connNewX509(NewX509 *nx)
 {
 	connect( nx, SIGNAL(genKey(QString)), keys, SLOT(newItem(QString)) );
-	connect( keys, SIGNAL(keyDone(QString)), nx, SLOT(newKeyDone(QString)) );
-	connect( nx, SIGNAL(showReq(QString)), reqs, SLOT(showItem(QString)));
+	connect( keys, SIGNAL(keyDone(pki_key*)), nx, SLOT(newKeyDone(pki_key*)) );
+	connect( nx, SIGNAL(showReq(pki_base*)), reqs, SLOT(showItem(pki_base*)));
 }
 
 void MainWindow::importAnything(QString file)

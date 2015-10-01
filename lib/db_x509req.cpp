@@ -176,3 +176,8 @@ void db_x509req::signReq(QModelIndex index)
 	pki_x509req *req = static_cast<pki_x509req*>(index.internalPointer());
 	emit newCert(req);
 }
+
+QList<pki_base *> db_x509req::getAllRequests()
+{
+	return sqlSELECTpki("SELECT item FROM requests");
+}

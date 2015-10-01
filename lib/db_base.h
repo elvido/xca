@@ -74,6 +74,7 @@ class db_base: public QAbstractItemModel
 		virtual void remFromCont(QModelIndex &idx);
 
 		QPixmap *loadImg(const char *name);
+		QList<pki_base *> sqlSELECTpki(QString query);
 		void writeAll(void);
 		void dump(QString dirname);
 		QModelIndex index(int row, int column, const QModelIndex &parent)const;

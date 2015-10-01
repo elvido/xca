@@ -208,9 +208,9 @@ void db_crl::updateRevocations(pki_x509 *cert)
 void db_crl::newItem()
 {
 	bool ok = false;
-	QStringList sl = mainwin->certs->getSignerDesc();
+#warning "FIXME erts->getSignerDesc();"
+	QStringList sl; // = mainwin->certs->getSignerDesc();
 	QString ca;
-
 	switch (sl.size()) {
 	case 0:
 		XCA_INFO(tr("There are no CA certificates for CRL generation"));

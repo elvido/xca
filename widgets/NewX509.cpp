@@ -70,28 +70,30 @@ NewX509::NewX509(QWidget *parent)
 	nsImg->setPixmap(*MainWindow::nsImg);
 	serialNr->setValidator(new QRegExpValidator(QRegExp("[0-9a-fA-F]*"), this));
 	QStringList strings;
+	QList<pki_base *> requests;
 
 	// are there any useable private keys  ?
-	newKeyDone("");
+	newKeyDone(NULL);
 
 	// any PKCS#10 requests to be used ?
-	strings = MainWindow::reqs->getDesc();
-	if (strings.isEmpty()) {
+	requests = MainWindow::reqs->getAllRequests();
+	if (requests.isEmpty()) {
 		fromReqCB->setDisabled(true);
 		fromReqCB->setChecked(false);
 	}
 	else {
-		reqList->insertItems(0, strings);
+		reqList->insertPkiItems(requests);
 	}
 	on_fromReqCB_clicked();
 
 	// How about signing certificates ?
-	strings = MainWindow::certs->getSignerDesc();
-	if (strings.isEmpty()) {
+	QList<pki_base*> issuers = MainWindow::certs->getAllIssuers();
+	if (issuers.isEmpty()) {
 		foreignSignRB->setDisabled(true);
 	} else {
-		certList->insertItems(0, strings);
+		certList->insertPkiItems(issuers);
 	}
+#warning "Remove WG_QA_SERIAL finally! :-)"
 #ifdef WG_QA_SERIAL
 	selfQASignRB = new QRadioButton(signerBox);
 	setTabOrder(serialNr, selfQASignRB);
@@ -381,12 +383,9 @@ void NewX509::defineTemplate(pki_temp *temp)
 /* Select a Request for signing it */
 void NewX509::defineRequest(pki_x509req *req)
 {
-	if (!req)
-		return;
 	fromReqCB->setEnabled(true);
 	fromReqCB->setChecked(true);
-	QString reqname = req->getIntName();
-	reqList->setCurrentIndex(reqList->findText(reqname));
+	reqList->setCurrentPkiItem(req);
 	on_fromReqCB_clicked();
 }
 
@@ -402,8 +401,7 @@ void NewX509::fromX509super(pki_x509super *cert_or_req)
 	pki_key *key = cert_or_req->getRefKey();
 	if (key) {
 		usedKeysToo->setChecked(true);
-		keyList->setCurrentIndex(private_keys.indexOf(
-			key->getIntNameWithType()));
+		keyList->setCurrentPkiItem(key);
 	}
 	hashAlgo->setCurrentMD(cert_or_req->getDigest());
 
@@ -449,17 +447,14 @@ void NewX509::defineCert(pki_x509 *cert)
 /* Preset the signing certificate */
 void NewX509::defineSigner(pki_x509 *defcert)
 {
-	int index;
 	// suggested from: Andrey Brindeew <abr@abr.pp.ru>
 	if (defcert && defcert->canSign() ) {
-		QString name = defcert->getIntName();
-		foreignSignRB->setChecked(true);
-		certList->setEnabled(true);
-		if ((index = certList->findText(name)) >= 0) {
-			certList->setCurrentIndex(index);
-		}
-		if (!defcert->getTemplate().isEmpty()) {
-			on_applyTemplate_clicked();
+		if (certList->setCurrentPkiItem(defcert) != -1) {
+			foreignSignRB->setChecked(true);
+			certList->setEnabled(true);
+			if (!defcert->getTemplate().isEmpty()) {
+				on_applyTemplate_clicked();
+			}
 		}
 	}
 }
@@ -665,8 +660,7 @@ void NewX509::switchHashAlgo()
 
 void NewX509::on_showReqBut_clicked()
 {
-	QString req = reqList->currentText();
-	emit showReq(req);
+	emit showReq(reqList->currentPkiItem());
 }
 
 void NewX509::on_genKeyBut_clicked()
@@ -752,51 +746,39 @@ void NewX509::on_foreignSignRB_toggled(bool)
 	switchHashAlgo();
 }
 
-void NewX509::newKeyDone(QString name)
+void NewX509::newKeyDone(pki_key *nkey)
 {
-	QStringList keys;
-	private_keys = MainWindow::keys->get0KeyDesc(true);
-	private_keys0 = MainWindow::keys->get0KeyDesc(false);
-	keyList->clear();
-	if (usedKeysToo->isChecked())
-		keys = private_keys;
+	allKeys =   MainWindow::keys->getAllKeys();
+	unusedKeys= MainWindow::keys->getUnusedKeys();
+	on_usedKeysToo_toggled(true);
+	if (nkey)
+		keyList->setCurrentPkiItem(nkey);
 	else
-		keys = private_keys0;
-
-	keyList->insertItems(0, keys);
-	if (name.isEmpty() && keys.count() >0)
-		name = keys[0];
-	keyList->setCurrentIndex(keys.indexOf(name));
+		keyList->setCurrentIndex(0);
 }
 
 void NewX509::on_usedKeysToo_toggled(bool)
 {
-	QString cur = keyList->currentText();
-	QStringList keys;
+	pki_base *cur = keyList->currentPkiItem();
 	keyList->clear();
-	if (usedKeysToo->isChecked())
-		keys = private_keys;
-	else
-		keys = private_keys0;
-
-	keyList->insertItems(0, keys);
-	keyList->setCurrentIndex(keys.indexOf(cur));
+	keyList->insertPkiItems(usedKeysToo->isChecked() ?
+			allKeys : unusedKeys);
+	keyList->setCurrentPkiItem(cur);
 }
 
 pki_key *NewX509::getSelectedKey()
 {
-	QString name = pki_key::removeTypeFromIntName(keyList->currentText());
-	return (pki_key *)MainWindow::keys->getByName(name);
+	return (pki_key*)keyList->currentPkiItem();
 }
 
 pki_x509 *NewX509::getSelectedSigner()
 {
-	return (pki_x509 *)MainWindow::certs->getByName(certList->currentText());
+	return (pki_x509 *)certList->currentPkiItem();
 }
 
 pki_x509req *NewX509::getSelectedReq()
 {
-	return (pki_x509req *)MainWindow::reqs->getByName(reqList->currentText());
+	return (pki_x509req *)reqList->currentPkiItem();
 }
 
 x509name NewX509::getX509name(int _throw)

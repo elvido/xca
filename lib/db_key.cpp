@@ -57,14 +57,16 @@ pki_base *db_key::newPKI(enum pki_type type)
 	return new pki_scard("");
 }
 
-QStringList db_key::get0KeyDesc(bool all)
+QList<pki_base *> db_key::getAllKeys()
 {
-	QStringList x;
-	FOR_ALL_pki(pki, pki_key) {
-		if ((pki->getUcount() == 0) || all)
-			x.append(pki->getIntNameWithType());
-	}
-	return x;
+	return sqlSELECTpki("SELECT item from public_keys");
+}
+
+QList<pki_base *> db_key::getUnusedKeys()
+{
+	return sqlSELECTpki("SELECT public_keys.item from public_keys "
+		"OUTER LEFT JOIN x509super ON x509super.key = public_keys.item "
+		"WHERE x509super.item IS NULL");
 }
 
 void db_key::remFromCont(QModelIndex &idx)
@@ -150,7 +152,7 @@ void db_key::newItem(QString name)
 				dlg->getKeyCurve_nid());
 		}
 		key = (pki_key*)insert(key);
-		emit keyDone(key->getIntNameWithType());
+		emit keyDone(key);
 		createSuccess(key);
 
 	} catch (errorEx &err) {

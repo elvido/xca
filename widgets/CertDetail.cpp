@@ -73,6 +73,8 @@ void CertDetail::setX509super(pki_x509super *x)
 
 	// Algorithm
 	sigAlgo->setText(x->getSigAlg());
+	connect(sigAlgo, SIGNAL(doubleClicked(QString)),
+		MainWindow::getResolver(), SLOT(searchOid(QString)));
 }
 
 void CertDetail::setCert(pki_x509 *cert)

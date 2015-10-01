@@ -108,21 +108,14 @@ pki_x509 *db_x509::findIssuer(pki_x509 *client)
 	return NULL;
 }
 
-QStringList db_x509::getSignerDesc()
+QList<pki_base *> db_x509::getAllIssuers()
 {
-	QStringList x;
-	QSqlQuery q;
-	/* Select X509 CA certificate names with available private key */
-	q.exec("SELECT name FROM items "
-		"JOIN x509super ON items.id = x509super.item"
+	/* Select X509 CA certificates with available private key */
+	return sqlSELECTpki("SELECT x509super.item FROM x509super "
 		"JOIN private_keys ON x509super.key = private_keys.item "
 		"JOIN certs ON certs.item = x509super.item "
 		"WHERE certs.ca='true'");
-	while (q.next())
-		x << q.value(0).toString();
-	return x;
 }
-
 
 void db_x509::remFromCont(QModelIndex &idx)
 {

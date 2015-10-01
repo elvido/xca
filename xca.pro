@@ -90,6 +90,7 @@ HEADERS += local.h \
            widgets/X509SuperTreeView.h \
            widgets/XcaHeaderView.h \
            widgets/OidResolver.h \
+	   widgets/ItemCombo.h \
            widgets/XcaProxyModel.h
 
 FORMS += ui/About.ui \
