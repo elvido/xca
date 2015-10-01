@@ -32,7 +32,7 @@ class db_x509: public db_x509super
 		static bool treeview;
 		db_x509(MainWindow *mw);
 		pki_base *newPKI(enum pki_type type = none);
-		pki_x509 *findSigner(pki_x509 *client);
+		pki_x509 *findIssuer(pki_x509 *client);
 		void updateAfterDbLoad();
 		void updateAfterCrlLoad(pki_x509 *pki);
 
@@ -40,7 +40,6 @@ class db_x509: public db_x509super
 		void updateViewAll();
 		void updateViewPKI(pki_base *pki);
 		void remFromCont(QModelIndex &idx);
-		QStringList getPrivateDesc();
 		QStringList getSignerDesc();
 		void calcEffTrust();
 		QList<pki_x509*> getCerts(bool onlyTrusted);

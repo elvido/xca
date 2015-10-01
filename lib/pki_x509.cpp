@@ -94,7 +94,7 @@ QSqlError pki_x509::insertSqlData()
 		  "VALUES (?, ?, ?, ?, ?, ?, ?)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, hash());
-	q.bindValue(2, (uint)getIssuer().hashNum());
+	q.bindValue(2, (uint)getIssuerName().hashNum());
 	q.bindValue(3, getSerial().toHex());
 	q.bindValue(4, signer ? signer->getSqlItemId() : QVariant());
 	q.bindValue(5, isCA());
@@ -351,7 +351,7 @@ void pki_x509::store_token(bool alwaysSelect)
 		pk11_attr_bool(CKA_TOKEN, true) <<
 		pk11_attr_bool(CKA_PRIVATE, false) <<
 		pk11_attr_data(CKA_SUBJECT, getSubject().i2d()) <<
-		pk11_attr_data(CKA_ISSUER, getIssuer().i2d()) <<
+		pk11_attr_data(CKA_ISSUER, getIssuerName().i2d()) <<
 		pk11_attr_data(CKA_SERIAL_NUMBER, getSerial().i2d()) <<
 		pk11_attr_data(CKA_LABEL, desc.toUtf8()) <<
 		(card ? card->getIdAttr() : p11.findUniqueID(CKO_CERTIFICATE));
@@ -468,7 +468,7 @@ x509name pki_x509::getSubject() const
 	return x;
 }
 
-x509name pki_x509::getIssuer() const
+x509name pki_x509::getIssuerName() const
 {
 	x509name x(cert->cert_info->issuer);
 	pki_openssl_error();
@@ -671,6 +671,9 @@ bool pki_x509::verify(pki_x509 *signer)
 		return true;
 	if ((psigner != NULL) || (signer == NULL))
 		return false;
+	if (signer == this && signerSqlId == sqlItemId)
+		return true;
+
 	if (verify_only(signer)) {
 		int idx;
 		x509rev r;
@@ -985,7 +988,7 @@ bool pki_x509::visible()
 {
 	if (pki_x509super::visible())
 		return true;
-	if (getIssuer().search(limitPattern))
+	if (getIssuerName().search(limitPattern))
 		return true;
 	if (fingerprint(EVP_md5()).contains(limitPattern))
 		return true;

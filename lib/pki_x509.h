@@ -66,7 +66,7 @@ class pki_x509 : public pki_x509super
 		a1time getNotBefore() const;
 		a1time getNotAfter() const;
 		x509name getSubject() const;
-		x509name getIssuer() const;
+		x509name getIssuerName() const;
 		void setSubject(const x509name &n);
 		void setIssuer(const x509name &n);
 		bool caAndPathLen(bool *ca, a1int *pathlen, bool *hasLen);

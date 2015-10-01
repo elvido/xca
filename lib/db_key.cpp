@@ -57,16 +57,6 @@ pki_base *db_key::newPKI(enum pki_type type)
 	return new pki_scard("");
 }
 
-QStringList db_key::getPrivateDesc()
-{
-	QStringList x;
-	x.clear();
-	FOR_ALL_pki(pki, pki_key)
-		if (pki->isPrivKey())
-			x.append(pki->getIntName());
-	return x;
-}
-
 QStringList db_key::get0KeyDesc(bool all)
 {
 	QStringList x;

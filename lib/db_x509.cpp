@@ -75,38 +75,51 @@ pki_base *db_x509::newPKI(enum pki_type type)
 	return new pki_x509();
 }
 
-pki_x509 *db_x509::findSigner(pki_x509 *client)
+pki_x509 *db_x509::findIssuer(pki_x509 *client)
 {
+	QSqlQuery q;
 	pki_x509 *signer;
+	unsigned hash;
+
 	if ((signer = client->getSigner()) != NULL)
 		return signer;
 	// first check for self-signed
-	if (client->verify(client)) {
+	if (client->verify(client))
 		return client;
-	}
-	FOR_ALL_pki(pki, pki_x509) {
-		if (client->verify(pki)) {
-			return pki;
+
+	hash = client->getIssuerName().hashNum();
+	/* Select X509 CA certificates with subject-hash == hash */
+	q.prepare("SELECT x509super.item from x509super "
+		"JOIN certs ON certs.item = x509super.item "
+		"WHERE certs.ca='true' AND x509super.subj_hash=?");
+	q.bindValue(0, hash);
+	q.exec();
+	while (q.next()) {
+		pki_x509 *issuer = static_cast<pki_x509*>(
+				lookupPki(q.value(0).toULongLong()));
+		if (!issuer) {
+			qDebug("Certificate with id %d not found",
+                                q.value(0).toInt());
+		}
+		if (client->verify(issuer)) {
+			return issuer;
 		}
 	}
 	return NULL;
 }
 
-QStringList db_x509::getPrivateDesc()
-{
-	QStringList x;
-	FOR_ALL_pki(pki, pki_x509)
-		if (pki->getRefKey())
-			x.append(pki->getIntName());
-	return x;
-}
-
 QStringList db_x509::getSignerDesc()
 {
 	QStringList x;
-	FOR_ALL_pki(pki, pki_x509)
-		if (pki->canSign())
-			x.append(pki->getIntName());
+	QSqlQuery q;
+	/* Select X509 CA certificate names with available private key */
+	q.exec("SELECT name FROM items "
+		"JOIN x509super ON items.id = x509super.item"
+		"JOIN private_keys ON x509super.key = private_keys.item "
+		"JOIN certs ON certs.item = x509super.item "
+		"WHERE certs.ca='true'");
+	while (q.next())
+		x << q.value(0).toString();
 	return x;
 }
 
@@ -128,7 +141,7 @@ void db_x509::remFromCont(QModelIndex &idx)
 	while (pki->childCount()) {
 		child = (pki_x509*)pki->childItems.takeFirst();
 		child->delSigner((pki_x509*)pki);
-		new_parent = findSigner(child);
+		new_parent = findIssuer(child);
 		insertChild(new_parent, child);
 	}
 	mainwin->crls->removeSigner(pki);
@@ -208,7 +221,7 @@ void db_x509::inToCont(pki_base *pki)
 	pki_x509 *cert = (pki_x509*)pki;
 	cert->setParent(NULL);
 	cert->delSigner(cert->getSigner());
-	findSigner(cert);
+	findIssuer(cert);
 	pki_base *root = cert->getSigner();
 	if (!treeview || root == cert || root == NULL)
 		root = rootItem;
