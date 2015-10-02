@@ -41,7 +41,8 @@ class pki_key: public pki_base
 		const char *getClassName() const;
 		static builtin_curves builtinCurves;
 		enum passType { ptCommon, ptPrivate, ptBogus, ptPin };
-		QString length();
+		QString length() const;
+		QString comboText() const;
 
 		virtual EVP_PKEY *decryptKey() const
 		{
@@ -57,14 +58,12 @@ class pki_key: public pki_base
 		}
 		virtual bool isToken();
 		virtual QString getTypeString(void) const;
-		virtual QString getIntNameWithType(void);
 		virtual QList<int> possibleHashNids();
 		virtual QString getMsg(msg_type msg);
 
 		void writePublic(const QString fname, bool pem);
 		bool compare(pki_base *ref);
 		int getKeyType();
-		static QString removeTypeFromIntName(QString n);
 		bool isPrivKey() const;
 		int getUcount();
 		int getOwnPass(void)

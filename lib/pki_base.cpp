@@ -30,7 +30,7 @@ pki_base::~pki_base(void)
 		delete takeFirst();
 }
 
-QString pki_base::comboText()
+QString pki_base::comboText() const
 {
 	return desc;
 }

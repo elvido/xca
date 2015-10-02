@@ -41,14 +41,6 @@ const char *pki_evp::getClassName() const
 	return "pki_evp";
 }
 
-QString pki_evp::removeTypeFromIntName(QString n)
-{
-	if (n.right(1) != ")" )
-		return n;
-	n.truncate(n.length() - 6);
-	return n;
-}
-
 void pki_evp::setOwnPass(enum passType x)
 {
 	QSqlQuery q;

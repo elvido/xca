@@ -105,14 +105,15 @@ BIO *pki_key::pem(BIO *b, int format)
 	return b;
 }
 
-QString pki_key::length()
+QString pki_key::length() const
 {
-	if (key_size == 0)
-		key_size = EVP_PKEY_bits(key);
+	int ks = key_size;
+	if (ks == 0)
+		ks = EVP_PKEY_bits(key);
 	if (key->type == EVP_PKEY_DSA && key->pkey.dsa->p == NULL) {
 		return QString("???");
 	}
-	return QString("%1 bit").arg(key_size);
+	return QString("%1 bit").arg(ks);
 }
 
 QString pki_key::getTypeString() const
@@ -166,22 +167,11 @@ QString pki_key::getMsg(msg_type msg)
 	return pki_base::getMsg(msg);
 }
 
-QString pki_key::getIntNameWithType()
+QString pki_key::comboText() const
 {
 	return QString("%1 (%2:%3%4)").arg(getIntName()).arg(getTypeString()).
 		arg(length()).arg(isPubKey() ?
 			QString(" ") + tr("public key") : QString(""));
-}
-
-QString pki_key::removeTypeFromIntName(QString n)
-{
-	int i;
-	if (n.right(1) != ")" )
-		return n;
-	i = n.lastIndexOf(" (");
-	if (i > 0)
-		n.truncate(i);
-	return n;
 }
 
 bool pki_key::isToken()

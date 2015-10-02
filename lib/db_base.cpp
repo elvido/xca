@@ -500,9 +500,11 @@ bool db_base::setData(const QModelIndex &index, const QVariant &value, int role)
 		if (nn == on)
 			return true;
 		QSqlQuery q;
-		q.prepare("UPDATE TABLE items SET name=? WHERE id=?");
+		q.prepare("UPDATE items SET name=? WHERE id=?");
 		q.bindValue(0, nn);
 		q.bindValue(1, item->getSqlItemId());
+		q.exec();
+		mainwin->dbSqlError(q.lastError());
 		item->setIntName(nn);
 		emit dataChanged(index, index);
 		return true;
