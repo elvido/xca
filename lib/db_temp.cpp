@@ -21,6 +21,7 @@ db_temp::db_temp(MainWindow *mw)
 	:db_x509name(mw)
 {
 	class_name = "templates";
+	sqlHashTable = "templates";
 	pkitype << tmpl;
 
 	updateHeaders();

@@ -30,6 +30,7 @@ db_x509::db_x509(MainWindow *mw)
 	:db_x509super(mw)
 {
 	class_name = "certificates";
+	sqlHashTable = "certs";
 	pkitype << x509;
 	updateHeaders();
 	loadContainer();
@@ -38,9 +39,6 @@ db_x509::db_x509(MainWindow *mw)
 
 void db_x509::dereferenceIssuer()
 {
-	while ((rootItem->childCount()))
-		rootItem->takeFirst();
-
 	QSqlQuery q("SELECT item, issuer FROM certs");
 	while (q.next()) {
 		pki_base *root = rootItem;
@@ -53,7 +51,14 @@ void db_x509::dereferenceIssuer()
 			if (cert != issuer)
 				root = issuer;
 		}
-		insertChild(root, cert);
+		if (cert->getParent() != root) {
+			fprintf(stderr, "MOVE '%s' from '%s' to '%s'\n",
+				CCHAR(cert->getIntName()),
+				CCHAR(cert->getParent()->getIntName()),
+				CCHAR(root->getIntName()));
+			cert->getParent()->takeChild(cert);
+			insertChild(root, cert);
+		}
 	}
 }
 
@@ -110,7 +115,6 @@ void db_x509::remFromCont(QModelIndex &idx)
 {
 	db_x509super::remFromCont(idx);
 	pki_base *pki = static_cast<pki_base*>(idx.internalPointer());
-	pki_base *parent_pki = pki->getParent();
 	pki_x509 *child;
 	pki_base *new_parent;
 	QModelIndex new_idx;
@@ -154,7 +158,7 @@ void db_x509::changeView()
 
 	while ((temproot->childCount())) {
 		pki = temproot->takeFirst();
-		insertChild((pki_x509*)pki->getSigner(), pki);
+		insertChild(static_cast<pki_x509*>(pki)->getParent(), pki);
 	}
 	delete temproot;
 }
@@ -221,8 +225,8 @@ void db_x509::inToCont(pki_base *pki)
 		}
 	}
 	/* Search rootItem childs, whether they are ours */
-	foreach(pki_base *_child, rootItem->childItems) {
-		pki_x509 *child = static_cast<pki_x509*>(_child);
+	foreach(pki_base *b, rootItem->childItems) {
+		pki_x509 *child = static_cast<pki_x509*>(b);
 		if (child == cert || child->getSigner() == child)
 			continue;
 		if (child->verify_only(cert))
@@ -230,7 +234,7 @@ void db_x509::inToCont(pki_base *pki)
 	}
 	/* move collected childs to us */
 	QSqlQuery q;
-	q.prepare("UPDATE cert SET issuer=? WHERE item=?");
+	q.prepare("UPDATE certs SET issuer=? WHERE item=?");
 	q.bindValue(0, cert->getSqlItemId());
 	foreach(pki_x509 *child, childs) {
 		int row;
@@ -239,16 +243,21 @@ void db_x509::inToCont(pki_base *pki)
 		if (!child->verify(cert))
 			continue;
 		row = child->row();
-		beginRemoveRows(index(child), row, row);
-		child->getParent()->takeChild(child);
-		endRemoveRows();
-		if (treeview)
+		if (treeview) {
+			beginRemoveRows(index(child->getParent()), row, row);
+			child->getParent()->takeChild(child);
+			endRemoveRows();
 			insertChild(cert, child);
-		else
-			insertChild(rootItem, child);
+		}
 		q.bindValue(1, child->getSqlItemId());
 		q.exec();
 		mainwin->dbSqlError(q.lastError());
+	}
+	/* Update CRLs */
+	items = sqlSELECTpki( "SELECT item FROM crls WHERE iss_hash=?",
+			QList<QVariant>() << namehash);
+	foreach(pki_base *b, items) {
+		static_cast<pki_crl*>(b)->verify(cert);
 	}
 	calcEffTrust();
 }
@@ -322,6 +331,7 @@ pki_base *db_x509::insert(pki_base *item)
 	}
 	cert->setCaSerial((cert->getSerial()));
 	insertPKI(cert);
+TRACE
 	a1int serial;
 
 	// check the CA serial of the CA of this cert to avoid serial doubles
@@ -332,16 +342,16 @@ pki_base *db_x509::insert(pki_base *item)
 			updatePKI(cert->getSigner());
 		}
 	}
+TRACE
 
 	// check CA serial of this cert
 	serial = searchSerial(cert);
 	if ( ++serial > cert->getCaSerial()) {
 		cert->setCaSerial(serial);
 	}
-	if (mainwin->crls) {
-		mainwin->crls->updateRevocations(cert);
-	}
+TRACE
 	updatePKI(cert);
+TRACE
 	return cert;
 }
 

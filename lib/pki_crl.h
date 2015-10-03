@@ -53,7 +53,7 @@ class pki_crl: public pki_x509name
 		a1time getNextUpdate();
 		a1time getLastUpdate();
 		void fromData(const unsigned char *p, db_header_t *head);
-		bool verify(pki_key *pkey);
+		bool verify(pki_x509 *issuer);
 		int numRev();
 		x509revList getRevList();
 		QString printV3ext();

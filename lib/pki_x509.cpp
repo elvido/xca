@@ -142,6 +142,12 @@ QSqlError pki_x509::deleteSqlData()
 	q.prepare("UPDATE crls SET issuer=NULL WHERE issuer=?");
 	q.bindValue(0, sqlItemId);
 	q.exec();
+	e = q.lastError();
+	if (e.isValid())
+		return e;
+	q.prepare("UPDATE certs SET issuer=NULL WHERE issuer=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
 	return q.lastError();
 }
 
@@ -702,24 +708,30 @@ bool pki_x509::verify_only(pki_x509 *signer)
 
 bool pki_x509::verify(pki_x509 *signer)
 {
+TRACE
 	if (psigner == signer)
 		return true;
+TRACE
 	if ((psigner != NULL) || (signer == NULL))
 		return false;
+TRACE
 	if (signer == this && signerSqlId == sqlItemId)
 		return true;
 
+TRACE
 	if (verify_only(signer)) {
 		int idx;
 		x509rev r;
 		r.setSerial(getSerial());
 		psigner = signer;
+TRACE
 		psigner->revList.merge(x509revList(revocation));
 		idx = psigner->revList.indexOf(r);
 		if (idx != -1)
 			revocation = psigner->revList[idx];
 		return true;
 	}
+TRACE
 	return false;
 }
 

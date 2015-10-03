@@ -190,6 +190,11 @@ bool x509name::operator == (const x509name &x) const
 	return (X509_NAME_cmp(xn, x.xn) == 0);
 }
 
+bool x509name::operator != (const x509name &x) const
+{
+	return (X509_NAME_cmp(xn, x.xn) != 0);
+}
+
 x509name &x509name::operator = (const x509name &x)
 {
 	set(x.xn);

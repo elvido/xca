@@ -32,6 +32,7 @@ db_key::db_key(MainWindow *mw)
 	:db_base(mw)
 {
 	class_name = "keys";
+	sqlHashTable = "public_keys";
 	pkitype << asym_key << smartCard;
 	updateHeaders();
 	loadContainer();

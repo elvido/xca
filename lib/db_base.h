@@ -42,6 +42,8 @@ class db_base: public QAbstractItemModel
 		QList<enum pki_type> pkitype;
 		MainWindow *mainwin;
 		QString class_name;
+		/* Sql table containing the 'hash' of this items */
+		QString sqlHashTable;
 		dbheaderList allHeaders;
 		virtual dbheaderList getHeaders();
 		int colResizing;

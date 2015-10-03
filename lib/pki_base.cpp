@@ -198,7 +198,9 @@ void pki_base::append(pki_base *item)
 
 void pki_base::insert(int row, pki_base *item)
 {
+TRACE
 	childItems.insert(row, item);
+TRACE
 	item->setParent(this);
 }
 
@@ -232,11 +234,19 @@ pki_base *pki_base::iterate(pki_base *pki)
 
 void pki_base::takeChild(pki_base *pki)
 {
+	fprintf(stderr, "Parent: '%s' %p %d before TAKE child: '%s'\n",
+		CCHAR(getIntName()), this,
+		childCount(),
+		CCHAR(pki->getIntName()));
 	childItems.takeAt(pki->row());
 }
 
 pki_base *pki_base::takeFirst()
 {
+	fprintf(stderr, "Parent: '%s' %p %d before TAKE FIRST child: '%s'\n",
+		CCHAR(getIntName()), this,
+		childCount(),
+		CCHAR(childItems.first()->getIntName()));
 	return childItems.takeFirst();
 }
 

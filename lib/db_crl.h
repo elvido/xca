@@ -32,7 +32,6 @@ class db_crl: public db_x509name
 		void load();
 		void showPki(pki_base *pki);
 		void updateCertView();
-		void updateRevocations(pki_x509 *cert);
 
 	public slots:
 		void newItem();

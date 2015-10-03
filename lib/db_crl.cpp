@@ -20,6 +20,7 @@ db_crl::db_crl(MainWindow *mw)
 	:db_x509name(mw)
 {
 	class_name = "crls";
+	sqlHashTable = "crls";
 	pkitype << revocation;
 	updateHeaders();
 	loadContainer();
@@ -82,33 +83,13 @@ TRACE
 void db_crl::inToCont(pki_base *pki)
 {
 	pki_crl *crl = (pki_crl *)pki;
-	if (crl->getIssuer() == NULL) {
-		pki_x509 *iss = NULL, *last = NULL, *newest = NULL;
-		x509name issname = crl->getSubject();
-		while (1) {
-#warning FIXME
-			iss = NULL; //mainwin->certs->getBySubject(issname, last);
-			if (!iss)
-				break;
-			last = iss;
-			pki_key *key = iss->getPubKey();
-			if (!key)
-				continue;
+	unsigned hash = crl->getSubject().hashNum();
+	QList<pki_base *> items;
 
-			if (!crl->verify(key)) {
-				delete key;
-				continue;
-			}
-			delete key;
-			if (!newest) {
-				newest = iss;
-			} else {
-				if (newest->getNotAfter() < iss->getNotAfter())
-					newest = iss;
-			}
-		}
-		crl->setIssuer(newest);
-	}
+	items = sqlSELECTpki( "SELECT item FROM certs WHERE iss_hash=?",
+				QList<QVariant>() << QVariant(hash));
+	foreach(pki_base *b, items)
+		crl->verify(static_cast<pki_x509*>(b));
 	db_base::inToCont(pki);
 }
 
@@ -175,6 +156,7 @@ void db_crl::store(QModelIndex index)
 	delete dlg;
 }
 
+#if 0
 void db_crl::updateRevocations(pki_x509 *cert)
 {
 	x509name issname = cert->getSubject();
@@ -208,6 +190,7 @@ void db_crl::updateRevocations(pki_x509 *cert)
 		cert->setCrlNumber(latest->getCrlNumber());
 	}
 }
+#endif
 
 void db_crl::newItem()
 {

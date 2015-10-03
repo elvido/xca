@@ -331,14 +331,25 @@ x509name pki_crl::getSubject() const
 	return x ;
 }
 
-bool pki_crl::verify(pki_key *key)
+bool pki_crl::verify(pki_x509 *issuer)
 {
-	bool ret=false;
-	if (crl && crl->crl && key) {
-		ret = (X509_CRL_verify(crl, key->getPubKey()) == 1);
-		pki_ign_openssl_error();
+	if (getSubject() != issuer->getSubject())
+		return false;
+	pki_key *key = issuer->getPubKey();
+	if (!key)
+		return false;
+	int ret = X509_CRL_verify(crl, key->getPubKey());
+	pki_ign_openssl_error();
+	if (ret != 1) {
+		delete key;
+		return false;
 	}
-	return ret;
+	delete key;
+	pki_x509 *curr = getIssuer();
+	if (curr && curr->getNotAfter() > issuer->getNotAfter())
+		return true;
+	setIssuer(issuer);
+	return true;
 }
 
 void pki_crl::setCrlNumber(a1int num)

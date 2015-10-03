@@ -311,9 +311,22 @@ void db_base::insertChild(pki_base *parent, pki_base *child)
 	if (parent != rootItem)
 		idx = index(parent);
 
+TRACE
 	beginInsertRows(idx, 0, 0);
+TRACE
+	fprintf(stderr, "Parent: '%s' %p %d before insert child: '%s'\n",
+		CCHAR(parent->getIntName()), parent,
+		parent->childCount(),
+		CCHAR(child->getIntName()));
+
 	parent->insert(0,child);
+	fprintf(stderr, "Parent: '%s' %p %d after insert child: '%s'\n",
+		CCHAR(parent->getIntName()), parent,
+		parent->childCount(),
+		CCHAR(child->getIntName()));
+TRACE
 	endInsertRows();
+TRACE
 }
 
 /* Does all the linking from existing keys, crls, certs
@@ -338,7 +351,12 @@ pki_base *db_base::getByReference(pki_base *refpki)
 {
 	if (refpki == NULL)
 		return NULL;
-	FOR_ALL_pki(pki, pki_base) {
+	QList<pki_base*> list = sqlSELECTpki(
+		QString("SELECT item FROM %1 WHERE hash=?").arg(sqlHashTable),
+		QList<QVariant>() << QVariant(refpki->hash()));
+	foreach(pki_base *pki, list) {
+TRACE
+		fprintf(stderr, "Maybe: '%s'\n", CCHAR(pki->getIntName()));
 		if (refpki->compare(pki))
 			return pki;
 	}
@@ -388,6 +406,8 @@ QModelIndex db_base::index(int row, int column, const QModelIndex &parent)
 {
 	pki_base *parentItem;
 
+if(column <0)
+	abort();
 	if (!parent.isValid())
 		parentItem = rootItem;
 	else
@@ -477,6 +497,10 @@ static QVariant getHeaderViewInfo(dbheader *h)
 QVariant db_base::headerData(int section, Qt::Orientation orientation,
 		int role) const
 {
+	if (section <0) {
+		qDebug("db_base::headerData Section = %d", section);
+		return QVariant();
+	}
 	if (orientation == Qt::Horizontal) {
 		switch (role) {
 		case Qt::DisplayRole:

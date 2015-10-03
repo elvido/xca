@@ -19,6 +19,7 @@ db_x509req::db_x509req(MainWindow *mw)
 	:db_x509super(mw)
 {
 	class_name = "requests";
+	sqlHashTable = "requests";
 	pkitype << x509_req;
 	updateHeaders();
 	loadContainer();
