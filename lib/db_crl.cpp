@@ -71,8 +71,11 @@ void db_crl::revokeCerts(pki_crl *crl)
 void db_crl::removeSigner(pki_base *signer)
 {
 	FOR_ALL_pki(crl, pki_crl) {
-		if (crl->getIssuer() == signer)
+TRACE
+		if (crl->getIssuer() == signer) {
+TRACE
 			crl->setIssuer(NULL);
+		}
 	}
 }
 
@@ -83,7 +86,8 @@ void db_crl::inToCont(pki_base *pki)
 		pki_x509 *iss = NULL, *last = NULL, *newest = NULL;
 		x509name issname = crl->getSubject();
 		while (1) {
-			iss = mainwin->certs->getBySubject(issname, last);
+#warning FIXME
+			iss = NULL; //mainwin->certs->getBySubject(issname, last);
 			if (!iss)
 				break;
 			last = iss;

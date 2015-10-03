@@ -53,6 +53,10 @@ class pki_x509 : public pki_x509super
 		~pki_x509();
 
 		const char *getClassName() const;
+		void setSigner(pki_x509 *signer)
+		{
+			psigner = signer;
+		}
 		void fload(const QString fname);
 		void load_token(pkcs11 &p11, CK_OBJECT_HANDLE object);
 		void store_token(bool alwaysSelect);
@@ -86,6 +90,7 @@ class pki_x509 : public pki_x509super
 		bool checkDate();
 		bool addV3ext(const x509v3ext &e, bool skip_existing = false);
 		void sign(pki_key *signkey, const EVP_MD *digest);
+		pki_x509 *findIssuer();
 		X509 *getCert()
 		{
 			return cert;

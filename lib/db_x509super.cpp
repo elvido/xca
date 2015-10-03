@@ -88,30 +88,6 @@ dbheaderList db_x509super::getHeaders()
 	return h;
 }
 
-void db_x509super::delKey(pki_key *delkey)
-{
-	FOR_ALL_pki(pki, pki_x509super) {
-		if (pki->getRefKey() == delkey)
-			pki->setRefKey(NULL);
-	}
-}
-
-void db_x509super::newKey(pki_key *newkey)
-{
-TRACE
-#if 0
-	QSqlQuery q;
-	unsigned hash = newkey->hash();
-	q.prepare("SELECT item from x509super")
-	 FOR_ALL_pki(pki,pki_x509super) {
-		if (pki->getRefKey())
-			continue;
-		if (pki->compareRefKey(newkey))
-			pki->setRefKey(newkey);
-	}
-#endif
-}
-
 pki_key *db_x509super::findKey(pki_x509super *ref)
 {
 	pki_key *key, *refkey;

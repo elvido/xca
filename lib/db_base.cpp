@@ -83,10 +83,17 @@ QString db_base::sqlItemSelector()
 	return sl.join(" OR ");
 }
 
-QList<pki_base *> db_base::sqlSELECTpki(QString query)
+QList<pki_base *> db_base::sqlSELECTpki(QString query, QList<QVariant> values)
 {
 	QList<pki_base *> x;
-	QSqlQuery q(query);
+	QSqlQuery q;
+	int i, num_values = values.size();
+
+	q.prepare(query);
+	for (i=0; i < num_values; i++) {
+		q.bindValue(i, values[i]);
+	}
+	q.exec();
 	mainwin->dbSqlError(q.lastError());
 	while (q.next())
 		x << lookupPki(q.value(0).toULongLong());
@@ -259,8 +266,11 @@ void db_base::deletePKI(QModelIndex idx)
 		}
 
 		if (db->transaction()) {
-			remFromCont(idx);
+TRACE
 			QSqlError e = pki->deleteSql();
+TRACE
+			remFromCont(idx);
+TRACE
 	                mainwin->dbSqlError(e);
 			if (e.isValid())
 				db->rollback();

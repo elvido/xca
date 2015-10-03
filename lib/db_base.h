@@ -57,6 +57,8 @@ class db_base: public QAbstractItemModel
 		{
 			return lookup[i];
 		}
+		QList<pki_base *> sqlSELECTpki(QString query,
+				QList<QVariant> values = QList<QVariant>());
 		virtual pki_base *newPKI(enum pki_type type = none);
 		pki_base *rootItem;
 		db_base(MainWindow *mw);
@@ -74,7 +76,6 @@ class db_base: public QAbstractItemModel
 		virtual void remFromCont(QModelIndex &idx);
 
 		QPixmap *loadImg(const char *name);
-		QList<pki_base *> sqlSELECTpki(QString query);
 		void writeAll(void);
 		void dump(QString dirname);
 		QModelIndex index(int row, int column, const QModelIndex &parent)const;

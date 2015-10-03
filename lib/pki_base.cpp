@@ -255,10 +255,10 @@ QVariant pki_base::getIcon(dbheader *hd)
 	return QVariant();
 }
 
-bool pki_base::compare(pki_base *refcrl)
+bool pki_base::compare(pki_base *ref)
 {
 	bool ret;
-	ret = (i2d() == refcrl->i2d());
+	ret = (i2d() == ref->i2d());
 	pki_openssl_error();
 	return ret;
 }

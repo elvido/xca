@@ -312,15 +312,6 @@ int MainWindow::init_database()
 	workingdir = QDir::currentPath();
 	setOptFlags((QString()));
 
-	connect( keys, SIGNAL(newKey(pki_key *)),
-		certs, SLOT(newKey(pki_key *)) );
-	connect( keys, SIGNAL(delKey(pki_key *)),
-		certs, SLOT(delKey(pki_key *)) );
-	connect( keys, SIGNAL(newKey(pki_key *)),
-		reqs, SLOT(newKey(pki_key *)) );
-	connect( keys, SIGNAL(delKey(pki_key *)),
-		reqs, SLOT(delKey(pki_key *)) );
-
 	connect( certs, SIGNAL(connNewX509(NewX509 *)), this,
 		SLOT(connNewX509(NewX509 *)) );
 	connect( reqs, SIGNAL(connNewX509(NewX509 *)), this,

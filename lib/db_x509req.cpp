@@ -103,24 +103,6 @@ void db_x509req::toRequest(QModelIndex index)
 		return;
 	newItem(NULL, req);
 }
-#if 0 // to be removed
-void db_x509req::inToCont(pki_base *pki)
-{
-	pki_x509req *req = (pki_x509req *)pki;
-	db_base::inToCont(pki);
-	findKey(req);
-	if (!mainwin->certs)
-		return;
-	pki_key *pub = req->getPubKey();
-	if (pub) {
-		int certs = mainwin->certs->findByPubKey(pub).count();
-		delete pub;
-		if (certs > 0) {
-			req->setDone();
-		}
-	}
-}
-#endif
 
 void db_x509req::load(void)
 {

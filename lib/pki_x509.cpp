@@ -9,6 +9,7 @@
 #include "pki_x509.h"
 #include "pki_evp.h"
 #include "pki_scard.h"
+#include "db_base.h"
 #include "func.h"
 #include "base.h"
 #include "exception.h"
@@ -85,10 +86,11 @@ QString pki_x509::getMsg(msg_type msg)
 QSqlError pki_x509::insertSqlData()
 {
 	QSqlQuery q;
-	pki_x509 *signer = getSigner();
+	pki_x509 *signer = findIssuer();
 	QSqlError e = pki_x509super::insertSqlData();
 	if (e.isValid())
 		return e;
+
 	q.prepare("INSERT INTO certs (item, hash, iss_hash, "
 					"serial, issuer, ca, cert) "
 		  "VALUES (?, ?, ?, ?, ?, ?, ?)");
@@ -141,6 +143,39 @@ QSqlError pki_x509::deleteSqlData()
 	q.bindValue(0, sqlItemId);
 	q.exec();
 	return q.lastError();
+}
+
+pki_x509 *pki_x509::findIssuer()
+{
+	QSqlQuery q;
+	pki_x509 *issuer;
+	unsigned hash;
+
+	if ((issuer = getSigner()) != NULL)
+		return issuer;
+	// first check for self-signed
+	if (verify(this))
+		return this;
+
+	hash = getIssuerName().hashNum();
+	/* Select X509 CA certificates with subject-hash == hash */
+	q.prepare("SELECT x509super.item from x509super "
+		"JOIN certs ON certs.item = x509super.item "
+		"WHERE certs.ca='true' AND x509super.subj_hash=?");
+	q.bindValue(0, hash);
+	q.exec();
+	while (q.next()) {
+		issuer = static_cast<pki_x509*>(
+				db_base::lookupPki(q.value(0).toULongLong()));
+		if (!issuer) {
+			qDebug("Certificate with id %d not found",
+                                q.value(0).toInt());
+		}
+		if (verify(issuer)) {
+			return issuer;
+		}
+	}
+	return NULL;
 }
 
 void pki_x509::fromPEM_BIO(BIO *bio, QString name)

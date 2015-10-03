@@ -43,6 +43,7 @@ class pki_x509super : public pki_x509name
 		{
 			return -1;
 		};
+		unsigned pubHash();
 		virtual pki_key *getPubKey() const
 		{
 			return NULL;

@@ -64,7 +64,7 @@ QList<pki_base *> db_key::getAllKeys()
 
 QList<pki_base *> db_key::getUnusedKeys()
 {
-	return sqlSELECTpki("SELECT public_keys.item from public_keys "
+	return sqlSELECTpki("SELECT public_keys.item FROM public_keys "
 		"OUTER LEFT JOIN x509super ON x509super.key = public_keys.item "
 		"WHERE x509super.item IS NULL");
 }
@@ -72,14 +72,44 @@ QList<pki_base *> db_key::getUnusedKeys()
 void db_key::remFromCont(QModelIndex &idx)
 {
 	db_base::remFromCont(idx);
-	pki_base *pki = static_cast<pki_base*>(idx.internalPointer());
-	emit delKey((pki_key *)pki);
+	QSqlQuery q;
+	pki_key *pki = static_cast<pki_key*>(idx.internalPointer());
+
+	QList<pki_base*> items = sqlSELECTpki(
+		"SELECT item FROM x509super WHERE key=?",
+		QList<QVariant>() << QVariant(pki->getSqlItemId()));
+	foreach(pki_base *b, items) {
+		pki_x509super *x509s = static_cast<pki_x509super*>(b);
+		x509s->setRefKey(NULL);
+	}
+
+	q.prepare("UPDATE x509super SET key=NULL WHERE item=?");
+	q.bindValue(0, pki->getSqlItemId());
+	q.exec();
+	mainwin->dbSqlError(q.lastError());
 }
 
 void db_key::inToCont(pki_base *pki)
 {
 	db_base::inToCont(pki);
-	emit newKey((pki_key *)pki);
+	pki_key *key = static_cast<pki_key*>(pki);
+	unsigned hash = key->hash();
+	QList<pki_base*> items = sqlSELECTpki(
+		"SELECT item FROM x509super WHERE key IS NULL AND key_hash=?",
+		QList<QVariant>() << QVariant(hash));
+	QSqlQuery q;
+	q.prepare("UPDATE x509super SET key=? WHERE item=?");
+	q.bindValue(0, key->getSqlItemId());
+	foreach(pki, items) {
+		pki_x509super *x509s = static_cast<pki_x509super*>(pki);
+		if (!x509s->compareRefKey(key))
+			continue;
+		/* Found item matching this key */
+		x509s->setRefKey(key);
+		q.bindValue(1, x509s->getSqlItemId());
+		q.exec();
+		mainwin->dbSqlError(q.lastError());
+	}
 }
 
 pki_base* db_key::insert(pki_base *item)
@@ -193,7 +223,7 @@ exportType::etype db_key::clipboardFormat(QModelIndexList indexes)
 
 	foreach(QModelIndex idx, indexes) {
 		pki_key *key = static_cast<pki_key*>
-				(idx.internalPointer());
+			(idx.internalPointer());
 		if (key->isPubKey() || key->isToken())
 			allPriv = false;
 		if (key->getKeyType() != EVP_PKEY_RSA &&

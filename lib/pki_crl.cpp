@@ -58,7 +58,28 @@ QString pki_crl::getMsg(msg_type msg)
 QSqlError pki_crl::insertSqlData()
 {
 	QSqlQuery q;
+#if 0
+	unsigned hash = pubHash();
 
+	q.prepare("SELECT item FROM public_keys WHERE hash=?");
+	q.bindValue(0, hash);
+	q.exec();
+	if (q.lastError().isValid())
+		return q.lastError();
+	while (q.next()) {
+		pki_key *x = static_cast<pki_key*>(
+			db_base::lookupPki(q.value(0).toULongLong()));
+		if (!x) {
+			qDebug("Public key with id %d not found",
+				q.value(0).toInt());
+			continue;
+		}
+		if (compareRefKey(x)) {
+			setRefKey(x);
+			break;
+		}
+	}
+#endif
 	q.prepare("INSERT INTO crls (item, hash, num, iss_hash, issuer, crl) "
 		  "VALUES (?, ?, ?, ?, ?, ?)");
 	q.bindValue(0, sqlItemId);

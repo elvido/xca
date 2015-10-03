@@ -27,6 +27,7 @@ class db_x509: public db_x509super
 		QPixmap *certicon[4];
 		pki_x509 *get1SelectedCert();
 		dbheaderList getHeaders();
+		void dereferenceIssuer();
 
 	public:
 		static bool treeview;
@@ -45,8 +46,6 @@ class db_x509: public db_x509super
 		QList<pki_x509*> getCerts(bool onlyTrusted);
 		a1int searchSerial(pki_x509 *signer);
 		void writeAllCerts(const QString fname, bool onlyTrusted);
-		pki_x509 *getByIssSerial(const pki_x509 *issuer, const a1int &a);
-		pki_x509 *getBySubject(const x509name &xname, pki_x509 *last = NULL);
 		pki_base *insert(pki_base *item);
 		void newCert(NewX509 *dlg);
 		void newCert(pki_x509 *cert);

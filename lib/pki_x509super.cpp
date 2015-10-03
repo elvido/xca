@@ -23,34 +23,25 @@ pki_x509super::~pki_x509super()
 QSqlError pki_x509super::insertSqlData()
 {
 	QSqlQuery q;
-	unsigned hash;
+	unsigned hash = pubHash();
 
-	if (privkey) {
-		hash = privkey->hash();
-	} else {
-		pki_key *x = getPubKey();
-		hash = x->hash();
-		delete x;
-
-		q.prepare("SELECT item FROM public_keys WHERE hash=?");
-		q.bindValue(0, hash);
-		q.exec();
-		if (q.lastError().isValid())
-			return q.lastError();
-		while (q.next()) {
-			x = static_cast<pki_key*>(
-				db_base::lookupPki(q.value(0).toULongLong()));
-			if (!x) {
-				qDebug("Public key with id %d not found",
-					q.value(0).toInt());
-				continue;
-			}
-			if (compareRefKey(x)) {
-				setRefKey(x);
-				break;
-			}
+	q.prepare("SELECT item FROM public_keys WHERE hash=?");
+	q.bindValue(0, hash);
+	q.exec();
+	if (q.lastError().isValid())
+		return q.lastError();
+	while (q.next()) {
+		pki_key *x = static_cast<pki_key*>(
+			db_base::lookupPki(q.value(0).toULongLong()));
+		if (!x) {
+			qDebug("Public key with id %d not found",
+				q.value(0).toInt());
+			continue;
 		}
-		q.finish();
+		if (compareRefKey(x)) {
+			setRefKey(x);
+			break;
+		}
 	}
 
 	q.prepare("INSERT INTO x509super (item, subj_hash, key, key_hash) "
@@ -96,6 +87,19 @@ QSqlError pki_x509super::deleteSqlData()
 pki_key *pki_x509super::getRefKey() const
 {
 	return privkey;
+}
+
+unsigned pki_x509super::pubHash()
+{
+	unsigned hash;
+	if (privkey) {
+		hash = privkey->hash();
+	} else {
+		pki_key *x = getPubKey();
+		hash = x->hash();
+		delete x;
+	}
+	return hash;
 }
 
 bool pki_x509super::compareRefKey(pki_key *ref) const
