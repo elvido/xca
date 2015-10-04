@@ -206,14 +206,21 @@ void db_base::sortIndicatorChanged(int logicalIndex, Qt::SortOrder order)
 	allHeaders[logicalIndex]->sortIndicator = order;
 }
 
+QSqlError db_base::insertPKI_noTransaction(pki_base *pki)
+{
+	QSqlError e = pki->insertSql();
+	lookup[pki->getSqlItemId().toULongLong()] = pki;
+	inToCont(pki);
+	mainwin->dbSqlError(e);
+	emit columnsContentChanged();
+	return e;
+}
+
 void db_base::insertPKI(pki_base *pki)
 {
 	QSqlDatabase *db = mainwin->getDb();
 	if (db->transaction()) {
-		QSqlError e = pki->insertSql();
-		lookup[pki->getSqlItemId().toULongLong()] = pki;
-		inToCont(pki);
-		mainwin->dbSqlError(e);
+		QSqlError e = insertPKI_noTransaction(pki);
 		if (e.isValid())
 			db->rollback();
 		else
@@ -266,11 +273,8 @@ void db_base::deletePKI(QModelIndex idx)
 		}
 
 		if (db->transaction()) {
-TRACE
 			QSqlError e = pki->deleteSql();
-TRACE
 			remFromCont(idx);
-TRACE
 	                mainwin->dbSqlError(e);
 			if (e.isValid())
 				db->rollback();
@@ -311,22 +315,9 @@ void db_base::insertChild(pki_base *parent, pki_base *child)
 	if (parent != rootItem)
 		idx = index(parent);
 
-TRACE
 	beginInsertRows(idx, 0, 0);
-TRACE
-	fprintf(stderr, "Parent: '%s' %p %d before insert child: '%s'\n",
-		CCHAR(parent->getIntName()), parent,
-		parent->childCount(),
-		CCHAR(child->getIntName()));
-
 	parent->insert(0,child);
-	fprintf(stderr, "Parent: '%s' %p %d after insert child: '%s'\n",
-		CCHAR(parent->getIntName()), parent,
-		parent->childCount(),
-		CCHAR(child->getIntName()));
-TRACE
 	endInsertRows();
-TRACE
 }
 
 /* Does all the linking from existing keys, crls, certs
@@ -355,8 +346,6 @@ pki_base *db_base::getByReference(pki_base *refpki)
 		QString("SELECT item FROM %1 WHERE hash=?").arg(sqlHashTable),
 		QList<QVariant>() << QVariant(refpki->hash()));
 	foreach(pki_base *pki, list) {
-TRACE
-		fprintf(stderr, "Maybe: '%s'\n", CCHAR(pki->getIntName()));
 		if (refpki->compare(pki))
 			return pki;
 	}

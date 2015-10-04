@@ -71,10 +71,9 @@ void db_crl::revokeCerts(pki_crl *crl)
 
 void db_crl::removeSigner(pki_base *signer)
 {
+#warning FIXME ......
 	FOR_ALL_pki(crl, pki_crl) {
-TRACE
 		if (crl->getIssuer() == signer) {
-TRACE
 			crl->setIssuer(NULL);
 		}
 	}
@@ -86,10 +85,15 @@ void db_crl::inToCont(pki_base *pki)
 	unsigned hash = crl->getSubject().hashNum();
 	QList<pki_base *> items;
 
-	items = sqlSELECTpki( "SELECT item FROM certs WHERE iss_hash=?",
+	items = sqlSELECTpki( "SELECT x509super.item FROM x509super "
+		"JOIN certs ON certs.item = x509super.item "
+		"WHERE x509super.subj_hash=? AND certs.ca='true'",
 				QList<QVariant>() << QVariant(hash));
-	foreach(pki_base *b, items)
+	foreach(pki_base *b, items) {
+		fprintf(stderr, "Possible Crl issuer: '%s'\n",
+			 CCHAR(b->getIntName()));
 		crl->verify(static_cast<pki_x509*>(b));
+	}
 	db_base::inToCont(pki);
 }
 
@@ -230,11 +234,13 @@ void db_crl::newItem(pki_x509 *cert)
 		delete dlg;
 		return;
 	}
+	QSqlDatabase *db = mainwin->getDb();
 	try {
 		x509v3ext e;
 		X509V3_CTX ext_ctx;
 		X509V3_set_ctx(&ext_ctx, cert->getCert(), NULL, NULL, NULL, 0);
 		X509V3_set_ctx_nodb(&ext_ctx);
+		QSqlQuery q;
 
 		crl = new pki_crl();
 		crl->createCrl(cert->getIntName(), cert);
@@ -253,20 +259,45 @@ void db_crl::newItem(pki_x509 *cert)
 					"issuer:copy", &ext_ctx));
 			}
 		}
+		QSqlError err;
 		if (dlg->setCrlNumber->isChecked()) {
 			a1int num;
 			num.setDec(dlg->crlNumber->text());
 			crl->setCrlNumber(num);
 			cert->setCrlNumber(num);
 		}
+		crl->setIssuer(cert);
 		crl->setLastUpdate(dlg->lastUpdate->getDate());
 		crl->setNextUpdate(dlg->nextUpdate->getDate());
 		crl->sign(cert->getRefKey(), dlg->hashAlgo->currentHash());
-		cert->setCrlExpiry(dlg->nextUpdate->getDate());
-		mainwin->certs->updatePKI(cert);
-		createSuccess(insert(crl));
+		if (!db->transaction())
+			throw errorEx(tr("Failed to initiate DB transaction"));
+		cert->setCrlExpire(dlg->nextUpdate->getDate());
+		q.prepare("UPDATE certs set crlNo=?, crlExpire=? WHERE item=?");
+		q.bindValue(0, (uint)cert->getCrlNumber().getLong());
+		q.bindValue(1, dlg->nextUpdate->getDate().toPlain());
+		q.bindValue(2, cert->getSqlItemId());
+		q.exec();
+		err = q.lastError();
+		if (err.isValid())
+			throw errorEx(tr("Database error: ").arg(err.text()));
+		q.prepare("UPDATE revocations set crlNo=? "
+				"WHERE crlNo IS NULL AND caId=?");
+		q.bindValue(0, (uint)crl->getCrlNumber().getLong());
+		q.bindValue(1, cert->getSqlItemId());
+		q.exec();
+		err = q.lastError();
+		if (err.isValid())
+			throw errorEx(tr("Database error: ").arg(err.text()));
+		insertPKI_noTransaction(crl);
+		err = db->lastError();
+		if (err.isValid())
+			throw errorEx(tr("Database error: ").arg(err.text()));
+		db->commit();
+		createSuccess((crl));
 	}
 	catch (errorEx &err) {
+		db->rollback();
 		MainWindow::Error(err);
 		if (crl)
 			delete crl;

@@ -157,8 +157,11 @@ void db_x509::changeView()
 		mainwin->BNviewState->setText(tr("Tree View"));
 
 	while ((temproot->childCount())) {
+		pki_base *parent = rootItem;
 		pki = temproot->takeFirst();
-		insertChild(static_cast<pki_x509*>(pki)->getParent(), pki);
+		if (treeview)
+			parent = static_cast<pki_x509*>(pki)->getSigner();
+		insertChild(parent, pki);
 	}
 	delete temproot;
 }
@@ -256,8 +259,17 @@ void db_x509::inToCont(pki_base *pki)
 	/* Update CRLs */
 	items = sqlSELECTpki( "SELECT item FROM crls WHERE iss_hash=?",
 			QList<QVariant>() << namehash);
+	q.prepare("UPDATE crls SET issuer=? WHERE item=?");
 	foreach(pki_base *b, items) {
-		static_cast<pki_crl*>(b)->verify(cert);
+		pki_crl *crl = static_cast<pki_crl*>(b);
+		crl->verify(cert);
+		cert = crl->getIssuer();
+		if (!cert)
+			continue;
+		q.bindValue(0, cert->getSqlItemId());
+		q.bindValue(1, crl->getSqlItemId());
+		q.exec();
+		mainwin->dbSqlError(q.lastError());
 	}
 	calcEffTrust();
 }
@@ -331,7 +343,6 @@ pki_base *db_x509::insert(pki_base *item)
 	}
 	cert->setCaSerial((cert->getSerial()));
 	insertPKI(cert);
-TRACE
 	a1int serial;
 
 	// check the CA serial of the CA of this cert to avoid serial doubles
@@ -342,16 +353,13 @@ TRACE
 			updatePKI(cert->getSigner());
 		}
 	}
-TRACE
 
 	// check CA serial of this cert
 	serial = searchSerial(cert);
 	if ( ++serial > cert->getCaSerial()) {
 		cert->setCaSerial(serial);
 	}
-TRACE
 	updatePKI(cert);
-TRACE
 	return cert;
 }
 
@@ -822,6 +830,19 @@ void db_x509::writePKCS7(pki_x509 *cert, QString s, exportType::etype type,
 
 }
 
+void db_x509::storeRevocations(pki_x509 *cert)
+{
+	QSqlDatabase *db = mainwin->getDb();
+	if (db->transaction()) {
+		QSqlError e;
+		e = cert->revList.sqlUpdate(cert->getSqlItemId());
+		if (e.isValid())
+			db->rollback();
+		else
+			db->commit();
+	}
+}
+
 void db_x509::manageRevocations(QModelIndex idx)
 {
 	pki_x509 *cert = static_cast<pki_x509*>(idx.internalPointer());
@@ -833,7 +854,7 @@ void db_x509::manageRevocations(QModelIndex idx)
 		mainwin->crls, SLOT(newItem(pki_x509*)));
 	if (dlg->exec()) {
 		cert->setRevocations(dlg->getRevList());
-		updatePKI(cert);
+		storeRevocations(cert);
 		emit columnsContentChanged();
 	}
 }
@@ -991,7 +1012,7 @@ void db_x509::do_revoke(QModelIndexList indexes, const x509rev &r)
 		revlist << rev;
 	}
 	parent->mergeRevList(revlist);
-	updatePKI(parent);
+	storeRevocations(parent);
 }
 
 void db_x509::unRevoke(QModelIndexList indexes)
@@ -1024,7 +1045,7 @@ void db_x509::unRevoke(QModelIndexList indexes)
 		if (i != -1)
 			parent->revList.takeAt(i);
 	}
-	updatePKI(parent);
+	storeRevocations(parent);
 	emit columnsContentChanged();
 }
 

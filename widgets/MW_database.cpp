@@ -97,12 +97,17 @@ QSqlError MainWindow::initSqlDB()
  * and then Base64 encode that.
  * So finally this is PEM without newlines, header and footer
  *
- *
- *
+ * Dates are alway stored as 'CHAR(15)' in the
+ * ASN.1 Generalized time 'yyyyMMddHHmmssZ' format
+ */
+
+#define DB_DATE "CHAR(15)"
+
+/*
  * Configuration settings from
  *  the Options dialog, window size, last export directory,
  *  default key type and size,
- *  column (position, sort order, visibility)
+ *  table column (position, sort order, visibility)
  */
 << "CREATE TABLE settings ("
 	"key CHAR(20) UNIQUE, "
@@ -117,9 +122,10 @@ QSqlError MainWindow::initSqlDB()
  */
 << "CREATE TABLE items("
 	"id INTEGER PRIMARY KEY, "
-	"name VARCHAR, "	/* Internal name of the item */
+	"name VARCHAR(128), "	/* Internal name of the item */
 	"type INTEGER, "	/* enum pki_type */
-	"comment VARCHAR)"
+	"date "DB_DATE", "	/* Time of insertion (creation/import) */
+	"comment VARCHAR(2048))"
 
 /*
  * Storage of public keys. Private keys and tokens also store
@@ -202,9 +208,11 @@ QSqlError MainWindow::initSqlDB()
 	"item INTEGER, "	/* reference to items(id) */
 	"hash INTEGER, "	/* 32 bit hash of the cert */
 	"iss_hash INTEGER, "	/* 32 bit hash of the issuer DN */
-	"serial CHAR, "		/* Serial numbe rof the certificate */
+	"serial VARCHAR(64), "	/* Serial number of the certificate */
 	"issuer INTEGER, "	/* The items(id) of the issuer or NULL */
 	"ca INTEGER, "		/* CA: yes / no from BasicConstraints */
+	"crlExpire "DB_DATE", "	/* CRL expiry date */
+	"crlNo INTEGER, "	/* Last CRL Number expiry date */
 	"cert "B64_BLOB", "	/* B64(DER(certificate)) */
 	"FOREIGN KEY (item) REFERENCES items (id), "
 	"FOREIGN KEY (issuer) REFERENCES items (id)) "
@@ -221,6 +229,18 @@ QSqlError MainWindow::initSqlDB()
 	"crl "B64_BLOB", "	/* B64(DER(revocation list)) */
 	"FOREIGN KEY (item) REFERENCES items (id), "
 	"FOREIGN KEY (issuer) REFERENCES items (id)) "
+
+/*
+ * Revocations
+ */
+<< "CREATE TABLE revocations ("
+	"caId INTEGER, "        /* reference to certs(item) */
+	"serial VARCHAR(64), "	/* Serial number of the revoked certificate */
+	"date "DB_DATE", "	/* Time of creation */
+	"invaldate "DB_DATE", "	/* Time of invalidation */
+	"crlNo INTEGER, "	/* Crl Number of CRL of first appearance */
+	"reasonBit, "		/* Bit number of the revocation reason */
+	"FOREIGN KEY (caId) REFERENCES items (id))"
 
 	;
 	QSqlQuery q;

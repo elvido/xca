@@ -9,6 +9,7 @@
 #include "pki_crl.h"
 #include "func.h"
 #include "exception.h"
+#include "db_base.h"
 #include <QDir>
 
 QPixmap *pki_crl::icon = NULL;
@@ -58,34 +59,31 @@ QString pki_crl::getMsg(msg_type msg)
 QSqlError pki_crl::insertSqlData()
 {
 	QSqlQuery q;
-#if 0
-	unsigned hash = pubHash();
+	unsigned name_hash = getSubject().hashNum();
 
-	q.prepare("SELECT item FROM public_keys WHERE hash=?");
-	q.bindValue(0, hash);
+	q.prepare("SELECT x509super.item FROM x509super "
+		"JOIN certs ON certs.item = x509super.item "
+		"WHERE x509super.subj_hash=? AND certs.ca='true'");
+	q.bindValue(0, name_hash);
 	q.exec();
 	if (q.lastError().isValid())
 		return q.lastError();
 	while (q.next()) {
-		pki_key *x = static_cast<pki_key*>(
+		pki_x509 *x = static_cast<pki_x509*>(
 			db_base::lookupPki(q.value(0).toULongLong()));
 		if (!x) {
-			qDebug("Public key with id %d not found",
+			qDebug("CA certificate with id %d not found",
 				q.value(0).toInt());
 			continue;
 		}
-		if (compareRefKey(x)) {
-			setRefKey(x);
-			break;
-		}
+		verify(x);
 	}
-#endif
 	q.prepare("INSERT INTO crls (item, hash, num, iss_hash, issuer, crl) "
 		  "VALUES (?, ?, ?, ?, ?, ?)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, hash());
 	q.bindValue(2, numRev());
-	q.bindValue(3, (uint)getSubject().hashNum());
+	q.bindValue(3, name_hash);
 	q.bindValue(4, issuer ? issuer->getSqlItemId() : QVariant());
 	q.bindValue(5, i2d().toBase64());
 	q.exec();
@@ -100,7 +98,7 @@ QSqlError pki_crl::restoreSql(QVariant sqlId)
 	e = pki_base::restoreSql(sqlId);
 	if (e.isValid())
 		return e;
-	q.prepare("SELECT crl FROM crls WHERE item=?");
+	q.prepare("SELECT crl, issuer FROM crls WHERE item=?");
 	q.bindValue(0, sqlId);
 	q.exec();
 	e = q.lastError();
@@ -110,6 +108,8 @@ QSqlError pki_crl::restoreSql(QVariant sqlId)
 		return sqlItemNotFound(sqlId);
 	QByteArray ba = QByteArray::fromBase64(q.value(0).toByteArray());
 	d2i(ba);
+	setIssuer(static_cast<pki_x509*>(
+                        db_base::lookupPki(q.value(1).toULongLong())));
 	return e;
 }
 

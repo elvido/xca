@@ -27,7 +27,7 @@ class pki_x509 : public pki_x509super
 	private:
 		pki_x509 *psigner;
 		QVariant signerSqlId;
-		a1time crlExpiry;
+		a1time crlExpire;
 		bool randomSerial;
 		int trust;
 		int efftrust;
@@ -154,7 +154,6 @@ class pki_x509 : public pki_x509super
 			return revocation;
 		}
 		pk11_attlist objectAttributes();
-		void setCrlExpiry(const a1time &time);
 		bool hasExtension(int nid);
 		bool cmpIssuerAndSerial(pki_x509 *refcert);
 		bool visible();
@@ -175,6 +174,10 @@ class pki_x509 : public pki_x509super
 		}
 		void setRevocations(const x509revList &rl);
 		bool compareNameAndKey(pki_x509 *other);
+		void setCrlExpire(a1time a)
+		{
+			crlExpire = a;
+		}
 		QSqlError insertSqlData();
 		QSqlError deleteSqlData();
 		QSqlError restoreSql(QVariant sqlId);

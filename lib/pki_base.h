@@ -12,6 +12,7 @@
 #include <QString>
 #include <QListView>
 #include <QtSql>
+#include "asn1time.h"
 #include "pkcs11_lib.h"
 #include "db.h"
 #include "base.h"
@@ -34,6 +35,7 @@ class pki_base : public QObject
 	protected:
 		QVariant sqlItemId;
 		QString desc, comment;
+		a1time insertion_date;
 		enum pki_type pkiType;
 		/* model data */
 		pki_base *parent;

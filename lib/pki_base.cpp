@@ -111,13 +111,15 @@ QSqlError pki_base::insertSql()
 	QSqlQuery q;
 	QString insert;
 	QSqlError e;
+	insertion_date.now();
 
 	q.prepare("INSERT INTO items "
-		  "(id, name, type, comment) "
-		  "VALUES (NULL, ?, ?, ?)");
+		  "(id, name, type, date, comment) "
+		  "VALUES (NULL, ?, ?, ?, ?)");
 	q.bindValue(0, getIntName());
 	q.bindValue(1, getType());
-	q.bindValue(2, getComment());
+	q.bindValue(2, insertion_date.toPlain());
+	q.bindValue(3, getComment());
 	q.exec();
 	e = q.lastError();
 	if (!e.isValid()) {
@@ -132,7 +134,7 @@ QSqlError pki_base::restoreSql(QVariant sqlId)
 	QSqlQuery q;
 	QSqlError e;
 
-	q.prepare("SELECT name, comment FROM items WHERE id=?");
+	q.prepare("SELECT name, date, comment FROM items WHERE id=?");
 	q.bindValue(0, sqlId);
 	q.exec();
 	e = q.lastError();
@@ -142,7 +144,8 @@ QSqlError pki_base::restoreSql(QVariant sqlId)
 	if (!q.first())
 		return sqlItemNotFound(sqlId);
 	desc = q.value(0).toString();
-	comment = q.value(1).toString();
+	insertion_date.fromPlain(q.value(1).toString());
+	comment = q.value(2).toString();
 	sqlItemId = sqlId;
 	return e;
 }
@@ -198,9 +201,7 @@ void pki_base::append(pki_base *item)
 
 void pki_base::insert(int row, pki_base *item)
 {
-TRACE
 	childItems.insert(row, item);
-TRACE
 	item->setParent(this);
 }
 

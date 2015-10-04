@@ -51,7 +51,7 @@ pki_x509::pki_x509(const pki_x509 *crt)
 	caTemplate = crt->caTemplate;
 	revocation = crt->revocation;
 	crlDays = crt->crlDays;
-	crlExpiry = crt->crlExpiry;
+	crlExpire = crt->crlExpire;
 	pki_openssl_error();
 }
 
@@ -86,21 +86,23 @@ QString pki_x509::getMsg(msg_type msg)
 QSqlError pki_x509::insertSqlData()
 {
 	QSqlQuery q;
+	a1time now;
 	pki_x509 *signer = findIssuer();
 	QSqlError e = pki_x509super::insertSqlData();
 	if (e.isValid())
 		return e;
 
-	q.prepare("INSERT INTO certs (item, hash, iss_hash, "
-					"serial, issuer, ca, cert) "
-		  "VALUES (?, ?, ?, ?, ?, ?, ?)");
+	q.prepare("INSERT INTO certs (item, hash, iss_hash, serial, issuer, "
+				"ca, crlExpire, crlNo, cert) "
+		  "VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?)");
 	q.bindValue(0, sqlItemId);
 	q.bindValue(1, hash());
 	q.bindValue(2, (uint)getIssuerName().hashNum());
 	q.bindValue(3, getSerial().toHex());
 	q.bindValue(4, signer ? signer->getSqlItemId() : QVariant());
 	q.bindValue(5, isCA());
-	q.bindValue(6, i2d().toBase64());
+	q.bindValue(6, now.toPlain());
+	q.bindValue(7, i2d().toBase64());
 	q.exec();
 	return q.lastError();
 }
@@ -113,7 +115,8 @@ QSqlError pki_x509::restoreSql(QVariant sqlId)
 	e = pki_x509super::restoreSql(sqlId);
 	if (e.isValid())
 		return e;
-	q.prepare("SELECT cert, issuer FROM certs WHERE item=?");
+	q.prepare("SELECT cert, issuer, crlNo, crlExpire FROM certs "
+			"WHERE item=?");
 	q.bindValue(0, sqlId);
 	q.exec();
 	e = q.lastError();
@@ -124,7 +127,10 @@ QSqlError pki_x509::restoreSql(QVariant sqlId)
 	QByteArray ba = QByteArray::fromBase64(q.value(0).toByteArray());
 	d2i(ba);
 	signerSqlId = q.value(1);
-	return e;
+	crlNumber.set(q.value(2).toUInt());
+	crlExpire.fromPlain(q.value(3).toString());
+	revList = x509revList::fromSql(sqlId);
+	return q.lastError();
 }
 
 QSqlError pki_x509::deleteSqlData()
@@ -146,6 +152,12 @@ QSqlError pki_x509::deleteSqlData()
 	if (e.isValid())
 		return e;
 	q.prepare("UPDATE certs SET issuer=NULL WHERE issuer=?");
+	q.bindValue(0, sqlItemId);
+	q.exec();
+	e = q.lastError();
+	if (e.isValid())
+		return e;
+	q.prepare("DELETE FROM revocations WHERE caId=?");
 	q.bindValue(0, sqlItemId);
 	q.exec();
 	return q.lastError();
@@ -243,7 +255,7 @@ void pki_x509::init()
 	caSerial = 1;
 	caTemplate = "";
 	crlDays = 30;
-	crlExpiry.setUndefined();
+	crlExpire.setUndefined();
 	cert = NULL;
 	pkiType = x509;
 	randomSerial = false;
@@ -617,7 +629,7 @@ void pki_x509::fromData(const unsigned char *p, db_header_t *head)
 	caSerial.setHex(db::stringFromData(ba));
 	caTemplate = db::stringFromData(ba);
 	crlDays = db::intFromData(ba);
-	crlExpiry.d2i(ba);
+	crlExpire.d2i(ba);
 	if (version > 1)
 		randomSerial = db::boolFromData(ba);
 	else
@@ -934,12 +946,6 @@ int pki_x509::calcEffTrust()
 	return mytrust;
 }
 
-void pki_x509::setCrlExpiry(const a1time &time)
-{
-	crlExpiry = time;
-	pki_openssl_error();
-}
-
 bool pki_x509::caAndPathLen(bool *ca, a1int *pathlen, bool *hasLen)
 {
 	x509v3ext e = getExtByNid(NID_basic_constraints);
@@ -975,8 +981,8 @@ QVariant pki_x509::column_data(dbheader *hd)
 			return QVariant(isRevoked() ?
 				revocation.getDate().toSortable() : "");
 		case HD_cert_crl_expire:
-			if (canSign() && !crlExpiry.isUndefined())
-				return QVariant(crlExpiry.toSortable());
+			if (canSign() && !crlExpire.isUndefined())
+				return QVariant(crlExpire.toSortable());
 			else
 				return QVariant();
 		case HD_cert_md5fp:
@@ -1085,8 +1091,8 @@ QVariant pki_x509::bg_color(dbheader *hd)
 		case HD_cert_crl_expire:
 			if (canSign()) {
 				QDateTime crlwarn, crlex;
-				crlex = crlExpiry;
-				if (!crlExpiry.isUndefined()) {
+				crlex = crlExpire;
+				if (!crlExpire.isUndefined()) {
 					crlwarn = crlex.addSecs(-2 *60*60*24);
 					if (crlex < now)
 						return QVariant(BG_RED);
