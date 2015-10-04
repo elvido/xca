@@ -256,6 +256,10 @@ QVariant pki_base::column_data(dbheader *hd)
 	switch (hd->id) {
 	case HD_internal_name:
 		return QVariant(getIntName());
+	case HD_creation:
+		return QVariant(insertion_date.toSortable());
+	case HD_comment:
+		return QVariant(comment);
 	}
 	return QVariant();
 }

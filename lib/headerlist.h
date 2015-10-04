@@ -23,6 +23,8 @@
 #define HD_x509key_name -5
 #define HD_counter -6
 #define HD_x509_sigalg -7
+#define HD_creation -8
+#define HD_comment -9
 
 #define HD_cert_serial -10
 #define HD_cert_notBefore -11
