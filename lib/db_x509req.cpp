@@ -8,7 +8,6 @@
 
 #include "db_x509req.h"
 #include "pki_x509req.h"
-#include "widgets/CertDetail.h"
 #include "widgets/MainWindow.h"
 #include <QMessageBox>
 #include <QContextMenuEvent>
@@ -109,20 +108,6 @@ void db_x509req::load(void)
 {
 	load_req l;
 	load_default(l);
-}
-
-void db_x509req::showPki(pki_base *pki)
-{
-	pki_x509req *req = (pki_x509req *)pki;
-	CertDetail *dlg;
-	dlg = new CertDetail(mainwin);
-	if (dlg) {
-		dlg->setReq(req);
-		connect(dlg->privKey, SIGNAL( doubleClicked(QString) ),
-			mainwin->keys, SLOT( showItem(QString) ));
-		dlg->exec();
-		delete dlg;
-	}
 }
 
 void db_x509req::store(QModelIndex index)

@@ -48,6 +48,7 @@ class db_base: public QAbstractItemModel
 		virtual dbheaderList getHeaders();
 		int colResizing;
 		QString sqlItemSelector();
+		void updateItem(pki_base *pki, QString name, QString comment);
 		virtual exportType::etype clipboardFormat(QModelIndexList indexes)
 		{
 			(void)indexes;

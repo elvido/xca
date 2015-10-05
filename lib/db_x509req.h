@@ -30,7 +30,6 @@ class db_x509req: public db_x509super
 		void signReq(QModelIndex index);
 		void toRequest(QModelIndex index);
 		void load();
-		void showPki(pki_base *pki);
 		QList<pki_base*> getAllRequests();
 
 	public slots:

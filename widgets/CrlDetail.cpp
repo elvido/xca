@@ -37,6 +37,7 @@ void CrlDetail::setCrl(pki_crl *crl)
 	signCheck->setClickText(crl->getSigAlg());
 	if (iss != NULL) {
 		issuerIntName->setText(iss->getIntName());
+		issuerIntName->setClickText(iss->getSqlItemId().toString());
 		issuerIntName->setGreen();
 		if (crl->verify(iss)) {
 			signCheck->setText(crl->getSigAlg());

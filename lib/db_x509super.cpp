@@ -8,6 +8,7 @@
 #include "pki_base.h"
 #include "db_x509super.h"
 #include "widgets/MainWindow.h"
+#include "widgets/CertDetail.h"
 #include "ui_About.h"
 #include "oid.h"
 #include <QMessageBox>
@@ -187,3 +188,33 @@ void db_x509super::toTemplate(QModelIndex index)
 	}
 }
 
+void db_x509super::showPki(pki_base *pki)
+{
+	pki_x509super *x = (pki_x509req *)pki;
+	CertDetail *dlg;
+	dlg = new CertDetail(mainwin);
+	if (!dlg)
+		return;
+
+	QString newname, newcomment;
+	switch (x->getType()) {
+		case x509_req: dlg->setReq((pki_x509req*)x); break;
+		case x509: dlg->setCert((pki_x509*)x); break;
+		default:
+			delete dlg;
+			return;
+	}
+	connect(dlg->privKey, SIGNAL(doubleClicked(QString)),
+		mainwin->keys, SLOT(showItem(QString)));
+	connect(dlg->signature, SIGNAL(doubleClicked(QString)),
+		this, SLOT(showItem(QString)));
+	dlg->exec();
+	newname = dlg->descr->text();
+	newcomment = dlg->comment->toPlainText();
+	if (newname != pki->getIntName() ||
+	    newcomment != pki->getComment())
+	{
+		updateItem(pki, newname, newcomment);
+	}
+	delete dlg;
+}

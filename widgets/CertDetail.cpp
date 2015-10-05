@@ -21,7 +21,6 @@ CertDetail::CertDetail(QWidget *parent)
 {
 	setupUi(this);
 	setWindowTitle(XCA_TITLE);
-	descr->setReadOnly(true);
 	showConf = false;
 }
 
@@ -47,6 +46,7 @@ void CertDetail::setX509super(pki_x509super *x)
 	pki_key *key= x->getRefKey();
 	if (key) {
 		privKey->setText(key->getIntName());
+		privKey->setClickText(key->getSqlItemId().toString());
 		if (key->isPrivKey()) {
 			privKey->setGreen();
 		} else {
@@ -75,6 +75,9 @@ void CertDetail::setX509super(pki_x509super *x)
 	sigAlgo->setText(x->getSigAlg());
 	connect(sigAlgo, SIGNAL(doubleClicked(QString)),
 		MainWindow::getResolver(), SLOT(searchOid(QString)));
+
+	// Comment
+	comment->setText(x->getComment());
 }
 
 void CertDetail::setCert(pki_x509 *cert)
@@ -98,6 +101,7 @@ void CertDetail::setCert(pki_x509 *cert)
 			signature->disableToolTip();
 		} else {
 			signature->setText(cert->getSigner()->getIntName());
+			privKey->setClickText(cert->getSqlItemId().toString());
 			signature->setGreen();
 		}
 

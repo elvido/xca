@@ -11,7 +11,6 @@
 #include "pki_evp.h"
 #include "pki_scard.h"
 #include "pass_info.h"
-#include "widgets/CertDetail.h"
 #include "widgets/CertExtend.h"
 #include "widgets/ExportDialog.h"
 #include "widgets/MainWindow.h"
@@ -564,22 +563,6 @@ void db_x509::newCert(NewX509 *dlg)
 		if (tempkey != NULL)
 			delete(tempkey);
     }
-}
-
-void db_x509::showPki(pki_base *pki)
-{
-	pki_x509 *crt = (pki_x509 *)pki;
-	CertDetail *dlg;
-	dlg = new CertDetail(mainwin);
-	if (dlg) {
-		dlg->setCert(crt);
-		connect(dlg->privKey, SIGNAL(doubleClicked(QString)),
-			mainwin->keys, SLOT(showItem(QString)));
-		connect(dlg->signature, SIGNAL(doubleClicked(QString)),
-			this, SLOT( showItem(QString) ));
-		dlg->exec();
-		delete dlg;
-	}
 }
 
 void db_x509::store(QModelIndex idx)

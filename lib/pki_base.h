@@ -72,6 +72,10 @@ class pki_base : public QObject
 		{
 			return comment;
 		}
+		void setComment(QString c)
+		{
+			comment = c;
+		}
 		QVariant getSqlItemId()
 		{
 			return sqlItemId;

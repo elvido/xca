@@ -303,7 +303,7 @@ void db_base::showItem(const QModelIndex &index)
 
 void db_base::showItem(const QString name)
 {
-	pki_base *pki = getByName(name);
+	pki_base *pki = lookupPki(name.toULongLong());
 	if (pki)
 		showPki(pki);
 }
@@ -525,17 +525,30 @@ bool db_base::setData(const QModelIndex &index, const QVariant &value, int role)
 		on = item->getIntName();
 		if (nn == on)
 			return true;
-		QSqlQuery q;
-		q.prepare("UPDATE items SET name=? WHERE id=?");
-		q.bindValue(0, nn);
-		q.bindValue(1, item->getSqlItemId());
-		q.exec();
-		mainwin->dbSqlError(q.lastError());
-		item->setIntName(nn);
-		emit dataChanged(index, index);
+		updateItem(item, nn, item->getComment());
 		return true;
 	}
 	return false;
+}
+
+void db_base::updateItem(pki_base *pki, QString name, QString comment)
+{
+	QSqlQuery q;
+	QSqlError e;
+
+	q.prepare("UPDATE items SET name=?, comment=? WHERE id=?");
+	q.bindValue(0, name);
+	q.bindValue(1, comment);
+	q.bindValue(2, pki->getSqlItemId());
+	q.exec();
+	e = q.lastError();
+	mainwin->dbSqlError(e);
+	if (e.isValid())
+		return;
+	pki->setIntName(name);
+	pki->setComment(comment);
+	QModelIndex i = index(pki);
+	emit dataChanged(i, i);
 }
 
 void db_base::load_default(load_base &load)
