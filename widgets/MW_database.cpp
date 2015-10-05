@@ -572,12 +572,13 @@ void MainWindow::close_database()
 	if (keys)
 		delete(keys);
 
+	db_base::flushLookup();
 	reqs = NULL;
 	certs = NULL;
 	temps = NULL;
 	keys = NULL;
 
-	QSqlDatabase::database().close();
+	db.close();
 	pki_evp::passwd.cleanse();
 	pki_evp::passwd = QByteArray();
 

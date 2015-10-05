@@ -42,10 +42,9 @@ class db_x509: public db_x509super
 		void updateViewPKI(pki_base *pki);
 		void remFromCont(QModelIndex &idx);
 		QList<pki_base*> getAllIssuers();
-		void calcEffTrust();
-		QList<pki_x509*> getCerts(bool onlyTrusted);
+		QList<pki_x509*> getCerts(bool unrevoked);
 		a1int searchSerial(pki_x509 *signer);
-		void writeAllCerts(const QString fname, bool onlyTrusted);
+		void writeAllCerts(const QString fname, bool unrevoked);
 		pki_base *insert(pki_base *item);
 		void newCert(NewX509 *dlg);
 		void newCert(pki_x509 *cert);
@@ -69,7 +68,6 @@ class db_x509: public db_x509super
 		void revoke(QModelIndexList indexes);
 		void do_revoke(QModelIndexList indexes, const x509rev &r);
 		void unRevoke(QModelIndexList indexes);
-		void setTrust(QModelIndexList indexes);
 		void storeRevocations(pki_x509 *cert);
 
 	public slots:

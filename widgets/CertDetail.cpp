@@ -101,17 +101,6 @@ void CertDetail::setCert(pki_x509 *cert)
 			signature->setGreen();
 		}
 
-		// check trust state
-		trustState->disableToolTip();
-		if (cert->getEffTrust() == 0) {
-			trustState->setText(tr("Not trusted"));
-			trustState->setRed();
-		}
-		else {
-			trustState->setText(tr("Trusted"));
-			trustState->setGreen();
-		}
-
 		// the serial
 		serialNr->setText(cert->getSerial().toHex());
 
@@ -176,7 +165,6 @@ void CertDetail::setReq(pki_x509req *req)
 			}
 		}
 		signature->disableToolTip();
-		trustState->hide();
 		fingerprints->hide();
 		validity->hide();
 		serialLabel->hide();

@@ -29,8 +29,6 @@ class pki_x509 : public pki_x509super
 		QVariant signerSqlId;
 		a1time crlExpire;
 		bool randomSerial;
-		int trust;
-		int efftrust;
 		a1int caSerial;
 		a1int crlNumber;
 		int crlDays;
@@ -95,16 +93,11 @@ class pki_x509 : public pki_x509super
 		{
 			return cert;
 		}
-		int getTrust();
-		void setTrust(int t);
-		int getEffTrust();
-		void setEffTrust(int t);
 		void setRevoked(bool rev, a1time inval = a1time(),
 				QString reason = QString());
 		void setRevoked(const x509rev &revok);
 		bool isRevoked();
 		pki_x509 *getBySerial(const a1int &a) const;
-		int calcEffTrust();
 		a1int getIncCaSerial();
 		a1int getCaSerial()
 		{

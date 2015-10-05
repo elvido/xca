@@ -45,8 +45,6 @@ pki_x509::pki_x509(const pki_x509 *crt)
 	pki_openssl_error();
 	psigner = crt->psigner;
 	setRefKey(crt->getRefKey());
-	trust = crt->trust;
-	efftrust = crt->efftrust;
 	caSerial = crt->caSerial;
 	caTemplate = crt->caTemplate;
 	revocation = crt->revocation;
@@ -115,7 +113,7 @@ QSqlError pki_x509::restoreSql(QVariant sqlId)
 	e = pki_x509super::restoreSql(sqlId);
 	if (e.isValid())
 		return e;
-	q.prepare("SELECT cert, issuer, crlNo, crlExpire FROM certs "
+	q.prepare("SELECT cert, issuer, crlNo, crlExpire, serial FROM certs "
 			"WHERE item=?");
 	q.bindValue(0, sqlId);
 	q.exec();
@@ -130,6 +128,18 @@ QSqlError pki_x509::restoreSql(QVariant sqlId)
 	crlNumber.set(q.value(2).toUInt());
 	crlExpire.fromPlain(q.value(3).toString());
 	revList = x509revList::fromSql(sqlId);
+	QVariant serial = q.value(4);
+
+	q.prepare("SELECT serial, date, invaldate, crlNo, reasonBit "
+			"FROM revocations WHERE caId=? AND serial=?");
+	q.bindValue(0, signerSqlId);
+	q.bindValue(1, serial);
+	q.exec();
+	e = q.lastError();
+	if (e.isValid())
+		return e;
+	if (q.first())
+		revocation = x509rev(q.record());
 	return q.lastError();
 }
 
@@ -206,8 +216,6 @@ void pki_x509::fromPEM_BIO(BIO *bio, QString name)
 	autoIntName();
 	if (getIntName().isEmpty())
 		setIntName(rmslashdot(name));
-	trust = 1;
-	efftrust = 1;
 }
 
 void pki_x509::fload(const QString fname)
@@ -235,8 +243,6 @@ void pki_x509::fload(const QString fname)
 	autoIntName();
 	if (getIntName().isEmpty())
 		setIntName(rmslashdot(fname));
-	trust = 1;
-	efftrust = 1;
 }
 
 pki_x509::~pki_x509()
@@ -250,8 +256,6 @@ pki_x509::~pki_x509()
 void pki_x509::init()
 {
 	psigner = NULL;
-	trust = 0;
-	efftrust = 0;
 	caSerial = 1;
 	caTemplate = "";
 	crlDays = 30;
@@ -616,7 +620,7 @@ void pki_x509::fromData(const unsigned char *p, db_header_t *head)
 
 	d2i(ba);
 	pki_openssl_error();
-	trust = db::intFromData(ba);
+	/* trust = */ db::intFromData(ba);
 	if (version < 4) {
 		a1time revoked;
 		isRevoked = db::boolFromData(ba);
@@ -878,32 +882,6 @@ pki_x509 *pki_x509::getSigner()
 	return (pki_x509 *)psigner;
 }
 
-int pki_x509::getTrust()
-{
-	if (trust > 2) trust = 2;
-	if (trust < 0) trust = 0;
-	return trust;
-}
-
-void pki_x509::setTrust(int t)
-{
-	if (t>=0 && t<=2)
-		trust = t;
-}
-
-int pki_x509::getEffTrust()
-{
-	if (efftrust > 2) efftrust = 2;
-	if (efftrust < 0) efftrust = 0;
-	return efftrust;
-}
-
-void pki_x509::setEffTrust(int t)
-{
-	if (t>= 0 && t<= 2)
-		efftrust = t;
-}
-
 bool pki_x509::isRevoked()
 {
 	return revocation.isValid();
@@ -912,38 +890,6 @@ bool pki_x509::isRevoked()
 void pki_x509::setRevoked(const x509rev &revok)
 {
 	revocation = revok;
-	if (revok.isValid()) {
-		setEffTrust(0);
-		setTrust(0);
-	}
-}
-
-int pki_x509::calcEffTrust()
-{
-	int mytrust = trust;
-	if (mytrust != 1) {
-		efftrust = mytrust;
-		return mytrust;
-	}
-	if (isRevoked()) {
-		efftrust = 0;
-		return 0;
-	}
-	if (getSigner() == this && trust == 1) { // inherit trust, but self signed
-		trust=0;
-		efftrust=0;
-		return 0;
-	}
-	//we must look at the parent certs
-	pki_x509 *signer = getSigner();
-	while (mytrust == 1 && signer && signer != this) {
-		mytrust = signer->getTrust();
-		signer = signer->getSigner();
-	}
-
-	if (mytrust == 1) mytrust = 0;
-	efftrust = mytrust;
-	return mytrust;
 }
 
 bool pki_x509::caAndPathLen(bool *ca, a1int *pathlen, bool *hasLen)
@@ -965,9 +911,6 @@ bool pki_x509::caAndPathLen(bool *ca, a1int *pathlen, bool *hasLen)
 
 QVariant pki_x509::column_data(dbheader *hd)
 {
-	QString truststatus[] =
-		{ tr("Not trusted"), tr("Trust inherited"), tr("Always Trusted") };
-
 	switch (hd->id) {
 		case HD_cert_serial:
 			return QVariant(getSerial().toHex());
@@ -975,8 +918,6 @@ QVariant pki_x509::column_data(dbheader *hd)
 			return QVariant(getNotBefore().toSortable());
 		case HD_cert_notAfter:
 			return QVariant(getNotAfter().toSortable());
-		case HD_cert_trust:
-			return QVariant(truststatus[getTrust()]);
 		case HD_cert_revocation:
 			return QVariant(isRevoked() ?
 				revocation.getDate().toSortable() : "");
@@ -1027,7 +968,7 @@ QVariant pki_x509::getIcon(dbheader *hd)
 		if (k && k->isPrivKey()) {
 			pixnum += 1;
 		}
-		if (calcEffTrust() == 0){
+		if (isRevoked()){
 			pixnum += 2;
 		}
 		break;

@@ -28,6 +28,7 @@ class db_token: public db_base
 		{
 			slot = s;
 		}
+		void saveHeaderState();
 };
 
 #endif

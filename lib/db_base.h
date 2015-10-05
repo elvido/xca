@@ -59,6 +59,10 @@ class db_base: public QAbstractItemModel
 		{
 			return lookup[i];
 		}
+		static void flushLookup()
+		{
+			lookup.clear();
+		}
 		QList<pki_base *> sqlSELECTpki(QString query,
 				QList<QVariant> values = QList<QVariant>());
 		virtual pki_base *newPKI(enum pki_type type = none);
@@ -97,7 +101,7 @@ class db_base: public QAbstractItemModel
 		void createSuccess(pki_base *pki);
 		bool columnHidden(int col) const;
 		bool isNumericCol(int col) const;
-		void saveHeaderState();
+		virtual void saveHeaderState();
 		void initHeaderView(QHeaderView *hv);
 		void setVisualIndex(int i, int visualIndex);
 		bool fixedHeaderSize(int sect);

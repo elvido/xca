@@ -29,7 +29,7 @@
 #define HD_cert_serial -10
 #define HD_cert_notBefore -11
 #define HD_cert_notAfter -12
-#define HD_cert_trust -13
+//#define HD_cert_trust -13
 #define HD_cert_revocation -14
 #define HD_cert_ca	 -15
 #define HD_cert_md5fp	 -16
@@ -235,7 +235,7 @@ class dbheaderList: public QList<dbheader*>
 			QStringList sl1 = hd.split(":");
 			int id = sl1.takeFirst().toInt();
 			if (id > 0) {
-				OBJ_txt2nid(CCHAR(sl1.takeFirst()));
+				id = OBJ_txt2nid(CCHAR(sl1.takeFirst()));
 			}
 			for (int i=0; i<count(); i++) {
 				dbheader *h = at(i);

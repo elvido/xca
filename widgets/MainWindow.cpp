@@ -521,7 +521,6 @@ void MainWindow::manageToken()
 			cert = new pki_x509("");
 			try {
 				cert->load_token(p11, objects[j]);
-				cert->setTrust(2);
 				dlgi->addItem(cert);
 			} catch (errorEx &err) {
 				Error(err);

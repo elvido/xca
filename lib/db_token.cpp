@@ -10,6 +10,10 @@ db_token::db_token(MainWindow *mw)
 	updateHeaders();
 }
 
+void db_token::saveHeaderState()
+{
+}
+
 bool db_token::setData(const QModelIndex &index, const QVariant &value, int role)
 {
 	QString on, nn;

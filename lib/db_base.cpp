@@ -157,7 +157,8 @@ dbheaderList db_base::getHeaders()
 
 void db_base::saveHeaderState()
 {
-	if (QSqlDatabase::database(QString(), false).isOpen())
+	QSqlDatabase *db = mainwin->getDb();
+	if (db->isOpen())
 		mainwin->storeSetting(class_name + "_hdView",
 					allHeaders.toData());
 }

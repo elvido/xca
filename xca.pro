@@ -91,6 +91,7 @@ HEADERS += local.h \
            widgets/XcaHeaderView.h \
            widgets/OidResolver.h \
 	   widgets/ItemCombo.h \
+	   widgets/XcaDialog.h \
            widgets/XcaProxyModel.h
 
 FORMS += ui/About.ui \
@@ -110,10 +111,10 @@ FORMS += ui/About.ui \
          ui/PwDialog.ui \
          ui/Revoke.ui \
          ui/SelectToken.ui \
-         ui/TrustState.ui \
          ui/SearchPkcs11.ui \
          ui/v3ext.ui \
          ui/OidResolver.ui \
+         ui/XcaDialog.ui \
 	 ui/RevocationList.ui
 
 SOURCES += lib/asn1int.cpp \

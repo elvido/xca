@@ -13,7 +13,8 @@
 #include "widgets/NewCrl.h"
 #include <QMessageBox>
 #include <QContextMenuEvent>
-#include <QInputDialog>
+#include "widgets/XcaDialog.h"
+#include "widgets/ItemCombo.h"
 #include "ui_NewCrl.h"
 
 db_crl::db_crl(MainWindow *mw)
@@ -198,28 +199,30 @@ void db_crl::updateRevocations(pki_x509 *cert)
 
 void db_crl::newItem()
 {
-	bool ok = false;
-#warning "FIXME erts->getSignerDesc();"
-	QStringList sl; // = mainwin->certs->getSignerDesc();
-	QString ca;
-	switch (sl.size()) {
+	QList<pki_base *> cas = mainwin->certs->getAllIssuers();
+	pki_base *ca = NULL;
+
+	switch (cas.size()) {
 	case 0:
 		XCA_INFO(tr("There are no CA certificates for CRL generation"));
-		break;
-	case 1:
-		ca = sl[0];
-		ok = true;
-		break;
-	default:
-		ca = QInputDialog::getItem(mainwin, XCA_TITLE,
-			tr("Select CA certificate"), sl, 0, false, &ok, 0);
-	}
-	if (!ok)
 		return;
-
-	pki_x509 *cert = static_cast<pki_x509*>
-		(mainwin->certs->getByName(ca));
-	newItem(cert);
+	case 1:
+		ca = cas[0];
+		break;
+	default: {
+		itemCombo *c = new itemCombo(NULL);
+		XcaDialog *d = new XcaDialog(mainwin, revocation, c,
+			tr("Select CA certificate"), QString());
+		c->insertPkiItems(cas);
+		if (!d->exec()) {
+			delete d;
+			return;
+		}
+		ca = c->currentPkiItem();
+		delete d;
+		}
+	}
+	newItem(static_cast<pki_x509*>(ca));
 }
 
 void db_crl::newItem(pki_x509 *cert)
