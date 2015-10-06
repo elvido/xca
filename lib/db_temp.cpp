@@ -27,6 +27,7 @@ db_temp::db_temp(MainWindow *mw)
 	updateHeaders();
 	loadContainer();
 
+#warning Use QList<pki_temp*> as "predefs"
 	predefs = newPKI();
 	QDir dir;
 	if (!dir.cd(getPrefix()))
@@ -100,7 +101,6 @@ bool db_temp::runTempDlg(pki_temp *temp)
 	emit connNewX509(dlg);
 
 	dlg->setTemp(temp);
-	dlg->fromTemplate(temp);
 	if (!dlg->exec()) {
 		delete dlg;
 		return false;

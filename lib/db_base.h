@@ -123,6 +123,8 @@ class db_base: public QAbstractItemModel
 		QString pem2QString(QModelIndexList indexes);
 
 		void deletePKI(QModelIndex idx);
+		void editComment(const QModelIndex &index);
+
 
 	public slots:
 		virtual void newItem() { }

@@ -259,7 +259,7 @@ QVariant pki_base::column_data(dbheader *hd)
 	case HD_creation:
 		return QVariant(insertion_date.toSortable());
 	case HD_comment:
-		return QVariant(comment);
+		return QVariant(comment.section('\n', 0, 0));
 	}
 	return QVariant();
 }

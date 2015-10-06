@@ -94,8 +94,7 @@ HEADERS += local.h \
 	   widgets/XcaDialog.h \
            widgets/XcaProxyModel.h
 
-FORMS += ui/About.ui \
-         ui/CaProperties.ui \
+FORMS += ui/CaProperties.ui \
          ui/CertDetail.ui \
          ui/CertExtend.ui \
          ui/CrlDetail.ui \

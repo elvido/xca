@@ -24,7 +24,6 @@ CrlDetail::CrlDetail(MainWindow *mainwin)
 	setWindowTitle(tr(XCA_TITLE));
 
 	image->setPixmap(*MainWindow::revImg);
-	descr->setReadOnly(true);
 }
 
 void CrlDetail::setCrl(pki_crl *crl)
@@ -69,4 +68,6 @@ void CrlDetail::setCrl(pki_crl *crl)
 	RevocationList::setupRevocationView(certList, crl->getRevList(), iss);
 
 	v3extensions->document()->setHtml(crl->printV3ext());
+
+	comment->setPlainText(crl->getComment());
 }

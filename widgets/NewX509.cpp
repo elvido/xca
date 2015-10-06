@@ -111,6 +111,7 @@ NewX509::NewX509(QWidget *parent)
 	// settings for the templates ....
 	strings.clear();
 	strings = MainWindow::temps->getDescPredefs();
+#warning USE itemCombo
 	tempList->insertItems(0, strings);
 
 	// setup Extended keyusage
@@ -358,6 +359,8 @@ void NewX509::setTemp(pki_temp *temp)
 	validityBox->setEnabled(false);
 	setImage(MainWindow::tempImg);
 	pt = tmpl;
+	fromTemplate(temp);
+	comment->setPlainText(temp->getComment());
 }
 
 /* Initialize dialog for Certificate creation */
@@ -592,6 +595,7 @@ void NewX509::toTemplate(pki_temp *temp)
 		temp->adv_ext = nconf_data->toPlainText();
 	}
 	temp->noWellDefined = noWellDefinedExpDate->isChecked();
+	temp->setComment(comment->toPlainText());
 }
 
 void NewX509::on_fromReqCB_clicked()
@@ -726,19 +730,36 @@ pki_temp *NewX509::currentTemplate()
 	return (pki_temp *)MainWindow::temps->getByName(name);
 }
 
+void NewX509::selfComment(QString msg)
+{
+	QString c = comment->toPlainText();
+	if (!c.endsWith("\n"))
+		c += "\n";
+	c += QString("(%1)\n").arg(msg);
+	comment->setPlainText(c);
+}
+
 void NewX509::on_applyTemplate_clicked()
 {
-	fromTemplate(currentTemplate());
+	pki_temp *t = currentTemplate();
+	fromTemplate(t);
+	selfComment(tr("Template '%1' applied").arg(t->comboText()));
 }
 
 void NewX509::on_applySubject_clicked()
 {
-	subjectFromTemplate(currentTemplate());
+	pki_temp *t = currentTemplate();
+	subjectFromTemplate(t);
+	selfComment(tr("Subject applied from template '%1'")
+			.arg(t->comboText()));
 }
 
 void NewX509::on_applyExtensions_clicked()
 {
-	extensionsFromTemplate(currentTemplate());
+	pki_temp *t = currentTemplate();
+	extensionsFromTemplate(t);
+	selfComment(tr("Extensions applied from template '%1'")
+			.arg(t->comboText()));
 }
 
 void NewX509::on_foreignSignRB_toggled(bool)
@@ -751,10 +772,13 @@ void NewX509::newKeyDone(pki_key *nkey)
 	allKeys =   MainWindow::keys->getAllKeys();
 	unusedKeys= MainWindow::keys->getUnusedKeys();
 	on_usedKeysToo_toggled(true);
-	if (nkey)
+	if (nkey) {
+		selfComment(tr("New key '%1' created")
+				.arg(nkey->comboText()));
 		keyList->setCurrentPkiItem(nkey);
-	else
+	} else {
 		keyList->setCurrentIndex(0);
+	}
 }
 
 void NewX509::on_usedKeysToo_toggled(bool)

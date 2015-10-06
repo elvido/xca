@@ -169,7 +169,7 @@ class MainWindow: public QMainWindow, public Ui::MainWindow
 		void help();
 		void undelete();
 		void loadPem();
-		bool pastePem(QString text);
+		bool pastePem(QString text, bool silent=false);
 		void pastePem();
 		void changeDbPass();
 		void openURLs(QStringList &files);

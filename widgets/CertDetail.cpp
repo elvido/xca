@@ -77,7 +77,7 @@ void CertDetail::setX509super(pki_x509super *x)
 		MainWindow::getResolver(), SLOT(searchOid(QString)));
 
 	// Comment
-	comment->setText(x->getComment());
+	comment->setPlainText(x->getComment());
 }
 
 void CertDetail::setCert(pki_x509 *cert)

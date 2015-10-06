@@ -16,6 +16,7 @@
 
 class XcaDialog : public QDialog, public Ui::XcaDialog
 {
+	QWidget *widg;
     public:
 	XcaDialog(QWidget *parent, enum pki_type type, QWidget *w,
 		QString t, QString desc) : QDialog(parent)
@@ -36,8 +37,32 @@ class XcaDialog : public QDialog, public Ui::XcaDialog
 		if (icon)
 			image->setPixmap(*icon);
 		content->addWidget(w);
+		widg = w;
 		title->setText(t);
-		description->setText(desc);
+		if (desc.isEmpty()) {
+			verticalLayout->removeWidget(description);
+			delete description;
+		} else {
+			description->setText(desc);
+		}
+	}
+	void noSpacer()
+	{
+		verticalLayout->removeItem(topSpacer);
+		verticalLayout->removeItem(bottomSpacer);
+		delete topSpacer;
+		delete bottomSpacer;
+		if (widg)
+			widg->setSizePolicy(QSizePolicy::Expanding,
+						QSizePolicy::Expanding);
+	}
+	void aboutDialog(QPixmap *lefticon)
+	{
+		QPixmap left = *lefticon;
+		title->setPixmap(left.scaledToHeight(title->height()));
+		noSpacer();
+		resize(560, 400);
+		buttonBox->setStandardButtons(QDialogButtonBox::Ok);
 	}
 };
 

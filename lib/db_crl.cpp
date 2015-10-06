@@ -121,13 +121,22 @@ void db_crl::showPki(pki_base *pki)
 	CrlDetail *dlg;
 
 	dlg = new CrlDetail(mainwin);
-	if (dlg) {
-		dlg->setCrl(crl);
-		connect( dlg->issuerIntName, SIGNAL( doubleClicked(QString) ),
-		            mainwin->certs, SLOT( showItem(QString) ));
-		dlg->exec();
-		delete dlg;
+	if (!dlg)
+		return;
+
+	dlg->setCrl(crl);
+	connect( dlg->issuerIntName, SIGNAL( doubleClicked(QString) ),
+	            mainwin->certs, SLOT( showItem(QString) ));
+	if (dlg->exec()) {
+		QString newname = dlg->descr->text();
+		QString newcomment = dlg->comment->toPlainText();
+		if (newname != pki->getIntName() ||
+		    newcomment != pki->getComment())
+		{
+			updateItem(pki, newname, newcomment);
+		}
 	}
+	delete dlg;
 }
 
 void db_crl::store(QModelIndex index)

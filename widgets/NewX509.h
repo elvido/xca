@@ -63,6 +63,7 @@ class NewX509: public QDialog, public Ui::NewX509
 		extList getExtDuplicates();
 		void checkIcon(const QString &text, int nid, QLabel*img);
 		QString dnEntryByNid(int nid);
+		void selfComment(QString msg);
 
 	public:
 		QRadioButton *selfQASignRB;

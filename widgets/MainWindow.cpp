@@ -38,7 +38,7 @@
 #include "lib/func.h"
 #include "lib/pkcs11.h"
 #include "lib/builtin_curves.h"
-#include "ui_About.h"
+#include "XcaDialog.h"
 #include "PwDialog.h"
 
 QPixmap *MainWindow::keyImg = NULL, *MainWindow::csrImg = NULL,
@@ -331,7 +331,7 @@ void MainWindow::loadPem()
 		keys->load_default(l);
 }
 
-bool MainWindow::pastePem(QString text)
+bool MainWindow::pastePem(QString text, bool silent)
 {
 	bool success = false;
 	QByteArray pemdata = text.toLatin1();
@@ -349,7 +349,8 @@ bool MainWindow::pastePem(QString text)
 		dlgi->execute(1);
 	}
 	catch (errorEx &err) {
-		Error(err);
+		if (!silent)
+			Error(err);
 	}
 	if (dlgi)
 		delete dlgi;
@@ -361,7 +362,6 @@ bool MainWindow::pastePem(QString text)
 
 void MainWindow::pastePem()
 {
-	Ui::About ui;
 	QClipboard *cb = QApplication::clipboard();
 	QString text;
 
@@ -370,24 +370,21 @@ void MainWindow::pastePem()
 		text = cb->text(QClipboard::Clipboard);
 
 	if (!text.isEmpty())
-		if (pastePem(text))
+		if (pastePem(text, true))
 			return;
 
-	QDialog *input = new QDialog(this, 0);
 
-	ui.setupUi(input);
-	delete ui.textbox;
-	QTextEdit *textbox = new QTextEdit(input);
-	ui.vboxLayout->addWidget(textbox);
-	ui.button->setText(tr("Import PEM data"));
-	input->setWindowTitle(XCA_TITLE);
+	QTextEdit *textbox = new QTextEdit();
 	textbox->setPlainText(text);
-	if (input->exec())
+	XcaDialog *input = new XcaDialog(this, x509, textbox,
+			tr("Import PEM data"), QString());
+	input->noSpacer();
+	if (input->exec()) {
 		text = textbox->toPlainText();
+		if (!text.isEmpty())
+			pastePem(text);
+	}
 	delete input;
-
-	if (!text.isEmpty())
-		pastePem(text);
 }
 
 void MainWindow::initToken()

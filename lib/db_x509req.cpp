@@ -87,6 +87,9 @@ void db_x509req::newItem(pki_temp *temp, pki_x509req *orig)
 		dlg->initCtx(NULL, NULL, req);
 		dlg->getReqAttributes(req);
 		req->createReq(key, xn, dlg->hashAlgo->currentHash(), dlg->getAllExt());
+		 // set the comment field
+		req->setComment(dlg->comment->toPlainText());
+
 		createSuccess(insert(req));
 	}
 	catch (errorEx &err) {

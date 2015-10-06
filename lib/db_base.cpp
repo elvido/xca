@@ -21,6 +21,8 @@
 #include <QDebug>
 #include "widgets/MainWindow.h"
 #include "widgets/ImportMulti.h"
+#include "widgets/XcaDialog.h"
+
 
 QHash<quint64, pki_base*> db_base::lookup;
 
@@ -150,8 +152,9 @@ dbheaderList db_base::getHeaders()
 	h << new dbheader(HD_internal_name, true, tr("Internal name"))
 	  << new dbheader(HD_counter, false, tr("No."))
 	  << new dbheader(HD_creation, false, tr("Date"),
-			 tr("Date of creation or insertion"))
-	  << new dbheader(HD_comment, false, tr("Comment"));
+			tr("Date of creation or insertion"))
+	  << new dbheader(HD_comment, false, tr("Comment"),
+			tr("First line of the comment field"));
 	return h;
 }
 
@@ -549,6 +552,23 @@ void db_base::updateItem(pki_base *pki, QString name, QString comment)
 	pki->setComment(comment);
 	QModelIndex i = index(pki);
 	emit dataChanged(i, i);
+}
+
+void db_base::editComment(const QModelIndex &index)
+{
+	pki_base *item = static_cast<pki_base*>(index.internalPointer());
+	if (!index.isValid() || !item)
+		return;
+
+	QTextEdit *t = new QTextEdit(mainwin);
+	t->setAutoFormatting(QTextEdit::AutoNone);
+	t->setAcceptRichText(false);
+	t->setPlainText(item->getComment());
+	XcaDialog *d = new XcaDialog(mainwin, item->getType(), t,
+		tr("Edit comment"), item->getIntName());
+	if (d->exec())
+		updateItem(item, item->getIntName(), t->toPlainText());
+	delete d;
 }
 
 void db_base::load_default(load_base &load)

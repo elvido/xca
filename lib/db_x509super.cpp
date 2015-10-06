@@ -9,7 +9,7 @@
 #include "db_x509super.h"
 #include "widgets/MainWindow.h"
 #include "widgets/CertDetail.h"
-#include "ui_About.h"
+#include "widgets/XcaDialog.h"
 #include "oid.h"
 #include <QMessageBox>
 
@@ -166,18 +166,15 @@ void db_x509super::toTemplate(QModelIndex index)
 		temp->setIntName(pki->getIntName());
 		extList el = temp->fromCert(pki);
 		if (el.size()) {
-			Ui::About ui;
 			QString etext;
-		        QDialog *d = new QDialog(mainwin, 0);
-		        ui.setupUi(d);
 			etext = QString("<h3>") +
 				tr("The following extensions were not ported into the template") +
 				QString("</h3><hr>") +
 				el.getHtml("<br>");
-			ui.textbox->setHtml(etext);
-			d->setWindowTitle(XCA_TITLE);
-			ui.image->setPixmap(*MainWindow::tempImg);
-			ui.image1->setPixmap(*MainWindow::certImg);
+			QTextEdit *textbox = new QTextEdit(etext);
+		        XcaDialog *d = new XcaDialog(mainwin, x509, textbox,
+						QString(), QString());
+			d->aboutDialog(MainWindow::tempImg);
 		        d->exec();
 		        delete d;
 		}
@@ -196,7 +193,6 @@ void db_x509super::showPki(pki_base *pki)
 	if (!dlg)
 		return;
 
-	QString newname, newcomment;
 	switch (x->getType()) {
 		case x509_req: dlg->setReq((pki_x509req*)x); break;
 		case x509: dlg->setCert((pki_x509*)x); break;
@@ -208,13 +204,14 @@ void db_x509super::showPki(pki_base *pki)
 		mainwin->keys, SLOT(showItem(QString)));
 	connect(dlg->signature, SIGNAL(doubleClicked(QString)),
 		this, SLOT(showItem(QString)));
-	dlg->exec();
-	newname = dlg->descr->text();
-	newcomment = dlg->comment->toPlainText();
-	if (newname != pki->getIntName() ||
-	    newcomment != pki->getComment())
-	{
-		updateItem(pki, newname, newcomment);
+	if (dlg->exec()) {
+		QString newname = dlg->descr->text();
+		QString newcomment = dlg->comment->toPlainText();
+		if (newname != pki->getIntName() ||
+		    newcomment != pki->getComment())
+		{
+			updateItem(pki, newname, newcomment);
+		}
 	}
 	delete dlg;
 }

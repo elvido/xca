@@ -17,7 +17,6 @@
 #include "widgets/PwDialog.h"
 #include "widgets/RevocationList.h"
 #include "ui_CaProperties.h"
-#include "ui_About.h"
 #include <QMessageBox>
 #include <QContextMenuEvent>
 #include <QAction>
@@ -536,6 +535,9 @@ void db_x509::newCert(NewX509 *dlg)
 #endif
 	// and finally sign the request
 	cert->sign(signkey, hashAlgo);
+
+	// set the comment field
+	cert->setComment(dlg->comment->toPlainText());
 
 	cert = (pki_x509*)insert(cert);
 	createSuccess(cert);
