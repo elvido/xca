@@ -11,7 +11,7 @@
 #include "pki_base.h"
 #include "x509name.h"
 #include "asn1time.h"
-#include "pki_x509.h"
+#include "pki_x509super.h"
 
 #define D5 "-----"
 #define PEM_STRING_XCA_TEMPLATE "XCA TEMPLATE"
@@ -22,6 +22,7 @@ class pki_temp: public pki_x509name
 	protected:
 		int dataSize();
 		void try_fload(QString fname, const char *mode);
+		bool pre_defined;
 	public:
 		static QPixmap *icon;
 		x509name xname;
@@ -43,7 +44,11 @@ class pki_temp: public pki_x509name
 		~pki_temp();
 		void fromData(const unsigned char *p, int size, int version);
 		void fromData(const unsigned char *p, db_header_t *head );
-
+		void setAsPreDefined()
+		{
+			pre_defined = true;
+		}
+		QString comboText() const;
 		QByteArray toData();
 		bool compare(pki_base *ref);
 		void writeTemp(QString fname);

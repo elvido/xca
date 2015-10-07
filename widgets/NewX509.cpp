@@ -69,7 +69,6 @@ NewX509::NewX509(QWidget *parent)
 
 	nsImg->setPixmap(*MainWindow::nsImg);
 	serialNr->setValidator(new QRegExpValidator(QRegExp("[0-9a-fA-F]*"), this));
-	QStringList strings;
 	QList<pki_base *> requests;
 
 	// are there any useable private keys  ?
@@ -109,10 +108,9 @@ NewX509::NewX509(QWidget *parent)
 	on_applyTime_clicked();
 
 	// settings for the templates ....
-	strings.clear();
-	strings = MainWindow::temps->getDescPredefs();
+	QList<pki_base*> templates = MainWindow::temps->getDescPredefs();
 #warning USE itemCombo
-	tempList->insertItems(0, strings);
+	tempList->insertPkiItems(templates);
 
 	// setup Extended keyusage
 	foreach(int nid, eku_nid)
@@ -455,7 +453,7 @@ void NewX509::defineSigner(pki_x509 *defcert)
 		if (certList->setCurrentPkiItem(defcert) != -1) {
 			foreignSignRB->setChecked(true);
 			certList->setEnabled(true);
-			if (!defcert->getTemplate().isEmpty()) {
+			if (defcert->getTemplate()) {
 				on_applyTemplate_clicked();
 			}
 		}
@@ -687,7 +685,7 @@ void NewX509::on_certList_currentIndexChanged(int)
 	if (!cert)
 		return;
 
-	QString templ = cert->getTemplate();
+	pki_temp *templ = cert->getTemplate();
 	snb = cert->getNotBefore();
 	sna = cert->getNotAfter();
 	if (snb > notBefore->getDate())
@@ -695,10 +693,8 @@ void NewX509::on_certList_currentIndexChanged(int)
 	if (sna < notAfter->getDate())
 		notAfter->setDate(sna);
 
-	if (templ.isEmpty())
-		return;
-
-	templateChanged(templ);
+	if (templ)
+		templateChanged(templ);
 }
 
 
@@ -716,18 +712,14 @@ void NewX509::templateChanged(QString tempname)
 
 void NewX509::templateChanged(pki_temp *templ)
 {
-	QString tempname = templ->getIntName();
-	templateChanged(tempname);
+	tempList->setCurrentPkiItem(templ);
 }
 
 pki_temp *NewX509::currentTemplate()
 {
 	if (!tempList->isEnabled())
 		return NULL;
-	QString name = tempList->currentText();
-	if (name.isEmpty())
-		return NULL;
-	return (pki_temp *)MainWindow::temps->getByName(name);
+	return static_cast<pki_temp*>(tempList->currentPkiItem());
 }
 
 void NewX509::selfComment(QString msg)

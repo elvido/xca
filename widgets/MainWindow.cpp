@@ -139,6 +139,21 @@ MainWindow::MainWindow(QWidget *parent)
 	certView->setMainwin(this, searchEdit);
 	tempView->setMainwin(this, searchEdit);
 	crlView->setMainwin(this, searchEdit);
+
+	QMap<QString, QString> testmap;
+	testmap["Meiser"] = "Doofdas";
+	testmap["Mueller"] = "Tick'Doofdas";
+	testmap["Turgau"] = "Newl\ni\tne\"Doofdas";
+
+#warning TESTCODE
+	QByteArray ba;
+	QBuffer buf(&ba);
+	buf.open(QIODevice::WriteOnly);
+	QDataStream out(&buf);
+	out.setVersion(QDataStream::Qt_4_2);
+	out << testmap;
+	buf.close();
+	fprintf(stderr, "L: %d %s\n", ba.size(), ba.toBase64().constData());
 }
 
 void MainWindow::dropEvent(QDropEvent *event)
@@ -794,9 +809,12 @@ void MainWindow::setPath(QString str)
 
 void MainWindow::connNewX509(NewX509 *nx)
 {
-	connect( nx, SIGNAL(genKey(QString)), keys, SLOT(newItem(QString)) );
-	connect( keys, SIGNAL(keyDone(pki_key*)), nx, SLOT(newKeyDone(pki_key*)) );
-	connect( nx, SIGNAL(showReq(pki_base*)), reqs, SLOT(showItem(pki_base*)));
+	connect(nx, SIGNAL(genKey(QString)),
+		keys, SLOT(newItem(QString)));
+	connect(keys, SIGNAL(keyDone(pki_key*)),
+		nx, SLOT(newKeyDone(pki_key*)));
+	connect(nx, SIGNAL(showReq(pki_base*)),
+		reqs, SLOT(showPki(pki_base*)));
 }
 
 void MainWindow::importAnything(QString file)

@@ -1024,6 +1024,7 @@ void db_x509::caProperties(QModelIndex idx)
 {
 	Ui::CaProperties ui;
 	int i;
+#warning FIXME for Policies
 
 	pki_x509 *cert = static_cast<pki_x509*>(idx.internalPointer());
 	if (!cert)
@@ -1038,7 +1039,7 @@ void db_x509::caProperties(QModelIndex idx)
 	ui.days->setMaximum(1000000);
 	ui.days->setValue(cert->getCrlDays());
 	ui.image->setPixmap(*MainWindow::certImg);
-	QString templ = cert->getTemplate();
+	QString templ = cert->getTemplate()->getIntName();
 	QStringList tempList = mainwin->temps->getDesc();
 	for (i=0; i<tempList.count(); i++) {
 		if (tempList[i] == templ)
@@ -1052,7 +1053,8 @@ void db_x509::caProperties(QModelIndex idx)
 		cert->setCrlDays(ui.days->value());
 		nserial.setHex(ui.serial->text());
 		cert->setCaSerial(nserial);
-		cert->setTemplate(ui.temp->currentText());
+#warning Fixme, too
+//		cert->setTemplate(ui.temp->currentText());
 		cert->setUseRandomSerial(ui.randomSerial->isChecked());
 		updatePKI(cert);
 	}

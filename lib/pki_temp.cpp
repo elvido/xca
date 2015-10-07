@@ -88,6 +88,12 @@ const char *pki_temp::getClassName() const
 	return "pki_temp";
 }
 
+QString pki_temp::comboText() const
+{
+	return pre_defined ? QString("[default] ") + pki_base::comboText() :
+			 pki_base::comboText();
+}
+
 QString pki_temp::getMsg(msg_type msg)
 {
 	/*

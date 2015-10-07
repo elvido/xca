@@ -20,7 +20,7 @@ class db_temp: public db_x509name
 	Q_OBJECT
     protected:
 	QPixmap *keyicon;
-	pki_base *predefs;
+	QList<pki_base*> predefs;
 	dbheaderList getHeaders();
 
     public:
@@ -30,8 +30,7 @@ class db_temp: public db_x509name
 	bool runTempDlg(pki_temp *temp);
 	bool alterTemp(pki_temp *temp);
 	void fillContextMenu(QMenu *menu, const QModelIndex &index);
-	pki_base *getByName(QString desc);
-	QStringList getDescPredefs();
+	QList<pki_base*> getDescPredefs();
 	void newItem();
 	void showPki(pki_base *pki);
 	void load();

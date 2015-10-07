@@ -257,7 +257,7 @@ void pki_x509::init()
 {
 	psigner = NULL;
 	caSerial = 1;
-	caTemplate = "";
+	caTemplate = NULL;
 	crlDays = 30;
 	crlExpire.setUndefined();
 	cert = NULL;
@@ -631,7 +631,7 @@ void pki_x509::fromData(const unsigned char *p, db_header_t *head)
 		}
 	}
 	caSerial.setHex(db::stringFromData(ba));
-	caTemplate = db::stringFromData(ba);
+	QString __caTemplate = db::stringFromData(ba);
 	crlDays = db::intFromData(ba);
 	crlExpire.d2i(ba);
 	if (version > 1)

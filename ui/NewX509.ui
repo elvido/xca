@@ -269,7 +269,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QComboBox" name="tempList">
+           <widget class="itemCombo" name="tempList">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -1349,8 +1349,8 @@
    <slot>deleteCurrentRow()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>622</x>
-     <y>284</y>
+     <x>713</x>
+     <y>199</y>
     </hint>
     <hint type="destinationlabel">
      <x>57</x>
@@ -1365,8 +1365,8 @@
    <slot>addKvRow()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>622</x>
-     <y>252</y>
+     <x>713</x>
+     <y>167</y>
     </hint>
     <hint type="destinationlabel">
      <x>57</x>
@@ -1445,8 +1445,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>557</x>
-     <y>584</y>
+     <x>566</x>
+     <y>627</y>
     </hint>
     <hint type="destinationlabel">
      <x>285</x>
@@ -1461,8 +1461,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>643</x>
-     <y>587</y>
+     <x>652</x>
+     <y>627</y>
     </hint>
     <hint type="destinationlabel">
      <x>405</x>
@@ -1509,8 +1509,8 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>350</x>
-     <y>333</y>
+     <x>431</x>
+     <y>348</y>
     </hint>
     <hint type="destinationlabel">
      <x>447</x>

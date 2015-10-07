@@ -1,6 +1,6 @@
 /* vi: set sw=4 ts=4:
  *
- * Copyright (C) 2014 Christian Hohnstaedt.
+ * Copyright (C) 2015 Christian Hohnstaedt.
  *
  * All rights reserved.
  */
@@ -19,7 +19,6 @@ class itemCombo : public QComboBox
 	itemCombo(QWidget *parent) : QComboBox(parent) { }
 	void insertPkiItems(QList<pki_base*> items) {
 		foreach(pki_base *p, items) {
-			fprintf(stderr, "addItem: '%s' '%s' %p\n", CCHAR(p->getIntName()), CCHAR(p->comboText()), p);
 			addItem(p->comboText(), QVariant::fromValue(p));
 		}
 	}
@@ -29,7 +28,6 @@ class itemCombo : public QComboBox
 	int setCurrentPkiItem(pki_base *p) {
 		int idx = findData(QVariant::fromValue(p));
 		setCurrentIndex(idx);
-		fprintf(stderr, "itemCombo: set curr: %d\n", idx);
 		return idx;
 	}
 };

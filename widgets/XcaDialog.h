@@ -1,6 +1,6 @@
 /* vi: set sw=4 ts=4:
  *
- * Copyright (C) 2014 Christian Hohnstaedt.
+ * Copyright (C) 2015 Christian Hohnstaedt.
  *
  * All rights reserved.
  */
@@ -63,6 +63,7 @@ class XcaDialog : public QDialog, public Ui::XcaDialog
 		noSpacer();
 		resize(560, 400);
 		buttonBox->setStandardButtons(QDialogButtonBox::Ok);
+		buttonBox->centerButtons();
 	}
 };
 

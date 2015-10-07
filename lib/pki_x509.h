@@ -12,6 +12,7 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 #include <openssl/pem.h>
+#include "pki_temp.h"
 #include "pki_key.h"
 #include "pki_x509req.h"
 #include "pki_x509super.h"
@@ -32,7 +33,7 @@ class pki_x509 : public pki_x509super
 		a1int caSerial;
 		a1int crlNumber;
 		int crlDays;
-		QString caTemplate;
+		pki_temp *caTemplate;
 		X509 *cert;
 		void init();
 		x509rev revocation;
@@ -116,12 +117,12 @@ class pki_x509 : public pki_x509super
 			if (n > crlNumber)
 				crlNumber = n;
 		}
-		void setTemplate(QString s)
+		void setTemplate(pki_temp *t)
 		{
-			if (s.length() > 0)
-				caTemplate = s;
+			if (t)
+				caTemplate = t;
 		}
-		QString getTemplate()
+		pki_temp *getTemplate()
 		{
 			return caTemplate;
 		}
