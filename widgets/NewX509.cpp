@@ -16,6 +16,8 @@
 #include <QPixmap>
 #include <QPushButton>
 #include <QValidator>
+#include <QMap>
+#include <QPair>
 #include "MainWindow.h"
 #include "v3ext.h"
 #include "lib/x509name.h"
@@ -515,17 +517,20 @@ static QString lb2QString(QListWidget *lb)
 void NewX509::subjectFromTemplate(pki_temp *temp)
 {
 	if (temp)
-		setX509name(temp->xname);
+		setX509name(temp->getSubject());
 }
+
+QMap<QString, QLineEdit*> NewX509::templateLineEdits = QMap<QString, QLineEdit*>();
+//	<< QPair<QString,int>("subAltName", subAltName);
 
 void NewX509::extensionsFromTemplate(pki_temp *temp)
 {
 	if (!temp)
 		return;
+#if 0
 	subAltName->setText(temp->subAltName);
 	issAltName->setText(temp->issAltName);
 	crlDist->setText(temp->crlDist);
-	setAuthInfAcc_string(temp->authInfAcc);
 	nsComment->setText(temp->nsComment);
 	nsBaseUrl->setText(temp->nsBaseUrl);
 	nsRevocationUrl->setText(temp->nsRevocationUrl);
@@ -533,21 +538,25 @@ void NewX509::extensionsFromTemplate(pki_temp *temp)
 	nsRenewalUrl->setText(temp->nsRenewalUrl);
 	nsCaPolicyUrl->setText(temp->nsCaPolicyUrl);
 	nsSslServerName->setText(temp->nsSslServerName);
-	int2lb(nsCertType, temp->nsCertType);
-	basicCA->setCurrentIndex(temp->ca);
+	validNumber->setText(temp->validN);
+	basicPath->setText(temp->basicPath);
+
 	bcCritical->setChecked(temp->bcCrit);
 	kuCritical->setChecked(temp->keyUseCrit);
 	ekuCritical->setChecked(temp->eKeyUseCrit);
 	subKey->setChecked(temp->subKey);
 	authKey->setChecked(temp->authKey);
+	midnightCB->setChecked(temp->validMidn);
+	noWellDefinedExpDate->setChecked(temp->noWellDefined);
+
+	int2lb(nsCertType, temp->nsCertType);
+	basicCA->setCurrentIndex(temp->ca);
 	int2lb(keyUsage, temp->keyUse);
 	QString2lb(ekeyUsage, temp->eKeyUse);
-	validNumber->setText(QString::number(temp->validN));
 	validRange->setCurrentIndex(temp->validM);
-	midnightCB->setChecked(temp->validMidn);
-	basicPath->setText(temp->pathLen);
 	nconf_data->document()->setPlainText(temp->adv_ext);
-	noWellDefinedExpDate->setChecked(temp->noWellDefined);
+	setAuthInfAcc_string(temp->authInfAcc);
+#endif
 	on_applyTime_clicked();
 }
 
@@ -560,7 +569,8 @@ void NewX509::fromTemplate(pki_temp *temp)
 void NewX509::toTemplate(pki_temp *temp)
 {
 	temp->setIntName(description->text());
-	temp->xname = getX509name();
+	temp->setSubject(getX509name());
+#if 0
 	temp->subAltName = subAltName->text();
 	temp->issAltName = issAltName->text();
 	temp->crlDist = crlDist->text();
@@ -593,6 +603,7 @@ void NewX509::toTemplate(pki_temp *temp)
 		temp->adv_ext = nconf_data->toPlainText();
 	}
 	temp->noWellDefined = noWellDefinedExpDate->isChecked();
+#endif
 	temp->setComment(comment->toPlainText());
 }
 

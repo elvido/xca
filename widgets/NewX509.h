@@ -64,6 +64,7 @@ class NewX509: public QDialog, public Ui::NewX509
 		void checkIcon(const QString &text, int nid, QLabel*img);
 		QString dnEntryByNid(int nid);
 		void selfComment(QString msg);
+		static QMap<QString, QLineEdit*> templateLineEdits;
 
 	public:
 		QRadioButton *selfQASignRB;
