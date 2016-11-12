@@ -31,6 +31,7 @@ class pki_x509super : public pki_x509name
 {
 		Q_OBJECT
 	protected:
+		QVariant keySqlId;
 		pki_key *privkey;
 		virtual ASN1_OBJECT *sigAlg() {
 			return NULL;
@@ -42,6 +43,7 @@ class pki_x509super : public pki_x509name
 		{
 			return -1;
 		};
+		unsigned pubHash();
 		virtual pki_key *getPubKey() const
 		{
 			return NULL;
@@ -56,12 +58,20 @@ class pki_x509super : public pki_x509name
 		{
 			return false;
 		}
+		QVariant getKeySqlId()
+		{
+			return keySqlId;
+		}
 		pki_key *getRefKey() const;
+		bool compareRefKey(pki_key* ref) const;
 		void setRefKey(pki_key *ref);
 		void delRefKey(pki_key *ref);
 		QVariant column_data(dbheader *hd);
 		void opensslConf(QString fname);
 		bool visible();
+		QSqlError insertSqlData();
+		QSqlError deleteSqlData();
+		QSqlError restoreSql(QVariant sqlId);
 };
 
 #endif

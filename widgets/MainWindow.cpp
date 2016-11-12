@@ -38,7 +38,7 @@
 #include "lib/func.h"
 #include "lib/pkcs11.h"
 #include "lib/builtin_curves.h"
-#include "ui_About.h"
+#include "XcaDialog.h"
 #include "PwDialog.h"
 
 QPixmap *MainWindow::keyImg = NULL, *MainWindow::csrImg = NULL,
@@ -99,6 +99,8 @@ MainWindow::MainWindow(QWidget *parent)
 	wdList << keyButtons << reqButtons << certButtons <<
 		tempButtons <<	crlButtons;
 
+	db = QSqlDatabase::addDatabase("QSQLITE");
+
 	historyMenu = NULL;
 	init_menu();
 	setItemEnabled(false);
@@ -137,6 +139,21 @@ MainWindow::MainWindow(QWidget *parent)
 	certView->setMainwin(this, searchEdit);
 	tempView->setMainwin(this, searchEdit);
 	crlView->setMainwin(this, searchEdit);
+
+	QMap<QString, QString> testmap;
+	testmap["Meiser"] = "Doofdas";
+	testmap["Mueller"] = "Tick'Doofdas";
+	testmap["Turgau"] = "Newl\ni\tne\"Doofdas";
+
+#warning TESTCODE
+	QByteArray ba;
+	QBuffer buf(&ba);
+	buf.open(QIODevice::WriteOnly);
+	QDataStream out(&buf);
+	out.setVersion(QDataStream::Qt_4_2);
+	out << testmap;
+	buf.close();
+	fprintf(stderr, "L: %d %s\n", ba.size(), ba.toBase64().constData());
 }
 
 void MainWindow::dropEvent(QDropEvent *event)
@@ -329,7 +346,7 @@ void MainWindow::loadPem()
 		keys->load_default(l);
 }
 
-bool MainWindow::pastePem(QString text)
+bool MainWindow::pastePem(QString text, bool silent)
 {
 	bool success = false;
 	QByteArray pemdata = text.toLatin1();
@@ -347,7 +364,8 @@ bool MainWindow::pastePem(QString text)
 		dlgi->execute(1);
 	}
 	catch (errorEx &err) {
-		Error(err);
+		if (!silent)
+			Error(err);
 	}
 	if (dlgi)
 		delete dlgi;
@@ -359,7 +377,6 @@ bool MainWindow::pastePem(QString text)
 
 void MainWindow::pastePem()
 {
-	Ui::About ui;
 	QClipboard *cb = QApplication::clipboard();
 	QString text;
 
@@ -368,24 +385,21 @@ void MainWindow::pastePem()
 		text = cb->text(QClipboard::Clipboard);
 
 	if (!text.isEmpty())
-		if (pastePem(text))
+		if (pastePem(text, true))
 			return;
 
-	QDialog *input = new QDialog(this, 0);
 
-	ui.setupUi(input);
-	delete ui.textbox;
-	QTextEdit *textbox = new QTextEdit(input);
-	ui.vboxLayout->addWidget(textbox);
-	ui.button->setText(tr("Import PEM data"));
-	input->setWindowTitle(XCA_TITLE);
+	QTextEdit *textbox = new QTextEdit();
 	textbox->setPlainText(text);
-	if (input->exec())
+	XcaDialog *input = new XcaDialog(this, x509, textbox,
+			tr("Import PEM data"), QString());
+	input->noSpacer();
+	if (input->exec()) {
 		text = textbox->toPlainText();
+		if (!text.isEmpty())
+			pastePem(text);
+	}
 	delete input;
-
-	if (!text.isEmpty())
-		pastePem(text);
 }
 
 void MainWindow::initToken()
@@ -519,7 +533,6 @@ void MainWindow::manageToken()
 			cert = new pki_x509("");
 			try {
 				cert->load_token(p11, objects[j]);
-				cert->setTrust(2);
 				dlgi->addItem(cert);
 			} catch (errorEx &err) {
 				Error(err);
@@ -573,28 +586,24 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
 QString makeSalt(void)
 {
-	unsigned char rand[2];
-	char saltbuf[10];
+	QString s = "T";
+	unsigned char rand[8];
 
-	Entropy::get(rand, 2);
-	snprintf(saltbuf, 10, "S%02X%02X", rand[0], rand[1]);
-	return QString(saltbuf);
+	Entropy::get(rand, sizeof rand);
+	for (unsigned i=0; i< sizeof rand; i++)
+		s += QString("%1").arg(rand[i]);
+	return s;
 }
 
 int MainWindow::checkOldGetNewPass(Passwd &pass)
 {
-	QString passHash;
-	db mydb(dbfile);
+	QString passHash, cpass;
 
-	if (!mydb.find(setting, "pwhash")) {
-		char *cpass;
+	cpass = getSetting("pwhash");
+	if (!cpass.isEmpty()) {
 		pass_info p(tr("Current Password"),
 			tr("Please enter the current database password"), this);
 
-		if ((cpass = (char *)mydb.load(NULL))) {
-			passHash = cpass;
-			free(cpass);
-		}
 		/* Try empty password */
 		if (pki_evp::sha512passwd(pass, passHash) != passHash) {
 			/* Not the empty password, check it */
@@ -618,43 +627,28 @@ int MainWindow::checkOldGetNewPass(Passwd &pass)
 void MainWindow::changeDbPass()
 {
 	Passwd pass;
-	QString tempn = dbfile + "{recrypt}";
 
 	if (!checkOldGetNewPass(pass))
 		return;
 
-	try {
-		if (!QFile::copy(dbfile, tempn))
-			throw errorEx("Could not create temporary file: " +
-				tempn);
-
-		QString passhash = updateDbPassword(tempn, pass);
-		QFile new_file(tempn);
-		/* closing the database erases 'dbfile' */
-		QString dbfile_bkup = dbfile;
-		close_database();
-		db mydb(dbfile_bkup);
-		if (mydb.mv(new_file))
-			throw errorEx(QString("Failed to rename %1 to %2").
-						arg(tempn).arg(dbfile_bkup));
-		dbfile = dbfile_bkup;
-		pki_evp::passHash = passhash;
-		pki_evp::passwd = pass;
-		init_database();
-	} catch (errorEx &ex) {
-		QFile::remove(tempn);
-		Error(ex);
-	}
+	QString salt = makeSalt();
+	QString passhash = pki_evp::sha512passwd(pass, salt);
+	// TRANSACTION start
+	exit(1);
+#if 0
+			EVP_PKEY *evp = key->decryptKey();
+			key->set_evp_key(evp);
+			key->encryptKey(pass.constData());
+#endif
+	// TRANSACTION stop
+	pki_evp::passHash = passhash;
+	pki_evp::passwd = pass;
 }
 
+#if 0
 QString MainWindow::updateDbPassword(QString newdb, Passwd pass)
 {
 	db mydb(newdb);
-
-	QString salt = makeSalt();
-	QString passhash = pki_evp::sha512passwd(pass, salt);
-	mydb.set((const unsigned char *)CCHAR(passhash),
-		passhash.length()+1, 1, setting, "pwhash");
 
 	QList<pki_evp*> klist;
 	mydb.first();
@@ -711,13 +705,12 @@ QString MainWindow::updateDbPassword(QString newdb, Passwd pass)
 	}
 	return passhash;
 }
+#endif
 
 int MainWindow::initPass()
 {
-	db mydb(dbfile);
-	char *pass;
 	pki_evp::passHash = QString();
-	QString salt;
+	QString salt, pass;
 	int ret;
 
 	pass_info p(tr("New Password"), tr("Please enter a password, "
@@ -725,23 +718,17 @@ int MainWindow::initPass()
 			"in the database file:\n%1").
 			arg(compressFilename(dbfile)), this);
 
-	if (!mydb.find(setting, "pwhash")) {
-		if ((pass = (char *)mydb.load(NULL))) {
-			pki_evp::passHash = pass;
-			free(pass);
-		}
-	}
+	pki_evp::passHash = getSetting("pwhash");
 	if (pki_evp::passHash.isEmpty()) {
 		ret = PwDialog::execute(&p, &pki_evp::passwd, true, true);
 		if (ret != 1)
 			return ret;
 		salt = makeSalt();
-		pki_evp::passHash = pki_evp::sha512passwd(pki_evp::passwd,salt);
-		mydb.set((const unsigned char *)CCHAR(pki_evp::passHash),
-			pki_evp::passHash.length()+1, 1, setting, "pwhash");
+		pki_evp::passHash =pki_evp::sha512passwT(pki_evp::passwd,salt);
+		storeSetting("pwhash", pki_evp::passHash);
 	} else {
 		ret = 0;
-		while (pki_evp::sha512passwd(pki_evp::passwd, pki_evp::passHash)
+		while (pki_evp::sha512passwT(pki_evp::passwd, pki_evp::passHash)
 				!= pki_evp::passHash)
 		{
 			if (ret)
@@ -755,8 +742,24 @@ int MainWindow::initPass()
 				pki_evp::passwd = QByteArray();
 				return ret;
 			}
-			if (pki_evp::passHash.left(1) == "S")
+			switch (pki_evp::passHash.at(0).toLatin1()) {
+			case 'T':
+				/* Fine, current hash function used. */
 				continue;
+			case 'S':
+			/* Start automatic update from sha512 to sha512*8000
+			 * if the password is correct. The sha512 hash does
+			 * start with 'S', while the new hash starts with T. */
+			if (pki_evp::sha512passwd(pki_evp::passwd,
+				pki_evp::passHash) == pki_evp::passHash)
+			{
+				salt = makeSalt();
+				pki_evp::passHash = pki_evp::sha512passwT(
+						pki_evp::passwd, salt);
+				storeSetting("pwhash", pki_evp::passHash);
+			}
+			break;
+			default:
 			/* Start automatic update from md5 to salted sha512
 			 * if the password is correct. my md5 hash does not
 			 * start with 'S', while my new hash does. */
@@ -764,12 +767,10 @@ int MainWindow::initPass()
 						pki_evp::passHash )
 			{
 				salt = makeSalt();
-				pki_evp::passHash = pki_evp::sha512passwd(
+				pki_evp::passHash = pki_evp::sha512passwT(
 						pki_evp::passwd, salt);
-				mydb.set((const unsigned char *)CCHAR(
-					pki_evp::passHash),
-					pki_evp::passHash.length() +1, 1,
-					setting, "pwhash");
+				storeSetting("pwhash", pki_evp::passHash);
+			}
 			}
 		}
 	}
@@ -802,22 +803,18 @@ QString MainWindow::getPath()
 
 void MainWindow::setPath(QString str)
 {
-	db mydb(dbfile);
 	workingdir = str;
-	mydb.set((const unsigned char *)CCHAR(str), str.length()+1, 1, setting, "workingdir");
-}
-
-void MainWindow::setDefaultKey(QString str)
-{
-	db mydb(dbfile);
-	mydb.set((const unsigned char *)CCHAR(str), str.length()+1, 1, setting, "defaultkey");
+	storeSetting("workingdir", str);
 }
 
 void MainWindow::connNewX509(NewX509 *nx)
 {
-	connect( nx, SIGNAL(genKey(QString)), keys, SLOT(newItem(QString)) );
-	connect( keys, SIGNAL(keyDone(QString)), nx, SLOT(newKeyDone(QString)) );
-	connect( nx, SIGNAL(showReq(QString)), reqs, SLOT(showItem(QString)));
+	connect(nx, SIGNAL(genKey(QString)),
+		keys, SLOT(newItem(QString)));
+	connect(keys, SIGNAL(keyDone(pki_key*)),
+		nx, SLOT(newKeyDone(pki_key*)));
+	connect(nx, SIGNAL(showReq(pki_base*)),
+		reqs, SLOT(showPki(pki_base*)));
 }
 
 void MainWindow::importAnything(QString file)
@@ -834,22 +831,13 @@ void MainWindow::importAnything(QString file)
 
 pki_multi *MainWindow::probeAnything(QString file, int *ret)
 {
+	(void)ret;
 	pki_multi *pki = new pki_multi();
 
 	try {
 		if (file.endsWith(".xdb")) {
-			try {
-				int r;
-				db *mydb = new db(file);
-				mydb->verify_magic();
-				delete mydb;
-				r = changeDB(file);
-				delete pki;
-				if (ret)
-					*ret = r;
-				return NULL;
-			} catch (errorEx &err) {
-			}
+TRACE
+			qDebug("FIXME OPEN DATABASE");
 		}
 		pki->probeAnything(file);
 	} catch (errorEx &err) {

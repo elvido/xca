@@ -239,13 +239,6 @@ int main_extract(int argc, char *argv[])
 	case revocation: pki = new pki_crl(name); break;
 	default: return usage_extract(argv);
 	}
-	if (pki->getVersion() < head.version) {
-		fprintf(stderr, "Item[%s]: Version %d > known version: %d",
-			head.name, head.version, pki->getVersion());
-		free(p);
-		delete pki;
-		return usage_extract(argv);
-	}
 	pki->setIntName(QString::fromUtf8(head.name));
 	try {
 		pki->fromData(p, &head);
@@ -284,7 +277,7 @@ static void segv_handler_gui(int)
 
 int main( int argc, char *argv[] )
 {
-	int ret = 0, pkictr;
+	int ret = 0;
 	MainWindow *mw;
 
 #ifdef WIN32
@@ -313,9 +306,5 @@ int main( int argc, char *argv[] )
 	}
 
 	delete mw;
-	pkictr = pki_base::get_pki_counter();
-	if (pkictr)
-		fprintf(stderr, "PKI Counter (%d)\n", pkictr);
-
 	return ret;
 }

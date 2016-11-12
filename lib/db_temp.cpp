@@ -9,6 +9,7 @@
 #include "db_temp.h"
 #include "func.h"
 #include <widgets/NewX509.h>
+#include <widgets/XcaDialog.h>
 #include <widgets/MainWindow.h>
 #include <QFileDialog>
 #include <QDir>
@@ -17,23 +18,26 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-db_temp::db_temp(QString DBfile, MainWindow *mw)
-	:db_x509name(DBfile, mw)
+db_temp::db_temp(MainWindow *mw)
+	:db_x509name(mw)
 {
 	class_name = "templates";
+	sqlHashTable = "templates";
 	pkitype << tmpl;
 
 	updateHeaders();
 	loadContainer();
 
-	predefs = newPKI();
 	QDir dir;
 	if (!dir.cd(getPrefix()))
 		return;
 	dir.setFilter(QDir::Files | QDir::NoSymLinks);
 	QFileInfoList list = dir.entryInfoList();
 	load_temp l;
-	pki_base *tmpl;
+	pki_temp *tmpl = new pki_temp(tr("Empty template"));
+	tmpl->setAsPreDefined();
+	predefs << tmpl;
+
 	for (int i = 0; i < list.size(); ++i) {
 		QFileInfo fileInfo = list.at(i);
 		QString name = getPrefix() + QDir::separator() +
@@ -41,9 +45,11 @@ db_temp::db_temp(QString DBfile, MainWindow *mw)
 		if (!name.endsWith(".xca", Qt::CaseInsensitive))
 			continue;
 		try {
-			tmpl = l.loadItem(name);
-			if (tmpl)
-				predefs->append(tmpl);
+			tmpl = (pki_temp*)l.loadItem(name);
+			if (tmpl) {
+				tmpl->setAsPreDefined();
+				predefs << tmpl;
+			}
 		} catch(errorEx &err) {
 			XCA_WARN(tr("Bad template: %1").arg(name));
 		}
@@ -59,37 +65,19 @@ dbheaderList db_temp::getHeaders()
 
 db_temp::~db_temp()
 {
-	delete predefs;
+	while (!predefs.isEmpty())
+		delete predefs.takeFirst();
 }
 
-pki_base *db_temp::newPKI(db_header_t *)
+pki_base *db_temp::newPKI(enum pki_type type)
 {
+	(void)type;
 	return new pki_temp("");
 }
 
-QStringList db_temp::getDescPredefs()
+QList<pki_base *> db_temp::getDescPredefs()
 {
-	QStringList x;
-	x.clear();
-	for(pki_temp *pki=(pki_temp*)predefs->iterate(); pki;
-			pki=(pki_temp*)pki->iterate()) {
-		x.append(QString("[default] ") + pki->getIntName());
-	}
-	x += getDesc();
-	return x;
-}
-
-pki_base *db_temp::getByName(QString desc)
-{
-	if (!desc.startsWith("[default] "))
-		return db_base::getByName(desc);
-	desc.remove(0, 10); // "[default] "
-	for(pki_temp *pki=(pki_temp*)predefs->iterate(); pki;
-	            pki=(pki_temp*)pki->iterate()) {
-		if (pki->getIntName() == desc)
-			return pki;
-	}
-	return NULL;
+	return predefs << sqlSELECTpki("SELECT item FROM templates");;
 }
 
 bool db_temp::runTempDlg(pki_temp *temp)
@@ -98,7 +86,6 @@ bool db_temp::runTempDlg(pki_temp *temp)
 	emit connNewX509(dlg);
 
 	dlg->setTemp(temp);
-	dlg->fromTemplate(temp);
 	if (!dlg->exec()) {
 		delete dlg;
 		return false;
@@ -111,39 +98,26 @@ bool db_temp::runTempDlg(pki_temp *temp)
 void db_temp::newItem()
 {
 	pki_temp *temp = NULL;
-	QStringList sl;
 	QString type;
-	bool ok;
-	int i, len;
-	len = predefs->childCount();
-	sl << tr("Nothing");
-	for (i=0; i<len; i++) {
-		sl << predefs->child(i)->getIntName();
-	}
-	type = QInputDialog::getItem(mainwin, XCA_TITLE,
-		tr("Preset Template values"), sl, 0, false, &ok, 0);
-	if (ok) {
-		if (type == sl[0]) {
-			temp = new pki_temp("");
-		} else {
-			for (i=0; i<len; i++) {
-				pki_temp *t = (pki_temp *)predefs->child(i);
-				if (type == t->getIntName()) {
-					temp = new pki_temp(t);
-					break;
-				}
+
+	itemCombo *ic = new itemCombo(NULL);
+	ic->insertPkiItems(predefs);
+	XcaDialog *dlg = new XcaDialog(mainwin, tmpl, ic,
+				tr("Preset Template values"), QString());
+//	dlg->buttonBox->setStandardButtons(QDialogButtonBox::Ignore |
+//					   QDialogButtonBox::Ok |
+//					   QDialogButtonBox::Cancel);
+	if (dlg->exec()) {
+		temp = new pki_temp((pki_temp*)ic->currentPkiItem());
+		if (temp) {
+			temp->setIntName("--");
+			if (runTempDlg(temp)) {
+				insertPKI(temp);
+				createSuccess(temp);
 			}
 		}
-		if (!temp)
-			return;
-		temp->setIntName("--");
-		if (runTempDlg(temp)) {
-			insertPKI(temp);
-			createSuccess(temp);
-			return;
-		}
 	}
-	delete temp;
+	delete dlg;
 }
 void db_temp::showPki(pki_base *pki)
 {

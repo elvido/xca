@@ -16,6 +16,7 @@
 #include <QContextMenuEvent>
 #include <QStringList>
 #include <QAbstractItemModel>
+#include <QHash>
 #include "widgets/ExportDialog.h"
 #include "pki_base.h"
 #include "headerlist.h"
@@ -33,7 +34,7 @@ class db_base: public QAbstractItemModel
 	Q_OBJECT
 
 	protected:
-		QString dbName;
+		static QHash<quint64, pki_base*> lookup;
 		QModelIndex currentIdx;
 		void _writePKI(pki_base *pki, bool overwrite);
 		void _removePKI(pki_base *pki );
@@ -41,10 +42,13 @@ class db_base: public QAbstractItemModel
 		QList<enum pki_type> pkitype;
 		MainWindow *mainwin;
 		QString class_name;
+		/* Sql table containing the 'hash' of this items */
+		QString sqlHashTable;
 		dbheaderList allHeaders;
 		virtual dbheaderList getHeaders();
 		int colResizing;
-		int handleBadEntry(unsigned char *p, db_header_t *head);
+		QString sqlItemSelector();
+		void updateItem(pki_base *pki, QString name, QString comment);
 		virtual exportType::etype clipboardFormat(QModelIndexList indexes)
 		{
 			(void)indexes;
@@ -52,12 +56,23 @@ class db_base: public QAbstractItemModel
 		}
 
 	public:
+		static pki_base *lookupPki(quint64 i)
+		{
+			return lookup[i];
+		}
+		static void flushLookup()
+		{
+			lookup.clear();
+		}
+		QList<pki_base *> sqlSELECTpki(QString query,
+				QList<QVariant> values = QList<QVariant>());
+		virtual pki_base *newPKI(enum pki_type type = none);
 		pki_base *rootItem;
-		db_base(QString db, MainWindow *mw);
+		db_base(MainWindow *mw);
 		virtual void updateHeaders();
 		virtual ~db_base();
-		virtual pki_base *newPKI(db_header_t *head = NULL);
 		virtual void insertPKI(pki_base *pki);
+		virtual QSqlError insertPKI_noTransaction(pki_base *pki);
 		virtual void updatePKI(pki_base *pki);
 		pki_base *getByName(QString desc);
 		pki_base *getByReference(pki_base *refpki);
@@ -87,7 +102,7 @@ class db_base: public QAbstractItemModel
 		void createSuccess(pki_base *pki);
 		bool columnHidden(int col) const;
 		bool isNumericCol(int col) const;
-		void saveHeaderState();
+		virtual void saveHeaderState();
 		void initHeaderView(QHeaderView *hv);
 		void setVisualIndex(int i, int visualIndex);
 		bool fixedHeaderSize(int sect);
@@ -108,6 +123,8 @@ class db_base: public QAbstractItemModel
 		QString pem2QString(QModelIndexList indexes);
 
 		void deletePKI(QModelIndex idx);
+		void editComment(const QModelIndex &index);
+
 
 	public slots:
 		virtual void newItem() { }

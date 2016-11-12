@@ -25,8 +25,8 @@ class pki_crl: public pki_x509name
 		X509_CRL *crl;
 	public:
 		pki_crl(const QString name = "");
-		/* destructor */
 		~pki_crl();
+		const char *getClassName() const;
 		void fromPEM_BIO(BIO *bio, QString name);
 		void fload(const QString fname);
 		QString getSigAlg();
@@ -53,9 +53,7 @@ class pki_crl: public pki_x509name
 		a1time getNextUpdate();
 		a1time getLastUpdate();
 		void fromData(const unsigned char *p, db_header_t *head);
-		void oldFromData(unsigned char *p, int size);
-		QByteArray toData();
-		bool verify(pki_key *pkey);
+		bool verify(pki_x509 *issuer);
 		int numRev();
 		x509revList getRevList();
 		QString printV3ext();
@@ -71,6 +69,9 @@ class pki_crl: public pki_x509name
 		a1int getCrlNumber();
 		BIO *pem(BIO *, int);
 		bool visible();
+		QSqlError insertSqlData();
+		QSqlError deleteSqlData();
+		QSqlError restoreSql(QVariant sqlId);
 };
 
 #endif

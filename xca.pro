@@ -90,10 +90,11 @@ HEADERS += local.h \
            widgets/X509SuperTreeView.h \
            widgets/XcaHeaderView.h \
            widgets/OidResolver.h \
+	   widgets/ItemCombo.h \
+	   widgets/XcaDialog.h \
            widgets/XcaProxyModel.h
 
-FORMS += ui/About.ui \
-         ui/CaProperties.ui \
+FORMS += ui/CaProperties.ui \
          ui/CertDetail.ui \
          ui/CertExtend.ui \
          ui/CrlDetail.ui \
@@ -109,10 +110,10 @@ FORMS += ui/About.ui \
          ui/PwDialog.ui \
          ui/Revoke.ui \
          ui/SelectToken.ui \
-         ui/TrustState.ui \
          ui/SearchPkcs11.ui \
          ui/v3ext.ui \
          ui/OidResolver.ui \
+         ui/XcaDialog.ui \
 	 ui/RevocationList.ui
 
 SOURCES += lib/asn1int.cpp \
@@ -127,7 +128,6 @@ SOURCES += lib/asn1int.cpp \
            lib/db_x509req.cpp \
            lib/db_x509super.cpp \
            lib/func.cpp \
-           lib/import.cpp \
            lib/load_obj.cpp \
            lib/main.cpp \
            lib/oid.cpp \

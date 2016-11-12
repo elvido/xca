@@ -90,19 +90,19 @@ if test -n "${_QTDIR}" && test -d "${_QTDIR}"; then
   DYLD_LIBRARY_PATH="${_QTDIR}/lib:${DYLD_LIBRARY_PATH}"
 fi
 
-PKG_CHECK_MODULES(Qt5, [Qt5Core >= 5.0, Qt5Widgets >= 5.0], [
+PKG_CHECK_MODULES(Qt5, [Qt5Core >= 5.0, QtGui >= 5.0, Qt5Widgets >= 5.0, Qt5Sql >= 5.0], [
   _QT_HOST_BINS="`pkg-config --variable=host_bins Qt5Core`"
   QT_MOC="${_QT_HOST_BINS}/moc"
   QT_UIC="${_QT_HOST_BINS}/uic"
   if test -n "$DARWIN"; then
     FRAMEDIR=`pkg-config --variable=libdir Qt5Core`
-    Qt5_CFLAGS="$Qt5_CFLAGS -F${FRAMEDIR} -I${FRAMEDIR}/QtCore.framework/Headers -I${FRAMEDIR}/QtGui.framework/Headers -I${FRAMEDIR}/QtWdgets.framework/Headers"
+    Qt5_CFLAGS="$Qt5_CFLAGS -F${FRAMEDIR} -I${FRAMEDIR}/QtCore.framework/Headers -I${FRAMEDIR}/QtGui.framework/Headers -I${FRAMEDIR}/QtWdgets.framework/Headers -I${FRAMEDIR}/QtSql.framework/Headers"
   fi
   QT_VERSION=5
   QT_CFLAGS="${Qt5_CFLAGS} -fPIC"
   QT_LIBS="${Qt5_LIBS}"
 ], [
-  PKG_CHECK_MODULES(Qt4, [QtCore >= 4.6, QtCore < 5.0, QtGui >= 4.6, QtGui < 5.0], [
+  PKG_CHECK_MODULES(Qt4, [QtCore >= 4.6, QtCore < 5.0, QtGui >= 4.6, QtGui < 5.0, QtSql >= 4.6, QtSql < 5.0], [
     QT_MOC="`pkg-config --variable=moc_location QtCore`"
     QT_UIC="`pkg-config --variable=uic_location QtCore`"
     if test -n "${QT_MOC}"; then
@@ -110,7 +110,7 @@ PKG_CHECK_MODULES(Qt5, [Qt5Core >= 5.0, Qt5Widgets >= 5.0], [
     fi
     if test -n "$DARWIN"; then
       FRAMEDIR=`pkg-config --variable=libdir QtCore`
-      Qt4_CFLAGS="$Qt4_CFLAGS -F${FRAMEDIR} -I${FRAMEDIR}/QtCore.framework/Headers -I${FRAMEDIR}/QtGui.framework/Headers"
+      Qt4_CFLAGS="$Qt4_CFLAGS -F${FRAMEDIR} -I${FRAMEDIR}/QtCore.framework/Headers -I${FRAMEDIR}/QtGui.framework/Headers -I${FRAMEDIR}/QtSql.framework/Headers"
     fi
     QT_VERSION=4
     QT_CFLAGS="${Qt4_CFLAGS}"
